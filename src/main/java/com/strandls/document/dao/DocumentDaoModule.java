@@ -17,6 +17,7 @@ public class DocumentDaoModule extends AbstractModule {
 		bind(DocumentDao.class).in(Scopes.SINGLETON);
 		bind(DocumentHabitatDao.class).in(Scopes.SINGLETON);
 		bind(DocumentSpeciesGroupDao.class).in(Scopes.SINGLETON);
+		bind(DocumentCoverageDao.class).in(Scopes.SINGLETON);
 	}
 
 }

@@ -9,6 +9,8 @@ import com.strandls.resource.pojo.UFile;
 import com.strandls.user.pojo.UserIbp;
 import com.strandls.userGroup.pojo.Featured;
 import com.strandls.userGroup.pojo.UserGroupIbp;
+import com.strandls.utility.pojo.FlagShow;
+import com.strandls.utility.pojo.Tags;
 
 /**
  * @author Abhishek Rudra
@@ -23,6 +25,8 @@ public class ShowDocument {
 	private UFile uFile;
 	private List<Long> habitatIds;
 	private List<Long> speciesGroupIds;
+	private List<FlagShow> flag;
+	private List<Tags> tags;
 
 	/**
 	 * 
@@ -39,9 +43,11 @@ public class ShowDocument {
 	 * @param uFile
 	 * @param habitatIds
 	 * @param speciesGroupIds
+	 * @param flag
+	 * @param tags
 	 */
 	public ShowDocument(Document document, UserIbp userIbp, List<UserGroupIbp> userGroupIbp, List<Featured> featured,
-			UFile uFile, List<Long> habitatIds, List<Long> speciesGroupIds) {
+			UFile uFile, List<Long> habitatIds, List<Long> speciesGroupIds, List<FlagShow> flag, List<Tags> tags) {
 		super();
 		this.document = document;
 		this.userIbp = userIbp;
@@ -50,6 +56,8 @@ public class ShowDocument {
 		this.uFile = uFile;
 		this.habitatIds = habitatIds;
 		this.speciesGroupIds = speciesGroupIds;
+		this.flag = flag;
+		this.tags = tags;
 	}
 
 	public Document getDocument() {
@@ -106,6 +114,22 @@ public class ShowDocument {
 
 	public void setSpeciesGroupIds(List<Long> speciesGroupIds) {
 		this.speciesGroupIds = speciesGroupIds;
+	}
+
+	public List<FlagShow> getFlag() {
+		return flag;
+	}
+
+	public void setFlag(List<FlagShow> flag) {
+		this.flag = flag;
+	}
+
+	public List<Tags> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<Tags> tags) {
+		this.tags = tags;
 	}
 
 }

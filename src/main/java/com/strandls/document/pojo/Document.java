@@ -43,7 +43,7 @@ public class Document implements Serializable {
 	private Long coverageId;
 	private Date createdOn;
 	private String notes;
-	private String doil;
+	private String doi;
 	private Date lastRevised;
 	private Long licenseId;
 	private Long sourceHolderId;
@@ -79,6 +79,117 @@ public class Document implements Serializable {
 	private Boolean isDeleted;
 	private Long dataTableId;
 	private String dateAccuracy;
+
+	/**
+	 * 
+	 */
+	public Document() {
+		super();
+	}
+
+	/**
+	 * @param id
+	 * @param version
+	 * @param agreeTerms
+	 * @param attribution
+	 * @param authorId
+	 * @param contributors
+	 * @param coverageId
+	 * @param createdOn
+	 * @param notes
+	 * @param doi
+	 * @param lastRevised
+	 * @param licenseId
+	 * @param sourceHolderId
+	 * @param sourceHolderType
+	 * @param title
+	 * @param type
+	 * @param uFileId
+	 * @param fromDate
+	 * @param geoPrivacy
+	 * @param groupId
+	 * @param habitatId
+	 * @param latitude
+	 * @param locationAccuracy
+	 * @param longitude
+	 * @param placeName
+	 * @param reverseGeoCodedName
+	 * @param toDate
+	 * @param topology
+	 * @param featureCount
+	 * @param flagCount
+	 * @param languageId
+	 * @param locationScale
+	 * @param dataSetId
+	 * @param externalId
+	 * @param externalUrl
+	 * @param lastCrawled
+	 * @param lastInterpreted
+	 * @param originalAuthor
+	 * @param viaCode
+	 * @param viaId
+	 * @param visitCount
+	 * @param rating
+	 * @param isDeleted
+	 * @param dataTableId
+	 * @param dateAccuracy
+	 */
+	public Document(Long id, Long version, Boolean agreeTerms, String attribution, Long authorId, String contributors,
+			Long coverageId, Date createdOn, String notes, String doi, Date lastRevised, Long licenseId,
+			Long sourceHolderId, String sourceHolderType, String title, String type, Long uFileId, Date fromDate,
+			Boolean geoPrivacy, Long groupId, Long habitatId, Double latitude, String locationAccuracy,
+			Double longitude, String placeName, String reverseGeoCodedName, Date toDate, Geometry topology,
+			Integer featureCount, Integer flagCount, Long languageId, String locationScale, Long dataSetId,
+			String externalId, String externalUrl, Date lastCrawled, Date lastInterpreted, String originalAuthor,
+			String viaCode, String viaId, Integer visitCount, Integer rating, Boolean isDeleted, Long dataTableId,
+			String dateAccuracy) {
+		super();
+		this.id = id;
+		this.version = version;
+		this.agreeTerms = agreeTerms;
+		this.attribution = attribution;
+		this.authorId = authorId;
+		this.contributors = contributors;
+		this.coverageId = coverageId;
+		this.createdOn = createdOn;
+		this.notes = notes;
+		this.doi = doi;
+		this.lastRevised = lastRevised;
+		this.licenseId = licenseId;
+		this.sourceHolderId = sourceHolderId;
+		this.sourceHolderType = sourceHolderType;
+		this.title = title;
+		this.type = type;
+		this.uFileId = uFileId;
+		this.fromDate = fromDate;
+		this.geoPrivacy = geoPrivacy;
+		this.groupId = groupId;
+		this.habitatId = habitatId;
+		this.latitude = latitude;
+		this.locationAccuracy = locationAccuracy;
+		this.longitude = longitude;
+		this.placeName = placeName;
+		this.reverseGeoCodedName = reverseGeoCodedName;
+		this.toDate = toDate;
+		this.topology = topology;
+		this.featureCount = featureCount;
+		this.flagCount = flagCount;
+		this.languageId = languageId;
+		this.locationScale = locationScale;
+		this.dataSetId = dataSetId;
+		this.externalId = externalId;
+		this.externalUrl = externalUrl;
+		this.lastCrawled = lastCrawled;
+		this.lastInterpreted = lastInterpreted;
+		this.originalAuthor = originalAuthor;
+		this.viaCode = viaCode;
+		this.viaId = viaId;
+		this.visitCount = visitCount;
+		this.rating = rating;
+		this.isDeleted = isDeleted;
+		this.dataTableId = dataTableId;
+		this.dateAccuracy = dateAccuracy;
+	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -165,11 +276,11 @@ public class Document implements Serializable {
 
 	@Column(name = "doi")
 	public String getDoil() {
-		return doil;
+		return doi;
 	}
 
-	public void setDoil(String doil) {
-		this.doil = doil;
+	public void setDoil(String doi) {
+		this.doi = doi;
 	}
 
 	@Column(name = "last_revised")

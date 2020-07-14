@@ -4,13 +4,17 @@
 package com.strandls.document.service.Impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
+import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.strandls.authentication_utility.util.AuthUtil;
 import com.strandls.document.dao.DocumentDao;
 import com.strandls.document.dao.DocumentHabitatDao;
 import com.strandls.document.dao.DocumentSpeciesGroupDao;
@@ -22,11 +26,18 @@ import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.resource.pojo.UFile;
+import com.strandls.resource.pojo.UFileCreateData;
 import com.strandls.user.controller.UserServiceApi;
 import com.strandls.user.pojo.UserIbp;
 import com.strandls.userGroup.controller.UserGroupSerivceApi;
 import com.strandls.userGroup.pojo.Featured;
+import com.strandls.userGroup.pojo.UserGroupDocCreateData;
 import com.strandls.userGroup.pojo.UserGroupIbp;
+import com.strandls.utility.controller.UtilityServiceApi;
+import com.strandls.utility.pojo.FlagShow;
+import com.strandls.utility.pojo.Tags;
+import com.strandls.utility.pojo.TagsMapping;
+import com.strandls.utility.pojo.TagsMappingData;
 
 /**
  * @author Abhishek Rudra
@@ -52,37 +63,45 @@ public class DocumentServiceImpl implements DocumentService {
 	private UserGroupSerivceApi ugService;
 
 	@Inject
+	private UtilityServiceApi utilityService;
+
+	@Inject
 	private ResourceServicesApi resourceService;
 
 	@Override
 	public ShowDocument show(Long documentId) {
 		try {
 			Document document = documentDao.findById(documentId);
+			if (!document.getIsDeleted()) {
 
-			UserIbp userIbp = userService.getUserIbp(document.getAuthorId().toString());
+				UserIbp userIbp = userService.getUserIbp(document.getAuthorId().toString());
 
-			List<UserGroupIbp> userGroup = ugService.getUserGroupByDocId(documentId.toString());
-			List<Featured> featured = ugService.getAllFeatured("content.eml.Document", documentId.toString());
+				List<UserGroupIbp> userGroup = ugService.getUserGroupByDocId(documentId.toString());
+				List<Featured> featured = ugService.getAllFeatured("content.eml.Document", documentId.toString());
 
-			UFile resource = null;
-			if (document.getuFileId() != null)
-				resource = resourceService.getUFilePath(document.getuFileId().toString());
+				UFile resource = null;
+				if (document.getuFileId() != null)
+					resource = resourceService.getUFilePath(document.getuFileId().toString());
 
-			List<DocumentHabitat> docHabitats = docHabitatDao.findByDocumentId(documentId);
-			List<DocumentSpeciesGroup> docSGroups = docSGroupDao.findByDocumentId(documentId);
-			List<Long> docHabitatIds = new ArrayList<Long>();
-			List<Long> docSGroupIds = new ArrayList<Long>();
+				List<FlagShow> flag = utilityService.getFlagByObjectType("content.eml.Document", documentId.toString());
+				List<Tags> tags = utilityService.getTags("document", documentId.toString());
 
-			for (DocumentHabitat docHabitat : docHabitats) {
-				docHabitatIds.add(docHabitat.getHabitatId());
+				List<DocumentHabitat> docHabitats = docHabitatDao.findByDocumentId(documentId);
+				List<DocumentSpeciesGroup> docSGroups = docSGroupDao.findByDocumentId(documentId);
+				List<Long> docHabitatIds = new ArrayList<Long>();
+				List<Long> docSGroupIds = new ArrayList<Long>();
+
+				for (DocumentHabitat docHabitat : docHabitats) {
+					docHabitatIds.add(docHabitat.getHabitatId());
+				}
+				for (DocumentSpeciesGroup docSGroup : docSGroups) {
+					docSGroupIds.add(docSGroup.getSpeciesGroupId());
+				}
+
+				ShowDocument showDoc = new ShowDocument(document, userIbp, userGroup, featured, resource, docHabitatIds,
+						docSGroupIds, flag, tags);
+				return showDoc;
 			}
-			for (DocumentSpeciesGroup docSGroup : docSGroups) {
-				docSGroupIds.add(docSGroup.getSpeciesGroupId());
-			}
-
-			ShowDocument showDoc = new ShowDocument(document, userIbp, userGroup, featured, resource, docHabitatIds,
-					docSGroupIds);
-			return showDoc;
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
@@ -90,7 +109,72 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
-	public ShowDocument createDocument(DocumentCreateData documentCreateData) {
+	public ShowDocument createDocument(HttpServletRequest request, DocumentCreateData documentCreateData) {
+
+		try {
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			Long authorId = Long.parseLong(profile.getId());
+
+			UFile ufile = null;
+			if (documentCreateData.getResourceURL() != null && documentCreateData.getSize() != null) {
+				UFileCreateData ufileCreateData = new UFileCreateData();
+				ufileCreateData.setMimeType(documentCreateData.getMimeType());
+				ufileCreateData.setPath(documentCreateData.getResourceURL());
+				ufileCreateData.setSize(documentCreateData.getSize());
+				ufileCreateData.setWeight(0);
+				ufile = resourceService.createUFile(ufileCreateData);
+			}
+
+			Document document = new Document(null, 0L, true, documentCreateData.getAttribution(), authorId,
+					documentCreateData.getContribution(), null, new Date(), documentCreateData.getDescription(), null,
+					new Date(), documentCreateData.getLicenseId(), null, null, documentCreateData.getTitle(),
+					documentCreateData.getType(), (ufile != null ? ufile.getId() : null),
+					documentCreateData.getFromDate(), null, null, null, documentCreateData.getLatitude(), null,
+					documentCreateData.getLongitude(), documentCreateData.getObservedAt(),
+					documentCreateData.getReverseGeocoded(), documentCreateData.getFromDate(), null, 0, 0, 205L,
+					documentCreateData.getLocationScale(), null, null, null, null, null, null, null, null, 1,
+					documentCreateData.getRating(), false, null, null);
+
+			document = documentDao.save(document);
+
+//			speciesGroup
+
+			for (Long speciesGroupId : documentCreateData.getSpeciesGroupIds()) {
+				DocumentSpeciesGroup docSGroup = new DocumentSpeciesGroup(document.getId(), speciesGroupId);
+				docSGroupDao.save(docSGroup);
+			}
+
+//			habitat 
+			for (Long habitatId : documentCreateData.getHabitatIds()) {
+				DocumentHabitat docHabitat = new DocumentHabitat(document.getId(), habitatId);
+				docHabitatDao.save(docHabitat);
+			}
+//			user group
+			if (documentCreateData.getUserGroupId() != null) {
+				UserGroupDocCreateData groupDocCreateData = new UserGroupDocCreateData();
+				groupDocCreateData.setDocumentId(document.getId());
+				groupDocCreateData.setUserGroupIds(documentCreateData.getUserGroupId());
+				ugService.createUGDocMapping(groupDocCreateData);
+			}
+
+//			tags
+			if (documentCreateData.getTags() != null) {
+				TagsMapping tagsMapping = new TagsMapping();
+				tagsMapping.setObjectId(document.getId());
+				tagsMapping.setTags(documentCreateData.getTags());
+				TagsMappingData tagsMappingData = new TagsMappingData();
+//				TODO fill in the mail data for document
+				tagsMappingData.setMailData(null);
+				tagsMappingData.setTagsMapping(tagsMapping);
+				utilityService.createTags("document", tagsMappingData);
+			}
+
+			return show(document.getId());
+		} catch (
+
+		Exception e) {
+			logger.error(e.getMessage());
+		}
 
 		return null;
 	}
