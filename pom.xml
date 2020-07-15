@@ -260,7 +260,7 @@
 		    <groupId>com.strandls.biodiv</groupId>
 		    <artifactId>resource-client</artifactId>
 		    <version>1.0.0</version>
-		</dependency>
+		</dependency>    
 
 	</dependencies>
 

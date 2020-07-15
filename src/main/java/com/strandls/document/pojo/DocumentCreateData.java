@@ -3,6 +3,7 @@
  */
 package com.strandls.document.pojo;
 
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -21,9 +22,13 @@ public class DocumentCreateData {
 	private String attribution;
 	private Long licenseId;
 	private String description;
+	private Date fromDate;
+	private Integer rating;
 
 //	-----RESOURCE DATA------
+	private String mimeType;
 	private String resourceURL;
+	private String size;
 
 //	-----TAGS--------
 	private List<Tags> tags;
@@ -90,12 +95,44 @@ public class DocumentCreateData {
 		this.description = description;
 	}
 
+	public Date getFromDate() {
+		return fromDate;
+	}
+
+	public void setFromDate(Date fromDate) {
+		this.fromDate = fromDate;
+	}
+
+	public Integer getRating() {
+		return rating;
+	}
+
+	public void setRating(Integer rating) {
+		this.rating = rating;
+	}
+
+	public String getMimeType() {
+		return mimeType;
+	}
+
+	public void setMimeType(String mimeType) {
+		this.mimeType = mimeType;
+	}
+
 	public String getResourceURL() {
 		return resourceURL;
 	}
 
 	public void setResourceURL(String resourceURL) {
 		this.resourceURL = resourceURL;
+	}
+
+	public String getSize() {
+		return size;
+	}
+
+	public void setSize(String size) {
+		this.size = size;
 	}
 
 	public List<Tags> getTags() {
