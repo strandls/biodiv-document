@@ -3,10 +3,13 @@
  */
 package com.strandls.document.dao;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +38,24 @@ public class DocumentCoverageDao extends AbstractDAO<DocumentCoverage, Long> {
 		Session session = sessionFactory.openSession();
 		try {
 			result = session.get(DocumentCoverage.class, id);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		} finally {
+			session.close();
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<DocumentCoverage> findByDocumentId(Long documentId) {
+		String qry = "from DocumentCoverage where documentId = :docId";
+		Session session = sessionFactory.openSession();
+		List<DocumentCoverage> result = null;
+		try {
+			Query<DocumentCoverage> query = session.createQuery(qry);
+			query.setParameter("docId", documentId);
+			result = query.getResultList();
+
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		} finally {

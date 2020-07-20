@@ -36,10 +36,13 @@ import com.google.inject.servlet.ServletModule;
 import com.strandls.document.controllers.DocumentControllerModule;
 import com.strandls.document.dao.DocumentDaoModule;
 import com.strandls.document.service.Impl.DocumentServiceModule;
+import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.user.controller.UserServiceApi;
 import com.strandls.userGroup.controller.UserGroupSerivceApi;
 import com.strandls.utility.controller.UtilityServiceApi;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.PrecisionModel;
 
 /**
  * @author Abhishek Rudra
@@ -70,6 +73,9 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 				configuration = configuration.configure();
 				SessionFactory sessionFactory = configuration.buildSessionFactory();
 
+				GeometryFactory geofactory = new GeometryFactory(new PrecisionModel(), 4326);
+				bind(GeometryFactory.class).toInstance(geofactory);
+
 				Map<String, String> props = new HashMap<String, String>();
 				props.put("javax.ws.rs.Application", ApplicationConfig.class.getName());
 				props.put("jersey.config.server.provider.packages", "com");
@@ -80,6 +86,7 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 				bind(UserGroupSerivceApi.class).in(Scopes.SINGLETON);
 				bind(ResourceServicesApi.class).in(Scopes.SINGLETON);
 				bind(UtilityServiceApi.class).in(Scopes.SINGLETON);
+				bind(GeoentitiesServicesApi.class).in(Scopes.SINGLETON);
 				bind(ServletContainer.class).in(Scopes.SINGLETON);
 
 				serve("/api/*").with(ServletContainer.class, props);
