@@ -20,6 +20,7 @@ public class ShowDocument {
 
 	private Document document;
 	private UserIbp userIbp;
+	private List<DocumentCoverage> documentCoverages;
 	private List<UserGroupIbp> userGroupIbp;
 	private List<Featured> featured;
 	private UFile uFile;
@@ -38,6 +39,7 @@ public class ShowDocument {
 	/**
 	 * @param document
 	 * @param userIbp
+	 * @param documentCoverages
 	 * @param userGroupIbp
 	 * @param featured
 	 * @param uFile
@@ -46,11 +48,13 @@ public class ShowDocument {
 	 * @param flag
 	 * @param tags
 	 */
-	public ShowDocument(Document document, UserIbp userIbp, List<UserGroupIbp> userGroupIbp, List<Featured> featured,
-			UFile uFile, List<Long> habitatIds, List<Long> speciesGroupIds, List<FlagShow> flag, List<Tags> tags) {
+	public ShowDocument(Document document, UserIbp userIbp, List<DocumentCoverage> documentCoverages,
+			List<UserGroupIbp> userGroupIbp, List<Featured> featured, UFile uFile, List<Long> habitatIds,
+			List<Long> speciesGroupIds, List<FlagShow> flag, List<Tags> tags) {
 		super();
 		this.document = document;
 		this.userIbp = userIbp;
+		this.documentCoverages = documentCoverages;
 		this.userGroupIbp = userGroupIbp;
 		this.featured = featured;
 		this.uFile = uFile;
@@ -74,6 +78,14 @@ public class ShowDocument {
 
 	public void setUserIbp(UserIbp userIbp) {
 		this.userIbp = userIbp;
+	}
+
+	public List<DocumentCoverage> getDocumentCoverages() {
+		return documentCoverages;
+	}
+
+	public void setDocumentCoverages(List<DocumentCoverage> documentCoverages) {
+		this.documentCoverages = documentCoverages;
 	}
 
 	public List<UserGroupIbp> getUserGroupIbp() {

@@ -38,11 +38,9 @@ public class DocumentCreateData {
 	private List<Long> habitatIds;
 
 //	-----Location Data--------
-	private String observedAt;
-	private String reverseGeocoded;
-	private String locationScale;
-	private Double latitude;
-	private Double longitude;
+
+	private List<Long> geoentitiesId;
+	private List<DocumentCoverageData> docCoverageData;
 
 //	-----User Group Data-----
 	private List<Long> userGroupId;
@@ -159,44 +157,20 @@ public class DocumentCreateData {
 		this.habitatIds = habitatIds;
 	}
 
-	public String getObservedAt() {
-		return observedAt;
+	public List<Long> getGeoentitiesId() {
+		return geoentitiesId;
 	}
 
-	public void setObservedAt(String observedAt) {
-		this.observedAt = observedAt;
+	public void setGeoentitiesId(List<Long> geoentitiesId) {
+		this.geoentitiesId = geoentitiesId;
 	}
 
-	public String getReverseGeocoded() {
-		return reverseGeocoded;
+	public List<DocumentCoverageData> getDocCoverageData() {
+		return docCoverageData;
 	}
 
-	public void setReverseGeocoded(String reverseGeocoded) {
-		this.reverseGeocoded = reverseGeocoded;
-	}
-
-	public String getLocationScale() {
-		return locationScale;
-	}
-
-	public void setLocationScale(String locationScale) {
-		this.locationScale = locationScale;
-	}
-
-	public Double getLatitude() {
-		return latitude;
-	}
-
-	public void setLatitude(Double latitude) {
-		this.latitude = latitude;
-	}
-
-	public Double getLongitude() {
-		return longitude;
-	}
-
-	public void setLongitude(Double longitude) {
-		this.longitude = longitude;
+	public void setDocCoverageData(List<DocumentCoverageData> docCoverageData) {
+		this.docCoverageData = docCoverageData;
 	}
 
 	public List<Long> getUserGroupId() {
