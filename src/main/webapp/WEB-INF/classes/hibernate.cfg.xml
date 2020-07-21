@@ -4,7 +4,7 @@
 
 <hibernate-configuration>
 	<session-factory>
-		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+		<property name="dialect">org.hibernate.spatial.dialect.postgis.PostgisDialect</property>
 		<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
 		<property name="hibernate.connection.username">postgres</property>
 		<property name="hibernate.connection.password">postgres123</property>
@@ -16,6 +16,7 @@
 
 		<property name="show_sql">true</property>
 
+		<property name="hibernate.current_session_context_class">thread</property>
 		<property name="hibernate.connection.provider_class">org.hibernate.hikaricp.internal.HikariCPConnectionProvider</property>
 
 		<!-- Maximum waiting time for a connection from the pool -->
@@ -29,7 +30,8 @@
 
 		<!-- Maximum time that a connection is allowed to sit ideal in the pool -->
 		<property name="hibernate.hikari.idleTimeout">10000</property>
+
 		<property name="hibernate.jdbc.lob.non_contextual_creation">true</property>
-		
+
 	</session-factory>
 </hibernate-configuration>
