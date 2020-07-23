@@ -3,14 +3,23 @@
  */
 package com.strandls.document.service.Impl;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.jbibtex.BibTeXDatabase;
+import org.jbibtex.BibTeXEntry;
+import org.jbibtex.Key;
+import org.jbibtex.Value;
 import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +57,8 @@ import com.strandls.utility.pojo.TagsMappingData;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.WKTReader;
+
+import de.undercouch.citeproc.bibtex.BibTeXConverter;
 
 /**
  * @author Abhishek Rudra
@@ -226,6 +237,27 @@ public class DocumentServiceImpl implements DocumentService {
 			logger.error(e.getMessage());
 		}
 
+		return null;
+	}
+
+	@Override
+	public Map<String, String> readBibTex(InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
+		try {
+			Map<String, String> bibMapping = new HashMap<String, String>();
+
+			BibTeXDatabase bibTextDB = new BibTeXConverter().loadDatabase(uploadedInputStream);
+			Map<Key, BibTeXEntry> bibTexEntires = bibTextDB.getEntries();
+			for (Entry<Key, BibTeXEntry> entry : bibTexEntires.entrySet()) {
+				bibMapping.put("item type", entry.getValue().getType().toString());
+
+				for (Entry<Key, Value> bibEntry : entry.getValue().getFields().entrySet()) {
+					bibMapping.put(bibEntry.getKey().toString(), bibEntry.getValue().toUserString());
+				}
+			}
+			return bibMapping;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
 		return null;
 	}
 

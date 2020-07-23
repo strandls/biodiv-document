@@ -3,6 +3,9 @@
  */
 package com.strandls.document.controllers;
 
+import java.io.InputStream;
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -15,6 +18,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import com.strandls.authentication_utility.filter.ValidateUser;
 import com.strandls.document.ApiConstants;
@@ -81,6 +87,24 @@ public class DocumentController {
 			return Response.status(Status.NOT_ACCEPTABLE).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).build();
+		}
+	}
+
+	@POST
+	@Path(ApiConstants.UPLOAD + ApiConstants.BIB)
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	public Response uploadBib(@FormDataParam("file") InputStream uploadedInputStream,
+			@FormDataParam("file") FormDataContentDisposition fileDetail) {
+		try {
+			System.out.println(fileDetail.getSize());
+			System.out.println(fileDetail.getType());
+			System.out.println(fileDetail.getFileName());
+			Map<String, String> result = docService.readBibTex(uploadedInputStream, fileDetail);
+			return Response.status(Status.OK).entity(result).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
 	}
 
