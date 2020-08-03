@@ -24,18 +24,32 @@ import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.strandls.activity.controller.ActivitySerivceApi;
+import com.strandls.activity.pojo.Activity;
+import com.strandls.activity.pojo.CommentLoggingData;
+import com.strandls.activity.pojo.DocumentMailData;
+import com.strandls.activity.pojo.MailData;
+import com.strandls.activity.pojo.UserGroupMailData;
 import com.strandls.authentication_utility.util.AuthUtil;
 import com.strandls.document.Headers;
+import com.strandls.document.dao.BibTexFieldTypeDao;
+import com.strandls.document.dao.BibTexItemFieldMappingDao;
+import com.strandls.document.dao.BibTexItemTypeDao;
 import com.strandls.document.dao.DocumentCoverageDao;
 import com.strandls.document.dao.DocumentDao;
 import com.strandls.document.dao.DocumentHabitatDao;
 import com.strandls.document.dao.DocumentSpeciesGroupDao;
+import com.strandls.document.pojo.BibTexFieldMappingShow;
+import com.strandls.document.pojo.BibTexFieldType;
+import com.strandls.document.pojo.BibTexItemFieldMapping;
+import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.Document;
 import com.strandls.document.pojo.DocumentCoverage;
 import com.strandls.document.pojo.DocumentCoverageData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentHabitat;
 import com.strandls.document.pojo.DocumentSpeciesGroup;
+import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
@@ -43,14 +57,26 @@ import com.strandls.geoentities.pojo.GeoentitiesCreateData;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
+import com.strandls.taxonomy.controllers.TaxonomyServicesApi;
+import com.strandls.taxonomy.pojo.SpeciesGroup;
 import com.strandls.user.controller.UserServiceApi;
+import com.strandls.user.pojo.Follow;
 import com.strandls.user.pojo.UserIbp;
 import com.strandls.userGroup.controller.UserGroupSerivceApi;
 import com.strandls.userGroup.pojo.Featured;
+import com.strandls.userGroup.pojo.FeaturedCreate;
+import com.strandls.userGroup.pojo.FeaturedCreateData;
 import com.strandls.userGroup.pojo.UserGroupDocCreateData;
 import com.strandls.userGroup.pojo.UserGroupIbp;
+import com.strandls.userGroup.pojo.UserGroupMappingCreateData;
+import com.strandls.userGroup.pojo.UserGroupMemberRole;
+import com.strandls.userGroup.pojo.UserGroupPermissions;
 import com.strandls.utility.controller.UtilityServiceApi;
+import com.strandls.utility.pojo.FlagCreateData;
+import com.strandls.utility.pojo.FlagIbp;
 import com.strandls.utility.pojo.FlagShow;
+import com.strandls.utility.pojo.Habitat;
+import com.strandls.utility.pojo.Language;
 import com.strandls.utility.pojo.Tags;
 import com.strandls.utility.pojo.TagsMapping;
 import com.strandls.utility.pojo.TagsMappingData;
@@ -59,6 +85,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.WKTReader;
 
 import de.undercouch.citeproc.bibtex.BibTeXConverter;
+import net.minidev.json.JSONArray;
 
 /**
  * @author Abhishek Rudra
@@ -100,6 +127,24 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Inject
 	private GeoentitiesServicesApi geoentitiesService;
+
+	@Inject
+	private BibTexFieldTypeDao bibTexFieldTypeDao;
+
+	@Inject
+	private BibTexItemFieldMappingDao bibTexItemFieldMappingDao;
+
+	@Inject
+	private BibTexItemTypeDao bibTexItemTypeDao;
+
+	@Inject
+	private MailMetaDataConverter converter;
+
+	@Inject
+	private ActivitySerivceApi activityService;
+
+	@Inject
+	private TaxonomyServicesApi taxonomyService;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -241,6 +286,52 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
+	public MailData generateMailData(Long documentId) {
+		try {
+
+			MailData mailData = new MailData();
+			DocumentMailData documentMailData = new DocumentMailData();
+			Document document = documentDao.findById(documentId);
+			documentMailData.setAuthorId(document.getAuthorId());
+			documentMailData.setCreatedOn(document.getCreatedOn());
+			documentMailData.setDocumentId(documentId);
+
+			List<UserGroupIbp> userGroupIbp = ugService.getUserGroupByDocId(documentId.toString());
+			List<UserGroupMailData> userGroupData = new ArrayList<UserGroupMailData>();
+			for (UserGroupIbp ugIbp : userGroupIbp) {
+				UserGroupMailData ugMailData = new UserGroupMailData();
+				ugMailData.setId(ugIbp.getId());
+				ugMailData.setIcon(ugIbp.getIcon());
+				ugMailData.setName(ugIbp.getName());
+				ugMailData.setWebAddress(ugIbp.getWebAddress());
+				userGroupData.add(ugMailData);
+			}
+
+			mailData.setDocumentMailData(documentMailData);
+			mailData.setUserGroupData(userGroupData);
+			return mailData;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
+		return null;
+	}
+
+	@Override
+	public Boolean removeDocument(HttpServletRequest request, Long documentId) {
+		CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+		Long userId = Long.parseLong(profile.getId());
+		JSONArray userRoles = (JSONArray) profile.getAttribute("roles");
+		Document document = documentDao.findById(documentId);
+		if (document.getAuthorId().equals(userId) || userRoles.contains("ROLE_ADMIN")) {
+			document.setIsDeleted(true);
+			documentDao.update(document);
+			return true;
+		}
+		return false;
+	}
+
+	@Override
 	public Map<String, String> readBibTex(InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
 		try {
 			Map<String, String> bibMapping = new HashMap<String, String>();
@@ -258,6 +349,335 @@ public class DocumentServiceImpl implements DocumentService {
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
+		return null;
+	}
+
+	@Override
+	public List<BibTexFieldMappingShow> getAllFieldTypes(Long itemTypeId) {
+		List<BibTexFieldMappingShow> result = new ArrayList<BibTexFieldMappingShow>();
+		List<BibTexItemFieldMapping> itemFieldMappings = bibTexItemFieldMappingDao.findByItemTypeId(itemTypeId);
+		for (BibTexItemFieldMapping itemFieldMapping : itemFieldMappings) {
+			BibTexFieldType fieldType = bibTexFieldTypeDao.findById(itemFieldMapping.getFieldId());
+			result.add(new BibTexFieldMappingShow(fieldType.getFieldType(), itemFieldMapping.getIsRequired()));
+		}
+
+		return result;
+	}
+
+	@Override
+	public List<BibTexItemType> fetchAllItemType() {
+		List<BibTexItemType> result = bibTexItemTypeDao.findAll();
+		return result;
+	}
+
+	@Override
+	public List<Tags> getTagsSuggestion(String phrase) {
+		try {
+			List<Tags> result = utilityService.getTagsAutoComplete(phrase);
+			return result;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return null;
+	}
+
+	@Override
+	public List<Tags> updateTags(HttpServletRequest request, TagsMapping tagsMapping) {
+		List<Tags> result = null;
+		try {
+			TagsMappingData tagsMappingData = new TagsMappingData();
+			tagsMappingData.setTagsMapping(tagsMapping);
+			tagsMappingData.setMailData(converter.utilityMetaData(generateMailData(tagsMapping.getObjectId())));
+			utilityService = headers.addUtilityHeaders(utilityService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			result = utilityService.updateTags("document", tagsMappingData);
+			updateDocumentLastRevised(tagsMapping.getObjectId());
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return result;
+	}
+
+	@Override
+	public Activity addDocumentCommet(HttpServletRequest request, CommentLoggingData loggingData) {
+		try {
+			loggingData.setMailData(generateMailData(loggingData.getRootHolderId()));
+			activityService = headers.addActivityHeaders(activityService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			Activity result = activityService.addComment("observation", loggingData);
+			updateDocumentLastRevised(loggingData.getRootHolderId());
+			return result;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return null;
+	}
+
+	private void updateDocumentLastRevised(Long documentId) {
+		Document document = documentDao.findById(documentId);
+		document.setLastRevised(new Date());
+		documentDao.update(document);
+
+//		TODO elastic update
+	}
+
+	@Override
+	public List<SpeciesGroup> getAllSpeciesGroup() {
+		List<SpeciesGroup> result = null;
+		try {
+			result = taxonomyService.getAllSpeciesGroup();
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return result;
+	}
+
+	@Override
+	public List<Habitat> getAllHabitat() {
+		try {
+			List<Habitat> result = utilityService.getAllHabitat();
+			return result;
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return null;
+
+	}
+
+	@Override
+	public List<UserGroupIbp> updateUserGroup(HttpServletRequest request, String documentId, List<Long> userGroupList) {
+		List<UserGroupIbp> result = null;
+		try {
+
+			UserGroupDocCreateData userGroupData = new UserGroupDocCreateData();
+			userGroupData.setUserGroupIds(userGroupList);
+			userGroupData.setMailData(converter.userGroupMetadata(generateMailData(Long.parseLong(documentId))));
+			userGroupData.setDocumentId(Long.parseLong(documentId));
+			ugService = headers.addUserGroupHeader(ugService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			result = ugService.updateUGDocMapping(userGroupData);
+			updateDocumentLastRevised(Long.parseLong(documentId));
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
+		return result;
+	}
+
+	@Override
+	public List<Featured> createFeatured(HttpServletRequest request, FeaturedCreate featuredCreate) {
+		List<Featured> result = null;
+
+		try {
+			FeaturedCreateData featuredCreateData = new FeaturedCreateData();
+			featuredCreateData.setFeaturedCreate(featuredCreate);
+			featuredCreateData.setMailData(converter.userGroupMetadata(generateMailData(featuredCreate.getObjectId())));
+			ugService = headers.addUserGroupHeader(ugService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			result = ugService.createFeatured(featuredCreateData);
+			updateDocumentLastRevised(featuredCreate.getObjectId());
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return result;
+	}
+
+	@Override
+	public List<Featured> unFeatured(HttpServletRequest request, String documentId, List<Long> userGroupList) {
+		List<Featured> result = null;
+		try {
+			UserGroupMappingCreateData userGroupData = new UserGroupMappingCreateData();
+			userGroupData.setUserGroups(userGroupList);
+			userGroupData.setUgFilterData(null);
+			userGroupData.setMailData(converter.userGroupMetadata(generateMailData(Long.parseLong(documentId))));
+			ugService = headers.addUserGroupHeader(ugService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			result = ugService.unFeatured("observation", documentId, userGroupData);
+			updateDocumentLastRevised(Long.parseLong(documentId));
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return result;
+	}
+
+	@Override
+	public List<FlagShow> createFlag(HttpServletRequest request, Long documentId, FlagIbp flagIbp) {
+		try {
+			FlagCreateData flagData = new FlagCreateData();
+			flagData.setFlagIbp(flagIbp);
+			flagData.setMailData(converter.utilityMetaData(generateMailData(documentId)));
+			utilityService = headers.addUtilityHeaders(utilityService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			List<FlagShow> flagList = utilityService.createFlag("document", documentId.toString(), flagData);
+			int flagCount = 0;
+			if (flagList != null)
+				flagCount = flagList.size();
+
+			Document document = documentDao.findById(documentId);
+			document.setFlagCount(flagCount);
+			document.setLastRevised(new Date());
+			documentDao.update(document);
+
+			return flagList;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
+		return null;
+	}
+
+	@Override
+	public List<FlagShow> unFlag(HttpServletRequest request, Long documentId, String flagId) {
+
+		try {
+
+			com.strandls.utility.pojo.MailData mailData = converter.utilityMetaData(generateMailData(documentId));
+			utilityService = headers.addUtilityHeaders(utilityService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			List<FlagShow> result = utilityService.unFlag("document", documentId.toString(), flagId, mailData);
+			int flagCount = 0;
+			if (result != null)
+				flagCount = result.size();
+
+			Document document = documentDao.findById(documentId);
+			document.setFlagCount(flagCount);
+			document.setLastRevised(new Date());
+			documentDao.update(document);
+			return result;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return null;
+
+	}
+
+	@Override
+	public Follow followRequest(HttpServletRequest request, Long documentId) {
+		try {
+			userService = headers.addUserHeaders(userService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			Follow result = userService.updateFollow("document", documentId.toString());
+			return result;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return null;
+	}
+
+	@Override
+	public Follow unFollowRequest(HttpServletRequest request, Long documentId) {
+		try {
+			userService = headers.addUserHeaders(userService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			Follow result = userService.unfollow("document", documentId.toString());
+			return result;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return null;
+	}
+
+	@Override
+	public DocumentUserPermission getUserPermission(HttpServletRequest request, String documentId) {
+
+		try {
+
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			List<UserGroupIbp> allowedUserGroup = new ArrayList<UserGroupIbp>();
+			List<Long> userGroupFeatureRole = new ArrayList<Long>();
+
+			userService = headers.addUserHeaders(userService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			Follow follow = userService.getFollowByObject("document", documentId);
+
+			List<UserGroupIbp> associatedUserGroup = ugService.getUserGroupByDocId(documentId);
+			ugService = headers.addUserGroupHeader(ugService, request.getHeader(HttpHeaders.AUTHORIZATION));
+			UserGroupPermissions userGroupPermission = ugService.getUserGroupPermission();
+
+			JSONArray userRole = (JSONArray) profile.getAttribute("roles");
+			if (userRole.contains("ROLE_ADMIN")) {
+
+				allowedUserGroup = ugService.getAllUserGroup();
+				for (UserGroupIbp ug : allowedUserGroup) {
+					userGroupFeatureRole.add(ug.getId());
+				}
+
+			} else {
+
+				List<Long> userGroupMember = new ArrayList<Long>();
+				for (UserGroupMemberRole userMemberRole : userGroupPermission.getUserMemberRole()) {
+					userGroupMember.add(userMemberRole.getUserGroupId());
+				}
+				String s = userGroupMember.toString();
+				if (s.substring(1, s.length() - 1).trim().length() != 0)
+					allowedUserGroup = ugService.getUserGroupList(s.substring(1, s.length() - 1));
+
+				for (UserGroupMemberRole userFeatureRole : userGroupPermission.getUserFeatureRole()) {
+					userGroupFeatureRole.add(userFeatureRole.getUserGroupId());
+				}
+			}
+
+			List<Long> userGroupIdList = new ArrayList<Long>();
+			List<UserGroupIbp> featureableGroup = new ArrayList<UserGroupIbp>();
+			for (UserGroupIbp userGroup : associatedUserGroup) {
+				userGroupIdList.add(userGroup.getId());
+				if (userGroupFeatureRole.contains(userGroup.getId()))
+					featureableGroup.add(userGroup);
+
+			}
+
+			DocumentUserPermission permission = new DocumentUserPermission(allowedUserGroup, featureableGroup,
+					(follow != null) ? true : false);
+
+			return permission;
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return null;
+	}
+
+	@Override
+	public List<UserGroupIbp> getAllowedUserGroupList(HttpServletRequest request) {
+		try {
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			List<UserGroupIbp> allowedUserGroup = null;
+			JSONArray userRole = (JSONArray) profile.getAttribute("roles");
+			if (userRole.contains("ROLE_ADMIN")) {
+				allowedUserGroup = ugService.getAllUserGroup();
+			} else {
+
+				ugService = headers.addUserGroupHeader(ugService, request.getHeader(HttpHeaders.AUTHORIZATION));
+				UserGroupPermissions userGroupPermission = ugService.getUserGroupPermission();
+
+				List<Long> userGroupMember = new ArrayList<Long>();
+				for (UserGroupMemberRole userMemberRole : userGroupPermission.getUserMemberRole()) {
+					userGroupMember.add(userMemberRole.getUserGroupId());
+				}
+				String s = userGroupMember.toString();
+				allowedUserGroup = ugService.getUserGroupList(s.substring(1, s.length() - 1));
+			}
+
+			return allowedUserGroup;
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return null;
+	}
+
+	@Override
+	public List<Language> getLanguages(Boolean isDirty) {
+
+		List<Language> result = null;
+		try {
+			result = utilityService.getAllLanguages(isDirty);
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return result;
+	}
+
+	@Override
+	public List<Long> updateSpeciesGroup(HttpServletRequest request,Long documentId,List<Long> speciesGroupList) {
+
+		return null;
+	}
+
+	@Override
+	public List<Long> updateHabitat(HttpServletRequest request, Long documentId, List<Long> habitatList) {
+		// TODO Auto-generated method stub
 		return null;
 	}
 

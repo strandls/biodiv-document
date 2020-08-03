@@ -5,6 +5,7 @@ package com.strandls.document;
 
 import javax.ws.rs.core.HttpHeaders;
 
+import com.strandls.activity.controller.ActivitySerivceApi;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.user.controller.UserServiceApi;
 import com.strandls.userGroup.controller.UserGroupSerivceApi;
@@ -15,6 +16,11 @@ import com.strandls.utility.controller.UtilityServiceApi;
  *
  */
 public class Headers {
+
+	public ActivitySerivceApi addActivityHeaders(ActivitySerivceApi activityService, String authHeader) {
+		activityService.getApiClient().addDefaultHeader(HttpHeaders.AUTHORIZATION, authHeader);
+		return activityService;
+	}
 
 	public ResourceServicesApi addResourceHeaders(ResourceServicesApi resourceService, String authHeader) {
 		resourceService.getApiClient().addDefaultHeader(HttpHeaders.AUTHORIZATION, authHeader);
