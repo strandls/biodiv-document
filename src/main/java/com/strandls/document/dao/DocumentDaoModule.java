@@ -18,6 +18,9 @@ public class DocumentDaoModule extends AbstractModule {
 		bind(DocumentHabitatDao.class).in(Scopes.SINGLETON);
 		bind(DocumentSpeciesGroupDao.class).in(Scopes.SINGLETON);
 		bind(DocumentCoverageDao.class).in(Scopes.SINGLETON);
+		bind(BibTexItemTypeDao.class).in(Scopes.SINGLETON);
+		bind(BibTexFieldTypeDao.class).in(Scopes.SINGLETON);
+		bind(BibTexItemFieldMappingDao.class).in(Scopes.SINGLETON);
 	}
 
 }
