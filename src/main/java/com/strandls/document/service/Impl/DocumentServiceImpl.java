@@ -39,6 +39,7 @@ import com.strandls.document.dao.DocumentCoverageDao;
 import com.strandls.document.dao.DocumentDao;
 import com.strandls.document.dao.DocumentHabitatDao;
 import com.strandls.document.dao.DocumentSpeciesGroupDao;
+import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexFieldMappingShow;
 import com.strandls.document.pojo.BibTexFieldType;
 import com.strandls.document.pojo.BibTexItemFieldMapping;
@@ -207,13 +208,19 @@ public class DocumentServiceImpl implements DocumentService {
 				ufile = resourceService.createUFile(ufileCreateData);
 			}
 
+			BibFieldsData bibData = documentCreateData.getBibFieldData();
 			Document document = new Document(null, 0L, true, documentCreateData.getAttribution(), authorId,
 					documentCreateData.getContribution(), null, new Date(), documentCreateData.getDescription(), null,
 					new Date(), documentCreateData.getLicenseId(), null, null, documentCreateData.getTitle(),
 					documentCreateData.getType(), (ufile != null ? ufile.getId() : null),
 					documentCreateData.getFromDate(), null, null, null, null, null, null, null, null,
 					documentCreateData.getFromDate(), null, 0, 0, 205L, null, null, null, null, null, null, null, null,
-					null, 1, documentCreateData.getRating(), false, null, null);
+					null, 1, documentCreateData.getRating(), false, null, null, bibData.getAuthor(),
+					bibData.getJournal(), bibData.getBookTitle(), bibData.getYear(), bibData.getMonth(),
+					bibData.getVolume(), bibData.getNumber(), bibData.getPages(), bibData.getPublisher(),
+					bibData.getSchool(), bibData.getEdition(), bibData.getSeries(), bibData.getAddress(),
+					bibData.getChapter(), bibData.getNote(), bibData.getEditor(), bibData.getOrganization(),
+					bibData.getHowPublished(), bibData.getInstitution(), bibData.getExtra());
 
 			document = documentDao.save(document);
 
@@ -670,15 +677,51 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
-	public List<Long> updateSpeciesGroup(HttpServletRequest request,Long documentId,List<Long> speciesGroupList) {
+	public List<Long> updateSpeciesGroup(HttpServletRequest request, Long documentId, List<Long> speciesGroupList) {
 
-		return null;
+		List<DocumentSpeciesGroup> previousDocSGroup = docSGroupDao.findByDocumentId(documentId);
+		for (DocumentSpeciesGroup docSgroup : previousDocSGroup) {
+			if (!speciesGroupList.contains(docSgroup.getSpeciesGroupId())) {
+				docSGroupDao.delete(docSgroup);
+			} else {
+				speciesGroupList.remove(docSgroup.getSpeciesGroupId());
+			}
+		}
+
+		for (Long speciesGroupId : speciesGroupList) {
+			DocumentSpeciesGroup docSGroup = new DocumentSpeciesGroup(documentId, speciesGroupId);
+			docSGroupDao.save(docSGroup);
+		}
+
+		List<DocumentSpeciesGroup> newDocSgroup = docSGroupDao.findByDocumentId(documentId);
+		List<Long> result = new ArrayList<Long>();
+		for (DocumentSpeciesGroup sGroup : newDocSgroup)
+			result.add(sGroup.getSpeciesGroupId());
+
+		return result;
 	}
 
 	@Override
 	public List<Long> updateHabitat(HttpServletRequest request, Long documentId, List<Long> habitatList) {
-		// TODO Auto-generated method stub
-		return null;
+		List<DocumentHabitat> previousHabitats = docHabitatDao.findByDocumentId(documentId);
+		for (DocumentHabitat docHabitat : previousHabitats) {
+			if (!habitatList.contains(docHabitat.getHabitatId())) {
+				docHabitatDao.delete(docHabitat);
+			} else {
+				habitatList.remove(docHabitat.getHabitatId());
+			}
+		}
+
+		for (Long habitatId : habitatList) {
+			DocumentHabitat docHabitat = new DocumentHabitat(documentId, habitatId);
+			docHabitatDao.save(docHabitat);
+		}
+		List<DocumentHabitat> newDocHabitat = docHabitatDao.findByDocumentId(documentId);
+		List<Long> habitatId = new ArrayList<Long>();
+		for (DocumentHabitat docHabitat : newDocHabitat)
+			habitatId.add(docHabitat.getHabitatId());
+
+		return habitatId;
 	}
 
 }

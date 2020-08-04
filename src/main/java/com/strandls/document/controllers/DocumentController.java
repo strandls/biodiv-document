@@ -204,9 +204,7 @@ public class DocumentController {
 	public Response getUserPermission(@Context HttpServletRequest request, @PathParam("documentId") String documentId) {
 		try {
 			DocumentUserPermission result = docService.getUserPermission(request, documentId);
-			if (result != null)
-				return Response.status(Status.OK).entity(result).build();
-			return Response.status(Status.NOT_FOUND).build();
+			return Response.status(Status.OK).entity(result).build();
 
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -325,17 +323,21 @@ public class DocumentController {
 	}
 
 	@PUT
-	@Path(ApiConstants.UPDATE + ApiConstants.SPECIESGROUP)
+	@Path(ApiConstants.UPDATE + ApiConstants.SPECIESGROUP + "/{documentId}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 
 	@ValidateUser
 
-	public Response udpateSpeciesGroup(@Context HttpServletRequest request,
+	@ApiOperation(value = "update the speciesGroup ids", notes = "return list of speciesGroup ids", response = Long.class, responseContainer = "List")
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to update", response = String.class) })
+
+	public Response udpateSpeciesGroup(@Context HttpServletRequest request, @PathParam("documentId") String documentId,
 			@ApiParam("speciesGroupList") List<Long> speciesGroupList) {
 		try {
-
-			return null;
+			Long docId = Long.parseLong(documentId);
+			List<Long> result = docService.updateSpeciesGroup(request, docId, speciesGroupList);
+			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
@@ -352,6 +354,28 @@ public class DocumentController {
 		try {
 			List<Habitat> result = docService.getAllHabitat();
 			return Response.status(Status.OK).entity(result).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+	}
+
+	@PUT
+	@Path(ApiConstants.UPDATE + ApiConstants.HABITAT + "/{documentId}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ValidateUser
+
+	@ApiOperation(value = "update the habitat ids", notes = "return list of habitat ids", response = Long.class, responseContainer = "List")
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to update", response = String.class) })
+
+	public Response updateHabitat(@Context HttpServletRequest request, @PathParam("documentId") String documentId,
+			@ApiParam("habitatList") List<Long> habitatList) {
+		try {
+			Long docId = Long.parseLong(documentId);
+			List<Long> result = docService.updateHabitat(request, docId, habitatList);
+			return Response.status(Status.OK).entity(result).build();
+
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
