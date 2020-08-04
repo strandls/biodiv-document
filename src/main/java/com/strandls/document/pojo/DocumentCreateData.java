@@ -25,6 +25,9 @@ public class DocumentCreateData {
 	private Date fromDate;
 	private Integer rating;
 
+//	-----BIBTEX DATA TYPE---
+	private BibFieldsData bibFieldData;
+
 //	-----RESOURCE DATA------
 	private String mimeType;
 	private String resourceURL;
@@ -107,6 +110,14 @@ public class DocumentCreateData {
 
 	public void setRating(Integer rating) {
 		this.rating = rating;
+	}
+
+	public BibFieldsData getBibFieldData() {
+		return bibFieldData;
+	}
+
+	public void setBibFieldData(BibFieldsData bibFieldData) {
+		this.bibFieldData = bibFieldData;
 	}
 
 	public String getMimeType() {
