@@ -793,7 +793,7 @@ public class Document implements Serializable {
 		this.chapter = chapter;
 	}
 
-	@Column(name = "notes")
+	@Column(name = "note")
 	public String getNote() {
 		return note;
 	}
