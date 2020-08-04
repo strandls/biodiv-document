@@ -107,8 +107,6 @@ public class Document implements Serializable {
 		super();
 	}
 
-	
-
 	/**
 	 * @param id
 	 * @param version
@@ -255,8 +253,6 @@ public class Document implements Serializable {
 		this.institution = institution;
 		this.extra = extra;
 	}
-
-
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
