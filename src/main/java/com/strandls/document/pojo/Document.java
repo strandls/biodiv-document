@@ -107,8 +107,6 @@ public class Document implements Serializable {
 		super();
 	}
 
-	
-
 	/**
 	 * @param id
 	 * @param version
@@ -255,8 +253,6 @@ public class Document implements Serializable {
 		this.institution = institution;
 		this.extra = extra;
 	}
-
-
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -793,7 +789,7 @@ public class Document implements Serializable {
 		this.chapter = chapter;
 	}
 
-	@Column(name = "notes")
+	@Column(name = "note")
 	public String getNote() {
 		return note;
 	}
