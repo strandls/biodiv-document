@@ -191,7 +191,7 @@ public class DocumentController {
 	}
 
 	@GET
-	@Path(ApiConstants.PERMISSION + "/{docuemntId}")
+	@Path(ApiConstants.PERMISSION + "/{documentId}")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
 

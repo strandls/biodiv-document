@@ -579,6 +579,7 @@ public class DocumentServiceImpl implements DocumentService {
 	@Override
 	public DocumentUserPermission getUserPermission(HttpServletRequest request, String documentId) {
 
+		DocumentUserPermission permission = new DocumentUserPermission();
 		try {
 
 			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
@@ -624,15 +625,13 @@ public class DocumentServiceImpl implements DocumentService {
 
 			}
 
-			DocumentUserPermission permission = new DocumentUserPermission(allowedUserGroup, featureableGroup,
+			permission = new DocumentUserPermission(allowedUserGroup, featureableGroup,
 					(follow != null) ? true : false);
-
-			return permission;
 
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
-		return null;
+		return permission;
 	}
 
 	@Override
