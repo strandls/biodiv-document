@@ -3,15 +3,18 @@
  */
 package com.strandls.document.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * @author Abhishek Rudra
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BibFieldsData {
 
 	private String author;
 	private String journal;
-	private String bookTitle;
+	private String booktitle;
 	private String title;
 	private String year;
 	private String month;
@@ -28,7 +31,7 @@ public class BibFieldsData {
 	private String type;
 	private String editor;
 	private String organization;
-	private String howPublished;
+	private String howpublished;
 	private String institution;
 	private String extra;
 
@@ -42,7 +45,7 @@ public class BibFieldsData {
 	/**
 	 * @param author
 	 * @param journal
-	 * @param bookTitle
+	 * @param booktitle
 	 * @param title
 	 * @param year
 	 * @param month
@@ -59,18 +62,18 @@ public class BibFieldsData {
 	 * @param type
 	 * @param editor
 	 * @param organization
-	 * @param howPublished
+	 * @param howpublished
 	 * @param institution
 	 * @param extra
 	 */
-	public BibFieldsData(String author, String journal, String bookTitle, String title, String year, String month,
+	public BibFieldsData(String author, String journal, String booktitle, String title, String year, String month,
 			String volume, String number, String pages, String publisher, String school, String edition, String series,
 			String address, String chapter, String note, String type, String editor, String organization,
-			String howPublished, String institution, String extra) {
+			String howpublished, String institution, String extra) {
 		super();
 		this.author = author;
 		this.journal = journal;
-		this.bookTitle = bookTitle;
+		this.booktitle = booktitle;
 		this.title = title;
 		this.year = year;
 		this.month = month;
@@ -87,7 +90,7 @@ public class BibFieldsData {
 		this.type = type;
 		this.editor = editor;
 		this.organization = organization;
-		this.howPublished = howPublished;
+		this.howpublished = howpublished;
 		this.institution = institution;
 		this.extra = extra;
 	}
@@ -108,12 +111,12 @@ public class BibFieldsData {
 		this.journal = journal;
 	}
 
-	public String getBookTitle() {
-		return bookTitle;
+	public String getBooktitle() {
+		return booktitle;
 	}
 
-	public void setBookTitle(String bookTitle) {
-		this.bookTitle = bookTitle;
+	public void setBooktitle(String booktitle) {
+		this.booktitle = booktitle;
 	}
 
 	public String getTitle() {
@@ -244,12 +247,12 @@ public class BibFieldsData {
 		this.organization = organization;
 	}
 
-	public String getHowPublished() {
-		return howPublished;
+	public String getHowpublished() {
+		return howpublished;
 	}
 
-	public void setHowPublished(String howPublished) {
-		this.howPublished = howPublished;
+	public void setHowpublished(String howpublished) {
+		this.howpublished = howpublished;
 	}
 
 	public String getInstitution() {

@@ -5,7 +5,6 @@ package com.strandls.document.controllers;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -30,6 +29,7 @@ import com.strandls.activity.pojo.Activity;
 import com.strandls.activity.pojo.CommentLoggingData;
 import com.strandls.authentication_utility.filter.ValidateUser;
 import com.strandls.document.ApiConstants;
+import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexFieldMappingShow;
 import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.DocumentCreateData;
@@ -118,10 +118,7 @@ public class DocumentController {
 	public Response uploadBib(@FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail) {
 		try {
-			System.out.println(fileDetail.getSize());
-			System.out.println(fileDetail.getType());
-			System.out.println(fileDetail.getFileName());
-			Map<String, String> result = docService.readBibTex(uploadedInputStream, fileDetail);
+			BibFieldsData result = docService.readBibTex(uploadedInputStream, fileDetail);
 			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
