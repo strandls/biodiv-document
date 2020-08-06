@@ -5,7 +5,6 @@ package com.strandls.document.service;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,6 +13,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import com.strandls.activity.pojo.Activity;
 import com.strandls.activity.pojo.CommentLoggingData;
 import com.strandls.activity.pojo.MailData;
+import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexFieldMappingShow;
 import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.DocumentCreateData;
@@ -43,7 +43,7 @@ public interface DocumentService {
 
 	public Boolean removeDocument(HttpServletRequest request, Long documentId);
 
-	public Map<String, String> readBibTex(InputStream uploadedInputStream, FormDataContentDisposition fileDetail);
+	public BibFieldsData readBibTex(InputStream uploadedInputStream, FormDataContentDisposition fileDetail);
 
 	public List<BibTexItemType> fetchAllItemType();
 

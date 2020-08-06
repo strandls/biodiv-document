@@ -24,6 +24,8 @@ import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.strandls.activity.controller.ActivitySerivceApi;
 import com.strandls.activity.pojo.Activity;
 import com.strandls.activity.pojo.CommentLoggingData;
@@ -54,7 +56,7 @@ import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
-import com.strandls.geoentities.pojo.GeoentitiesCreateData;
+import com.strandls.geoentities.pojo.GeoentitiesWKTData;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
@@ -147,6 +149,9 @@ public class DocumentServiceImpl implements DocumentService {
 	@Inject
 	private TaxonomyServicesApi taxonomyService;
 
+	@Inject
+	private ObjectMapper objectMapper;
+
 	@Override
 	public ShowDocument show(Long documentId) {
 		try {
@@ -216,11 +221,11 @@ public class DocumentServiceImpl implements DocumentService {
 					documentCreateData.getFromDate(), null, null, null, null, null, null, null, null,
 					documentCreateData.getFromDate(), null, 0, 0, 205L, null, null, null, null, null, null, null, null,
 					null, 1, documentCreateData.getRating(), false, null, null, bibData.getAuthor(),
-					bibData.getJournal(), bibData.getBookTitle(), bibData.getYear(), bibData.getMonth(),
+					bibData.getJournal(), bibData.getBooktitle(), bibData.getYear(), bibData.getMonth(),
 					bibData.getVolume(), bibData.getNumber(), bibData.getPages(), bibData.getPublisher(),
 					bibData.getSchool(), bibData.getEdition(), bibData.getSeries(), bibData.getAddress(),
 					bibData.getChapter(), bibData.getNote(), bibData.getEditor(), bibData.getOrganization(),
-					bibData.getHowPublished(), bibData.getInstitution(), bibData.getExtra());
+					bibData.getHowpublished(), bibData.getInstitution(), bibData.getExtra());
 
 			document = documentDao.save(document);
 
@@ -262,7 +267,7 @@ public class DocumentServiceImpl implements DocumentService {
 //			document coverage geo entities ids 
 			if (documentCreateData.getGeoentitiesId() != null) {
 				for (Long id : documentCreateData.getGeoentitiesId()) {
-					GeoentitiesCreateData geoentity = geoentitiesService.findGeoentitiesById(id.toString());
+					GeoentitiesWKTData geoentity = geoentitiesService.findGeoentitiesById(id.toString());
 					WKTReader reader = new WKTReader(geometryFactory);
 					Geometry topology = reader.read(geoentity.getWktData());
 					DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(),
@@ -339,7 +344,7 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
-	public Map<String, String> readBibTex(InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
+	public BibFieldsData readBibTex(InputStream uploadedInputStream, FormDataContentDisposition fileDetail) {
 		try {
 			Map<String, String> bibMapping = new HashMap<String, String>();
 
@@ -352,7 +357,19 @@ public class DocumentServiceImpl implements DocumentService {
 					bibMapping.put(bibEntry.getKey().toString(), bibEntry.getValue().toUserString());
 				}
 			}
-			return bibMapping;
+			BibFieldsData ressult = objectMapper.convertValue(bibMapping, BibFieldsData.class);
+			Map<String, Object> bibFieldMaps = objectMapper.convertValue(ressult,
+					new TypeReference<Map<String, Object>>() {
+					});
+
+			for (Entry<String, Object> entry : bibFieldMaps.entrySet()) {
+				bibMapping.remove(entry.getKey());
+			}
+
+			String extras = objectMapper.writeValueAsString(bibMapping);
+			ressult.setExtra(extras);
+
+			return ressult;
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
