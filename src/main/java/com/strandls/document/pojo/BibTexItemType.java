@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Abhishek Rudra
@@ -28,7 +29,9 @@ public class BibTexItemType implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -3223265886707177692L;
+	@JsonProperty(value = "value")
 	private Long id;
+	@JsonProperty(value = "label")
 	private String itemType;
 
 	/**
