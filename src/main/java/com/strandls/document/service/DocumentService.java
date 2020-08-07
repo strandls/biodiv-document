@@ -5,6 +5,7 @@ package com.strandls.document.service;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,7 +15,6 @@ import com.strandls.activity.pojo.Activity;
 import com.strandls.activity.pojo.CommentLoggingData;
 import com.strandls.activity.pojo.MailData;
 import com.strandls.document.pojo.BibFieldsData;
-import com.strandls.document.pojo.BibTexFieldMappingShow;
 import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentUserPermission;
@@ -47,7 +47,7 @@ public interface DocumentService {
 
 	public List<BibTexItemType> fetchAllItemType();
 
-	public List<BibTexFieldMappingShow> getAllFieldTypes(Long itemTypeId);
+	public Map<String, Boolean> getAllFieldTypes(Long itemTypeId);
 
 	public MailData generateMailData(Long documentId);
 
