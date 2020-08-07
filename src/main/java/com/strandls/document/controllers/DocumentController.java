@@ -5,6 +5,7 @@ package com.strandls.document.controllers;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -30,7 +31,6 @@ import com.strandls.activity.pojo.CommentLoggingData;
 import com.strandls.authentication_utility.filter.ValidateUser;
 import com.strandls.document.ApiConstants;
 import com.strandls.document.pojo.BibFieldsData;
-import com.strandls.document.pojo.BibTexFieldMappingShow;
 import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentUserPermission;
@@ -148,13 +148,13 @@ public class DocumentController {
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.APPLICATION_JSON)
 
-	@ApiOperation(value = "fetch all the fields based on item type", notes = "returns all the relevant field based on item type", response = BibTexFieldMappingShow.class, responseContainer = "List")
+	@ApiOperation(value = "fetch all the fields based on item type", notes = "returns all the relevant field based on item type", response = Map.class)
 	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to fetch the data", response = String.class) })
 
 	public Response getItemsFieldType(@PathParam("itemId") String itemId) {
 		try {
 			Long itemTypeId = Long.parseLong(itemId);
-			List<BibTexFieldMappingShow> result = docService.getAllFieldTypes(itemTypeId);
+			Map<String, Boolean> result = docService.getAllFieldTypes(itemTypeId);
 			return Response.status(Status.OK).entity(result).build();
 
 		} catch (Exception e) {

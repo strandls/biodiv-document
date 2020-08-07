@@ -42,7 +42,6 @@ import com.strandls.document.dao.DocumentDao;
 import com.strandls.document.dao.DocumentHabitatDao;
 import com.strandls.document.dao.DocumentSpeciesGroupDao;
 import com.strandls.document.pojo.BibFieldsData;
-import com.strandls.document.pojo.BibTexFieldMappingShow;
 import com.strandls.document.pojo.BibTexFieldType;
 import com.strandls.document.pojo.BibTexItemFieldMapping;
 import com.strandls.document.pojo.BibTexItemType;
@@ -379,12 +378,12 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
-	public List<BibTexFieldMappingShow> getAllFieldTypes(Long itemTypeId) {
-		List<BibTexFieldMappingShow> result = new ArrayList<BibTexFieldMappingShow>();
+	public Map<String, Boolean> getAllFieldTypes(Long itemTypeId) {
 		List<BibTexItemFieldMapping> itemFieldMappings = bibTexItemFieldMappingDao.findByItemTypeId(itemTypeId);
+		Map<String, Boolean> result = new HashMap<String, Boolean>();
 		for (BibTexItemFieldMapping itemFieldMapping : itemFieldMappings) {
 			BibTexFieldType fieldType = bibTexFieldTypeDao.findById(itemFieldMapping.getFieldId());
-			result.add(new BibTexFieldMappingShow(fieldType.getFieldType(), itemFieldMapping.getIsRequired()));
+			result.put(fieldType.getFieldType(), itemFieldMapping.getIsRequired());
 		}
 
 		return result;

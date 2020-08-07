@@ -38,7 +38,6 @@ public class BibFieldsData {
 	private String description;
 	private String doi;
 	private String url;
-	@JsonProperty(value = "publication language")
 	private String language;
 	private String file;
 	@JsonProperty(value = "item type")
