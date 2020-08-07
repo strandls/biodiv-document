@@ -242,7 +242,7 @@ public class DocumentServiceImpl implements DocumentService {
 				docHabitatDao.save(docHabitat);
 			}
 //			user group
-			if (documentCreateData.getUserGroupId() != null) {
+			if (documentCreateData.getUserGroupId() != null && !documentCreateData.getUserGroupId().isEmpty()) {
 				UserGroupDocCreateData groupDocCreateData = new UserGroupDocCreateData();
 				groupDocCreateData.setDocumentId(document.getId());
 				groupDocCreateData.setUserGroupIds(documentCreateData.getUserGroupId());
@@ -251,7 +251,7 @@ public class DocumentServiceImpl implements DocumentService {
 			}
 
 //			tags
-			if (documentCreateData.getTags() != null) {
+			if (documentCreateData.getTags() != null && !documentCreateData.getTags().isEmpty()) {
 				TagsMapping tagsMapping = new TagsMapping();
 				tagsMapping.setObjectId(document.getId());
 				tagsMapping.setTags(documentCreateData.getTags());
@@ -265,7 +265,7 @@ public class DocumentServiceImpl implements DocumentService {
 			}
 
 //			document coverage geo entities ids 
-			if (documentCreateData.getGeoentitiesId() != null) {
+			if (documentCreateData.getGeoentitiesId() != null && !documentCreateData.getGeoentitiesId().isEmpty()) {
 				for (Long id : documentCreateData.getGeoentitiesId()) {
 					GeoentitiesWKTData geoentity = geoentitiesService.findGeoentitiesById(id.toString());
 					WKTReader reader = new WKTReader(geometryFactory);
@@ -277,7 +277,7 @@ public class DocumentServiceImpl implements DocumentService {
 				}
 			}
 //			new wkt  coverage data
-			if (documentCreateData.getDocCoverageData() != null) {
+			if (documentCreateData.getDocCoverageData() != null && !documentCreateData.getDocCoverageData().isEmpty()) {
 				for (DocumentCoverageData docCoverageData : documentCreateData.getDocCoverageData()) {
 					WKTReader reader = new WKTReader(geometryFactory);
 					Geometry topology = reader.read(docCoverageData.getTopology());

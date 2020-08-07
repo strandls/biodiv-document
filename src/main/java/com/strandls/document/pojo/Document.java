@@ -516,7 +516,7 @@ public class Document implements Serializable {
 		this.toDate = toDate;
 	}
 
-	@Column(name = "topology", columnDefinition = "Geometry", nullable = false)
+	@Column(name = "topology", columnDefinition = "Geometry", nullable = true)
 	@JsonSerialize(using = GeometrySerializer.class)
 	@JsonDeserialize(contentUsing = GeometryDeserializer.class)
 	public Geometry getTopology() {
