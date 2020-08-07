@@ -16,12 +16,9 @@ import com.strandls.utility.pojo.Tags;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DocumentCreateData {
 
-	private String type;
-	private String title;
 	private String contribution;
 	private String attribution;
 	private Long licenseId;
-	private String description;
 	private Date fromDate;
 	private Integer rating;
 
@@ -48,22 +45,6 @@ public class DocumentCreateData {
 //	-----User Group Data-----
 	private List<Long> userGroupId;
 
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
 	public String getContribution() {
 		return contribution;
 	}
@@ -86,14 +67,6 @@ public class DocumentCreateData {
 
 	public void setLicenseId(Long licenseId) {
 		this.licenseId = licenseId;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	public Date getFromDate() {

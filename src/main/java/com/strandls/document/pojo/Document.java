@@ -16,6 +16,7 @@ import javax.persistence.Table;
 import com.bedatadriven.jackson.datatype.jts.serialization.GeometryDeserializer;
 import com.bedatadriven.jackson.datatype.jts.serialization.GeometrySerializer;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.vividsolutions.jts.geom.Geometry;
@@ -50,6 +51,7 @@ public class Document implements Serializable {
 	private String sourceHolderType;
 	private String title;
 	private String type;
+	@JsonProperty(value = "uFileId")
 	private Long uFileId;
 	private Date fromDate;
 	private Boolean geoPrivacy;
@@ -98,6 +100,11 @@ public class Document implements Serializable {
 	private String organization;
 	private String howPublished;
 	private String institution;
+	private String url;
+	private String language;
+	private String file;
+	private String itemtype;
+	private String isbn;
 	private String extra;
 
 	/**
@@ -172,6 +179,11 @@ public class Document implements Serializable {
 	 * @param organization
 	 * @param howPublished
 	 * @param institution
+	 * @param url
+	 * @param language
+	 * @param file
+	 * @param itemtype
+	 * @param isbn
 	 * @param extra
 	 */
 	public Document(Long id, Long version, Boolean agreeTerms, String attribution, Long authorId, String contributors,
@@ -185,7 +197,7 @@ public class Document implements Serializable {
 			String dateAccuracy, String author, String journal, String bookTitle, String year, String month,
 			String volume, String number, String pages, String publisher, String school, String edition, String series,
 			String address, String chapter, String note, String editor, String organization, String howPublished,
-			String institution, String extra) {
+			String institution, String url, String language, String file, String itemtype, String isbn, String extra) {
 		super();
 		this.id = id;
 		this.version = version;
@@ -251,6 +263,11 @@ public class Document implements Serializable {
 		this.organization = organization;
 		this.howPublished = howPublished;
 		this.institution = institution;
+		this.url = url;
+		this.language = language;
+		this.file = file;
+		this.itemtype = itemtype;
+		this.isbn = isbn;
 		this.extra = extra;
 	}
 
@@ -841,6 +858,51 @@ public class Document implements Serializable {
 
 	public void setExtra(String extra) {
 		this.extra = extra;
+	}
+
+	@Column(name = "url")
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	@Column(name = "language")
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	@Column(name = "file")
+	public String getFile() {
+		return file;
+	}
+
+	public void setFile(String file) {
+		this.file = file;
+	}
+
+	@Column(name = "item_type")
+	public String getItemtype() {
+		return itemtype;
+	}
+
+	public void setItemtype(String itemtype) {
+		this.itemtype = itemtype;
+	}
+
+	@Column(name = "isbn")
+	public String getIsbn() {
+		return isbn;
+	}
+
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
 	}
 
 }

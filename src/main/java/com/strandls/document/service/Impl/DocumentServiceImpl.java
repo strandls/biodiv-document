@@ -215,17 +215,18 @@ public class DocumentServiceImpl implements DocumentService {
 
 			BibFieldsData bibData = documentCreateData.getBibFieldData();
 			Document document = new Document(null, 0L, true, documentCreateData.getAttribution(), authorId,
-					documentCreateData.getContribution(), null, new Date(), documentCreateData.getDescription(), null,
-					new Date(), documentCreateData.getLicenseId(), null, null, documentCreateData.getTitle(),
-					documentCreateData.getType(), (ufile != null ? ufile.getId() : null),
-					documentCreateData.getFromDate(), null, null, null, null, null, null, null, null,
-					documentCreateData.getFromDate(), null, 0, 0, 205L, null, null, null, null, null, null, null, null,
-					null, 1, documentCreateData.getRating(), false, null, null, bibData.getAuthor(),
-					bibData.getJournal(), bibData.getBooktitle(), bibData.getYear(), bibData.getMonth(),
-					bibData.getVolume(), bibData.getNumber(), bibData.getPages(), bibData.getPublisher(),
-					bibData.getSchool(), bibData.getEdition(), bibData.getSeries(), bibData.getAddress(),
-					bibData.getChapter(), bibData.getNote(), bibData.getEditor(), bibData.getOrganization(),
-					bibData.getHowpublished(), bibData.getInstitution(), bibData.getExtra());
+					documentCreateData.getContribution(), null, new Date(), bibData.getDescription(), bibData.getDoi(),
+					new Date(), documentCreateData.getLicenseId(), null, null, bibData.getTitle(), bibData.getType(),
+					(ufile != null ? ufile.getId() : null), documentCreateData.getFromDate(), null, null, null, null,
+					null, null, null, null, documentCreateData.getFromDate(), null, 0, 0, 205L, null, null, null, null,
+					null, null, null, null, null, 1, documentCreateData.getRating(), false, null, null,
+					bibData.getAuthor(), bibData.getJournal(), bibData.getBooktitle(), bibData.getYear(),
+					bibData.getMonth(), bibData.getVolume(), bibData.getNumber(), bibData.getPages(),
+					bibData.getPublisher(), bibData.getSchool(), bibData.getEdition(), bibData.getSeries(),
+					bibData.getAddress(), bibData.getChapter(), bibData.getNote(), bibData.getEditor(),
+					bibData.getOrganization(), bibData.getHowpublished(), bibData.getInstitution(), bibData.getUrl(),
+					bibData.getLanguage(), bibData.getFile(), bibData.getItemtype(), bibData.getIsbn(),
+					bibData.getExtra());
 
 			document = documentDao.save(document);
 
@@ -357,8 +358,8 @@ public class DocumentServiceImpl implements DocumentService {
 					bibMapping.put(bibEntry.getKey().toString(), bibEntry.getValue().toUserString());
 				}
 			}
-			BibFieldsData ressult = objectMapper.convertValue(bibMapping, BibFieldsData.class);
-			Map<String, Object> bibFieldMaps = objectMapper.convertValue(ressult,
+			BibFieldsData result = objectMapper.convertValue(bibMapping, BibFieldsData.class);
+			Map<String, Object> bibFieldMaps = objectMapper.convertValue(result,
 					new TypeReference<Map<String, Object>>() {
 					});
 
@@ -366,10 +367,11 @@ public class DocumentServiceImpl implements DocumentService {
 				bibMapping.remove(entry.getKey());
 			}
 
+			result.setItemTypeId(bibTexItemTypeDao.findByName(result.getItemtype()).getId());
 			String extras = objectMapper.writeValueAsString(bibMapping);
-			ressult.setExtra(extras);
+			result.setExtra(extras);
 
-			return ressult;
+			return result;
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}

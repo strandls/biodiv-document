@@ -4,6 +4,7 @@
 package com.strandls.document.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Abhishek Rudra
@@ -33,6 +34,17 @@ public class BibFieldsData {
 	private String organization;
 	private String howpublished;
 	private String institution;
+	@JsonProperty(value = "abstract")
+	private String description;
+	private String doi;
+	private String url;
+	@JsonProperty(value = "publication language")
+	private String language;
+	private String file;
+	@JsonProperty(value = "item type")
+	private String itemtype;
+	private Long itemTypeId;
+	private String isbn;
 	private String extra;
 
 	/**
@@ -64,12 +76,21 @@ public class BibFieldsData {
 	 * @param organization
 	 * @param howpublished
 	 * @param institution
+	 * @param description
+	 * @param doi
+	 * @param url
+	 * @param language
+	 * @param file
+	 * @param itemtype
+	 * @param itemTypeId
+	 * @param isbn
 	 * @param extra
 	 */
 	public BibFieldsData(String author, String journal, String booktitle, String title, String year, String month,
 			String volume, String number, String pages, String publisher, String school, String edition, String series,
 			String address, String chapter, String note, String type, String editor, String organization,
-			String howpublished, String institution, String extra) {
+			String howpublished, String institution, String description, String doi, String url, String language,
+			String file, String itemtype, Long itemTypeId, String isbn, String extra) {
 		super();
 		this.author = author;
 		this.journal = journal;
@@ -92,6 +113,14 @@ public class BibFieldsData {
 		this.organization = organization;
 		this.howpublished = howpublished;
 		this.institution = institution;
+		this.description = description;
+		this.doi = doi;
+		this.url = url;
+		this.language = language;
+		this.file = file;
+		this.itemtype = itemtype;
+		this.itemTypeId = itemTypeId;
+		this.isbn = isbn;
 		this.extra = extra;
 	}
 
@@ -261,6 +290,70 @@ public class BibFieldsData {
 
 	public void setInstitution(String institution) {
 		this.institution = institution;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getDoi() {
+		return doi;
+	}
+
+	public void setDoi(String doi) {
+		this.doi = doi;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public String getFile() {
+		return file;
+	}
+
+	public void setFile(String file) {
+		this.file = file;
+	}
+
+	public String getItemtype() {
+		return itemtype;
+	}
+
+	public void setItemtype(String itemtype) {
+		this.itemtype = itemtype;
+	}
+
+	public Long getItemTypeId() {
+		return itemTypeId;
+	}
+
+	public void setItemTypeId(Long itemTypeId) {
+		this.itemTypeId = itemTypeId;
+	}
+
+	public String getIsbn() {
+		return isbn;
+	}
+
+	public void setIsbn(String isbn) {
+		this.isbn = isbn;
 	}
 
 	public String getExtra() {
