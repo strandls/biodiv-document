@@ -11,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -19,8 +20,10 @@ import javax.ws.rs.core.Response.Status;
 import com.strandls.authentication_utility.filter.ValidateUser;
 import com.strandls.document.ApiConstants;
 import com.strandls.document.pojo.DocumentCreateData;
+import com.strandls.document.pojo.GNFinderResponseMap;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
+import com.strandls.esmodule.controllers.EsServicesApi;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,6 +42,8 @@ public class DocumentController {
 
 	@Inject
 	private DocumentService docService;
+	@Inject
+	private EsServicesApi EsServicesApi;
 
 	@GET
 	@Path(ApiConstants.PING)
@@ -82,6 +87,17 @@ public class DocumentController {
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).build();
 		}
+	}
+	
+	@GET
+	@Path(ApiConstants.GNRD)
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
+	
+	public Response parsePdfWithGNFinder(@QueryParam("filePath")String filePath,@QueryParam("fileUrl")String fileUrl,
+			@QueryParam("documentId")Long documentId) {
+			GNFinderResponseMap response = docService.parsePdfWithGNFinder(filePath,fileUrl, documentId);
+			return Response.status(Status.OK).entity(response).build();
 	}
 
 }

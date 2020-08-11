@@ -162,7 +162,6 @@ public class ApplicationConfig extends Application {
 				names.add(name);
 			}
 		});
-
 		return names;
 	}
 }

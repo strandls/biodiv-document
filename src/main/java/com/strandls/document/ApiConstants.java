@@ -15,5 +15,6 @@ public class ApiConstants {
 	public static final String CREATE = "/create";
 	public static final String UPLOAD = "/upload";
 	public static final String SHOW = "/show";
+	public static final String GNRD = "/gnfinder";
 
 }

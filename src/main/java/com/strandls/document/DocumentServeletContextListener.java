@@ -28,6 +28,7 @@ import org.hibernate.cfg.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
@@ -36,6 +37,7 @@ import com.google.inject.servlet.ServletModule;
 import com.strandls.document.controllers.DocumentControllerModule;
 import com.strandls.document.dao.DocumentDaoModule;
 import com.strandls.document.service.Impl.DocumentServiceModule;
+import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.user.controller.UserServiceApi;
 import com.strandls.userGroup.controller.UserGroupSerivceApi;
@@ -81,7 +83,11 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 				bind(ResourceServicesApi.class).in(Scopes.SINGLETON);
 				bind(UtilityServiceApi.class).in(Scopes.SINGLETON);
 				bind(ServletContainer.class).in(Scopes.SINGLETON);
-
+				bind(EsServicesApi.class).in(Scopes.SINGLETON);
+				
+				ObjectMapper objectMapper = new ObjectMapper();
+				bind(ObjectMapper.class).toInstance(objectMapper);
+				
 				serve("/api/*").with(ServletContainer.class, props);
 			}
 		}, new DocumentControllerModule(), new DocumentDaoModule(), new DocumentServiceModule());
