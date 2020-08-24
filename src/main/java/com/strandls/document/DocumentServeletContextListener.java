@@ -38,6 +38,7 @@ import com.strandls.activity.controller.ActivitySerivceApi;
 import com.strandls.document.controllers.DocumentControllerModule;
 import com.strandls.document.dao.DocumentDaoModule;
 import com.strandls.document.service.Impl.DocumentServiceModule;
+import com.strandls.file.api.UploadApi;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.taxonomy.controllers.TaxonomyServicesApi;
@@ -95,6 +96,7 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 				bind(GeoentitiesServicesApi.class).in(Scopes.SINGLETON);
 				bind(ActivitySerivceApi.class).in(Scopes.SINGLETON);
 				bind(TaxonomyServicesApi.class).in(Scopes.SINGLETON);
+				bind(UploadApi.class).in(Scopes.SINGLETON);
 				bind(ServletContainer.class).in(Scopes.SINGLETON);
 
 				serve("/api/*").with(ServletContainer.class, props);

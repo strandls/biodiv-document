@@ -3,10 +3,14 @@
  */
 package com.strandls.document.service.Impl;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,6 +19,12 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.HttpHeaders;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.jbibtex.BibTeXDatabase;
 import org.jbibtex.BibTeXEntry;
@@ -45,15 +55,19 @@ import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexFieldType;
 import com.strandls.document.pojo.BibTexItemFieldMapping;
 import com.strandls.document.pojo.BibTexItemType;
+import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.Document;
 import com.strandls.document.pojo.DocumentCoverage;
 import com.strandls.document.pojo.DocumentCoverageData;
 import com.strandls.document.pojo.DocumentCreateData;
+import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentHabitat;
 import com.strandls.document.pojo.DocumentSpeciesGroup;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
+import com.strandls.file.api.UploadApi;
+import com.strandls.file.model.FilesDTO;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.geoentities.pojo.GeoentitiesWKTData;
 import com.strandls.resource.controllers.ResourceServicesApi;
@@ -85,6 +99,7 @@ import com.strandls.utility.pojo.TagsMappingData;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.WKTReader;
+import com.vividsolutions.jts.io.WKTWriter;
 
 import de.undercouch.citeproc.bibtex.BibTeXConverter;
 import net.minidev.json.JSONArray;
@@ -128,9 +143,6 @@ public class DocumentServiceImpl implements DocumentService {
 	private GeometryFactory geometryFactory;
 
 	@Inject
-	private GeoentitiesServicesApi geoentitiesService;
-
-	@Inject
 	private BibTexFieldTypeDao bibTexFieldTypeDao;
 
 	@Inject
@@ -149,7 +161,16 @@ public class DocumentServiceImpl implements DocumentService {
 	private TaxonomyServicesApi taxonomyService;
 
 	@Inject
+	private GeoentitiesServicesApi geoEntitiesServices;
+
+	@Inject
 	private ObjectMapper objectMapper;
+
+	@Inject
+	private UploadApi fileUpload;
+
+	@Inject
+	private DocumentHelper docHelper;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -202,6 +223,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 			UFile ufile = null;
 			if (documentCreateData.getResourceURL() != null && documentCreateData.getSize() != null) {
+
+//				fileUpload.mo
+
 				UFileCreateData ufileCreateData = new UFileCreateData();
 				ufileCreateData.setMimeType(documentCreateData.getMimeType());
 				ufileCreateData.setPath(documentCreateData.getResourceURL());
@@ -264,18 +288,6 @@ public class DocumentServiceImpl implements DocumentService {
 				utilityService.createTags("document", tagsMappingData);
 			}
 
-//			document coverage geo entities ids 
-			if (documentCreateData.getGeoentitiesId() != null && !documentCreateData.getGeoentitiesId().isEmpty()) {
-				for (Long id : documentCreateData.getGeoentitiesId()) {
-					GeoentitiesWKTData geoentity = geoentitiesService.findGeoentitiesById(id.toString());
-					WKTReader reader = new WKTReader(geometryFactory);
-					Geometry topology = reader.read(geoentity.getWktData());
-					DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(),
-							geoentity.getPlaceName(), topology);
-					docCoverageDao.save(docCoverage);
-
-				}
-			}
 //			new wkt  coverage data
 			if (documentCreateData.getDocCoverageData() != null && !documentCreateData.getDocCoverageData().isEmpty()) {
 				for (DocumentCoverageData docCoverageData : documentCreateData.getDocCoverageData()) {
@@ -294,6 +306,55 @@ public class DocumentServiceImpl implements DocumentService {
 			logger.error(e.getMessage());
 		}
 
+		return null;
+	}
+
+	@Override
+	public DocumentEditData getDocumentEditData(HttpServletRequest request, Long documentId) {
+		try {
+
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			Long userId = Long.parseLong(profile.getId());
+			JSONArray roles = (JSONArray) profile.getAttribute("roles");
+
+			Document document = documentDao.findById(documentId);
+			if (roles.contains("ROLE_ADMIN") || userId.equals(document.getAuthorId())) {
+				List<DocumentCoverage> docCoverages = docCoverageDao.findByDocumentId(documentId);
+				List<DocumentCoverageData> docCoverageData = new ArrayList<DocumentCoverageData>();
+				for (DocumentCoverage docCoverage : docCoverages) {
+					WKTWriter writer = new WKTWriter();
+					String wktData = writer.write(docCoverage.getTopology());
+					docCoverageData.add(new DocumentCoverageData(docCoverage.getPlaceName(), wktData));
+				}
+				UFile ufile = null;
+				if (document.getuFileId() != null)
+					ufile = resourceService.getUFilePath(document.getuFileId().toString());
+				UFileCreateData uFileData = new UFileCreateData();
+				if (ufile != null) {
+					uFileData.setMimeType(ufile.getMimeType());
+					uFileData.setPath(ufile.getPath());
+					uFileData.setSize(ufile.getSize());
+				}
+
+				DocumentEditData docEditData = new DocumentEditData(document, docCoverageData, uFileData);
+				return docEditData;
+			}
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		return null;
+	}
+
+	@Override
+	public ShowDocument updateDocument(HttpServletRequest request, DocumentEditData docEditData) {
+		try {
+			Document document = docEditData.getDocument();
+//			documentDao.
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
 		return null;
 	}
 
@@ -374,6 +435,200 @@ public class DocumentServiceImpl implements DocumentService {
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
+		return null;
+	}
+
+	@Override
+	public String bulkUploadBibTex(HttpServletRequest request, InputStream uploadedInputStream,
+			FormDataContentDisposition fileDetail) {
+
+		try {
+			BibTeXDatabase bibTexDB = new BibTeXConverter().loadDatabase(uploadedInputStream);
+			Map<Key, BibTeXEntry> bibEntries = bibTexDB.getEntries();
+
+//			iterate over each ref one after another
+			for (Entry<Key, BibTeXEntry> bibEntry : bibEntries.entrySet()) {
+
+			}
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
+		return null;
+	}
+
+	@SuppressWarnings({ "deprecation", "unchecked" })
+	@Override
+	public String bulkUploadExcel(HttpServletRequest request, BulkUploadExcelData bulkUploadData) {
+		try {
+			FileInputStream fileInputStream = new FileInputStream(new File(bulkUploadData.getFileName()));
+
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			Long authorId = Long.parseLong(profile.getId());
+
+//			read the excel sheet
+			XSSFWorkbook workBook = new XSSFWorkbook(fileInputStream);
+			XSSFSheet dataSheet = workBook.getSheetAt(0);
+			XSSFSheet notCitedData = workBook.getSheetAt(1);
+			Map<String, Integer> fieldMapping = bulkUploadData.getFieldMapping();
+
+			Iterator<Row> dataSheetIterator = dataSheet.iterator();
+			int count = 1;
+
+			dataSheetIterator.next();
+			while (dataSheetIterator.hasNext()) {
+				Row dataRow = dataSheetIterator.next();
+
+				System.out.println("Counter---------" + count);
+				count++;
+
+//				ufile
+
+				String fileName = dataRow.getCell(fieldMapping.get("file")).getStringCellValue();
+				FilesDTO filesDto = new FilesDTO();
+				filesDto.setFiles(Arrays.asList(fileName));
+				filesDto.setModule("DOCUMENT");
+
+				fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
+				Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
+
+				UFile ufile = null;
+				if (fileResponse != null && !fileResponse.isEmpty()) {
+					Map<String, String> files = (Map<String, String>) fileResponse.get(fileName);
+					String relativePath = files.get("name").toString();
+					String mimeType = files.get("mimeType").toString();
+					String size = files.get("size").toString();
+					UFileCreateData ufileCreateData = new UFileCreateData();
+					ufileCreateData.setMimeType(mimeType);
+					ufileCreateData.setPath(relativePath);
+					ufileCreateData.setSize(size);
+					ufileCreateData.setWeight(0);
+					resourceService = headers.addResourceHeaders(resourceService,
+							request.getHeader(HttpHeaders.AUTHORIZATION));
+					ufile = resourceService.createUFile(ufileCreateData);
+
+				}
+
+//				document creation
+				Document document = docHelper.bulkUploadPayload(dataRow, fieldMapping, authorId, ufile);
+
+				document = documentDao.save(document);
+
+//				GEO ENTITY
+				if (fieldMapping.get("geoentities") != null) {
+					String geoEntities = null;
+					Cell cell = dataRow.getCell(fieldMapping.get("geoentities"),
+							MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					if (cell != null) {
+						cell.setCellType(CellType.STRING);
+						geoEntities = cell.getStringCellValue();
+					}
+					if (geoEntities != null) {
+						String geoEntitesIds[] = geoEntities.split(",");
+						for (String geoEntitiesId : geoEntitesIds) {
+							GeoentitiesWKTData geoEntity = geoEntitiesServices.findGeoentitiesById(geoEntitiesId);
+							WKTReader reader = new WKTReader(geometryFactory);
+							Geometry topology = reader.read(geoEntity.getWktData());
+							DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(),
+									geoEntity.getPlaceName(), topology);
+							docCoverageDao.save(docCoverage);
+
+						}
+
+					}
+
+				}
+
+//				NOT CITED AREA
+
+				if (fieldMapping.get("notCitedArea") != null && fieldMapping.get("notCitedName") != null
+						&& fieldMapping.get("wktData") != null) {
+
+					String notCited = null;
+					Cell cell = dataRow.getCell(fieldMapping.get("notCitedArea"),
+							MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					if (cell != null) {
+						cell.setCellType(CellType.STRING);
+						notCited = cell.getStringCellValue();
+					}
+					if (notCited != null) {
+
+						List<String> notCitedNames = Arrays.asList(notCited.split(","));
+
+						Iterator<Row> notCitedIterator = notCitedData.iterator();
+						while (notCitedIterator.hasNext()) {
+							Row notCitedDataRow = notCitedIterator.next();
+
+							String citeName = null;
+							Cell notCitedCell = notCitedDataRow.getCell(fieldMapping.get("notCitedName"),
+									MissingCellPolicy.RETURN_BLANK_AS_NULL);
+							if (notCitedCell != null) {
+								notCitedCell.setCellType(CellType.STRING);
+								citeName = notCitedCell.getStringCellValue();
+							}
+							if (notCitedNames.contains(citeName)) {
+								String wktData = null;
+								Cell wktCell = notCitedDataRow.getCell(fieldMapping.get("wktData"),
+										MissingCellPolicy.RETURN_BLANK_AS_NULL);
+								if (wktCell != null) {
+									wktCell.setCellType(CellType.STRING);
+									wktData = wktCell.getStringCellValue();
+								}
+								WKTReader reader = new WKTReader(geometryFactory);
+								Geometry topology = reader.read(wktData);
+								DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(), citeName,
+										topology);
+								docCoverageDao.save(docCoverage);
+
+							}
+						}
+
+					}
+				}
+
+//				tags
+
+				if (fieldMapping.get("tags") != null) {
+					String docTags = null;
+					Cell cell = dataRow.getCell(fieldMapping.get("tags"), MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					if (cell != null) {
+						cell.setCellType(CellType.STRING);
+						docTags = cell.getStringCellValue();
+
+					}
+					if (docTags != null) {
+						String docTag[] = docTags.split(",");
+
+						List<Tags> tags = new ArrayList<Tags>();
+
+						TagsMapping tagsMapping = new TagsMapping();
+						tagsMapping.setObjectId(document.getId());
+						for (String tag : docTag) {
+							Tags t = new Tags();
+							t.setName(tag.trim());
+							tags.add(t);
+						}
+						tagsMapping.setTags(tags);
+						TagsMappingData tagsMappingData = new TagsMappingData();
+						tagsMappingData.setMailData(null);
+						tagsMappingData.setTagsMapping(tagsMapping);
+						utilityService = headers.addUtilityHeaders(utilityService,
+								request.getHeader(HttpHeaders.AUTHORIZATION));
+						utilityService.createTags("document", tagsMappingData);
+					}
+
+				}
+			}
+
+//			closing excel sheet
+			workBook.close();
+		} catch (
+
+		Exception e) {
+			logger.error(e.getMessage());
+		}
+
 		return null;
 	}
 

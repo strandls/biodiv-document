@@ -6,6 +6,7 @@ package com.strandls.document;
 import javax.ws.rs.core.HttpHeaders;
 
 import com.strandls.activity.controller.ActivitySerivceApi;
+import com.strandls.file.api.UploadApi;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.user.controller.UserServiceApi;
 import com.strandls.userGroup.controller.UserGroupSerivceApi;
@@ -40,6 +41,11 @@ public class Headers {
 	public UserServiceApi addUserHeaders(UserServiceApi userService, String authHeader) {
 		userService.getApiClient().addDefaultHeader(HttpHeaders.AUTHORIZATION, authHeader);
 		return userService;
+	}
+
+	public UploadApi addFileUploadHeader(UploadApi uploadService, String authHeader) {
+		uploadService.getApiClient().addDefaultHeader(HttpHeaders.AUTHORIZATION, authHeader);
+		return uploadService;
 	}
 
 }

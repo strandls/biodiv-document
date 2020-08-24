@@ -32,7 +32,9 @@ import com.strandls.authentication_utility.filter.ValidateUser;
 import com.strandls.document.ApiConstants;
 import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexItemType;
+import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.DocumentCreateData;
+import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
@@ -110,6 +112,26 @@ public class DocumentController {
 		}
 	}
 
+	@GET
+	@Path(ApiConstants.EDIT + "/{documentId}")
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ValidateUser
+
+	public Response getEditDocument(@Context HttpServletRequest request, @PathParam("documentId") String documentId) {
+		try {
+			Long docId = Long.parseLong(documentId);
+			DocumentEditData result = docService.getDocumentEditData(request, docId);
+			if (result != null)
+				return Response.status(Status.OK).entity(result).build();
+			return Response.status(Status.NOT_ACCEPTABLE).build();
+
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+	}
+
 	@POST
 	@Path(ApiConstants.UPLOAD + ApiConstants.BIB)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -120,6 +142,42 @@ public class DocumentController {
 		try {
 			BibFieldsData result = docService.readBibTex(uploadedInputStream, fileDetail);
 			return Response.status(Status.OK).entity(result).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+	}
+
+	@POST
+	@Path(ApiConstants.BULK + ApiConstants.UPLOAD + ApiConstants.BIB)
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ValidateUser
+
+	public Response bulkUploadBib(@Context HttpServletRequest request,
+			@FormDataParam("file") InputStream uploadedInputStream,
+			@FormDataParam("file") FormDataContentDisposition fileDetail) {
+		try {
+
+			return null;
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+	}
+
+	@POST
+	@Path(ApiConstants.BULK + ApiConstants.UPLOAD + ApiConstants.EXCEL)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ValidateUser
+
+	public Response bulkUploadExcel(@Context HttpServletRequest request,
+			@ApiParam(name = "bulkUploadData") BulkUploadExcelData bulkUploadData) {
+		try {
+			docService.bulkUploadExcel(request, bulkUploadData);
+
+			return Response.status(Status.OK).entity("process completed").build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}

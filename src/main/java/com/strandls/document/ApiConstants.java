@@ -13,9 +13,12 @@ public class ApiConstants {
 	public static final String AUTOCOMPLETE = "/autocomplete";
 	public static final String ADD = "/add";
 	public static final String BIB = "/bib";
+	public static final String BULK = "/bulk";
 	public static final String CREATE = "/create";
 	public static final String COMMENT = "/comment";
 	public static final String DELETE = "/delete";
+	public static final String EDIT = "/edit";
+	public static final String EXCEL = "/excel";
 	public static final String FIELDS = "/fields";
 	public static final String FLAG = "/flag";
 	public static final String FOLLOW = "/follow";

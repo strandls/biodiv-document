@@ -16,7 +16,9 @@ import com.strandls.activity.pojo.CommentLoggingData;
 import com.strandls.activity.pojo.MailData;
 import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexItemType;
+import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.DocumentCreateData;
+import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.taxonomy.pojo.SpeciesGroup;
@@ -41,9 +43,18 @@ public interface DocumentService {
 
 	public ShowDocument createDocument(HttpServletRequest request, DocumentCreateData documentCreateData);
 
+	public DocumentEditData getDocumentEditData(HttpServletRequest request, Long documentId);
+
+	public ShowDocument updateDocument(HttpServletRequest request, DocumentEditData docEditData);
+
 	public Boolean removeDocument(HttpServletRequest request, Long documentId);
 
 	public BibFieldsData readBibTex(InputStream uploadedInputStream, FormDataContentDisposition fileDetail);
+
+	public String bulkUploadBibTex(HttpServletRequest request, InputStream uploadedInputStream,
+			FormDataContentDisposition fileDetail);
+
+	public String bulkUploadExcel(HttpServletRequest request, BulkUploadExcelData bulkUploadData);
 
 	public List<BibTexItemType> fetchAllItemType();
 
