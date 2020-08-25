@@ -214,6 +214,7 @@ public class DocumentServiceImpl implements DocumentService {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public ShowDocument createDocument(HttpServletRequest request, DocumentCreateData documentCreateData) {
 
@@ -224,16 +225,31 @@ public class DocumentServiceImpl implements DocumentService {
 			UFile ufile = null;
 			if (documentCreateData.getResourceURL() != null && documentCreateData.getSize() != null) {
 
-//				fileUpload.mo
+//				file movemoent
 
-				UFileCreateData ufileCreateData = new UFileCreateData();
-				ufileCreateData.setMimeType(documentCreateData.getMimeType());
-				ufileCreateData.setPath(documentCreateData.getResourceURL());
-				ufileCreateData.setSize(documentCreateData.getSize());
-				ufileCreateData.setWeight(0);
-				resourceService = headers.addResourceHeaders(resourceService,
-						request.getHeader(HttpHeaders.AUTHORIZATION));
-				ufile = resourceService.createUFile(ufileCreateData);
+				FilesDTO filesDto = new FilesDTO();
+				filesDto.setFiles(Arrays.asList(documentCreateData.getResourceURL()));
+				filesDto.setModule("DOCUMENT");
+
+				fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
+				Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
+
+				if (fileResponse != null && !fileResponse.isEmpty()) {
+					Map<String, String> files = (Map<String, String>) fileResponse
+							.get(documentCreateData.getResourceURL());
+					String relativePath = files.get("name").toString();
+					String mimeType = files.get("mimeType").toString();
+					String size = files.get("size").toString();
+					UFileCreateData ufileCreateData = new UFileCreateData();
+					ufileCreateData.setMimeType(mimeType);
+					ufileCreateData.setPath(relativePath);
+					ufileCreateData.setSize(size);
+					ufileCreateData.setWeight(0);
+					resourceService = headers.addResourceHeaders(resourceService,
+							request.getHeader(HttpHeaders.AUTHORIZATION));
+					ufile = resourceService.createUFile(ufileCreateData);
+				}
+
 			}
 
 			BibFieldsData bibData = documentCreateData.getBibFieldData();
