@@ -146,7 +146,7 @@ public class DownloadLog implements Serializable {
 		this.notes = notes;
 	}
 
-	@Column(name = "notes", columnDefinition = "TEXT")
+	@Column(name = "params_map_as_text", columnDefinition = "TEXT")
 	public String getParamAsText() {
 		return paramAsText;
 	}
