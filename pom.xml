@@ -316,6 +316,12 @@
 		    <artifactId>file-upload-client</artifactId>
 		    <version>1.0.0</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>com.strandls.biodiv</groupId>
+		    <artifactId>activity-client</artifactId>
+		    <version>1.0.0</version>
+		</dependency>
 
 	</dependencies>
 

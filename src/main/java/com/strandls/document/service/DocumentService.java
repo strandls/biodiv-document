@@ -20,6 +20,7 @@ import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentUserPermission;
+import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.taxonomy.pojo.SpeciesGroup;
 import com.strandls.user.pojo.Follow;
@@ -95,5 +96,7 @@ public interface DocumentService {
 	public List<UserGroupIbp> getAllowedUserGroupList(HttpServletRequest request);
 
 	public List<Language> getLanguages(Boolean isDirty);
+
+	public Boolean documentDownloadLog(HttpServletRequest request, DownloadLogData downloadLogData);
 
 }

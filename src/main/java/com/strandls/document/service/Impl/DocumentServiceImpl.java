@@ -51,6 +51,7 @@ import com.strandls.document.dao.DocumentCoverageDao;
 import com.strandls.document.dao.DocumentDao;
 import com.strandls.document.dao.DocumentHabitatDao;
 import com.strandls.document.dao.DocumentSpeciesGroupDao;
+import com.strandls.document.dao.DownloadLogDao;
 import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexFieldType;
 import com.strandls.document.pojo.BibTexItemFieldMapping;
@@ -64,6 +65,8 @@ import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentHabitat;
 import com.strandls.document.pojo.DocumentSpeciesGroup;
 import com.strandls.document.pojo.DocumentUserPermission;
+import com.strandls.document.pojo.DownloadLog;
+import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
 import com.strandls.file.api.UploadApi;
@@ -172,6 +175,12 @@ public class DocumentServiceImpl implements DocumentService {
 	@Inject
 	private DocumentHelper docHelper;
 
+	@Inject
+	private DownloadLogDao downloadLogDao;
+
+	@Inject
+	private LogActivities logActivity;
+
 	@Override
 	public ShowDocument show(Long documentId) {
 		try {
@@ -229,7 +238,7 @@ public class DocumentServiceImpl implements DocumentService {
 
 				FilesDTO filesDto = new FilesDTO();
 				filesDto.setFiles(Arrays.asList(documentCreateData.getResourceURL()));
-				filesDto.setModule("DOCUMENT");
+				filesDto.setFolder("DOCUMENT");
 
 				fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
 				Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
@@ -268,6 +277,9 @@ public class DocumentServiceImpl implements DocumentService {
 					bibData.getExtra());
 
 			document = documentDao.save(document);
+
+			logActivity.LogDocumentActivities(request.getHeader(HttpHeaders.AUTHORIZATION), null, document.getId(),
+					document.getId(), "Document", null, "Document created", null);
 
 //			speciesGroup
 
@@ -504,7 +516,7 @@ public class DocumentServiceImpl implements DocumentService {
 				String fileName = dataRow.getCell(fieldMapping.get("file")).getStringCellValue();
 				FilesDTO filesDto = new FilesDTO();
 				filesDto.setFiles(Arrays.asList(fileName));
-				filesDto.setModule("DOCUMENT");
+				filesDto.setFolder("DOCUMENT");
 
 				fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
 				Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
@@ -530,6 +542,10 @@ public class DocumentServiceImpl implements DocumentService {
 				Document document = docHelper.bulkUploadPayload(dataRow, fieldMapping, authorId, ufile);
 
 				document = documentDao.save(document);
+
+//				Activity
+				logActivity.LogDocumentActivities(request.getHeader(HttpHeaders.AUTHORIZATION), null, document.getId(),
+						document.getId(), "Document", null, "Document created", null);
 
 //				GEO ENTITY
 				if (fieldMapping.get("geoentities") != null) {
@@ -1010,6 +1026,21 @@ public class DocumentServiceImpl implements DocumentService {
 			habitatId.add(docHabitat.getHabitatId());
 
 		return habitatId;
+	}
+
+	@Override
+	public Boolean documentDownloadLog(HttpServletRequest request, DownloadLogData downloadLogData) {
+		CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+		Long authorId = Long.parseLong(profile.getId());
+
+		DownloadLog downloadLog = new DownloadLog(null, 0L, authorId, new Date(), downloadLogData.getFilePath(),
+				downloadLogData.getFilterUrl(), null, null, downloadLogData.getStatus().toLowerCase(),
+				downloadLogData.getFileType().toUpperCase(), "Document", 0L);
+
+		downloadLog = downloadLogDao.save(downloadLog);
+		if (downloadLog.getId() != null)
+			return true;
+		return false;
 	}
 
 }

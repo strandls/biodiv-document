@@ -36,6 +36,7 @@ import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentUserPermission;
+import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
 import com.strandls.taxonomy.pojo.SpeciesGroup;
@@ -578,6 +579,28 @@ public class DocumentController {
 			Long docId = Long.parseLong(documentId);
 			Follow result = docService.unFollowRequest(request, docId);
 			return Response.status(Status.OK).entity(result).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+	}
+
+	@POST
+	@Path(ApiConstants.LOG + ApiConstants.DOWNLOAD)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.TEXT_PLAIN)
+
+	@ValidateUser
+
+	@ApiOperation(value = "log the document download", notes = "return true incase of logging", response = String.class)
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to log the download", response = String.class) })
+	public Response logDocumentDownload(@Context HttpServletRequest request,
+			@ApiParam("documentDownloadData") DownloadLogData downloadLogData) {
+		try {
+			Boolean result = docService.documentDownloadLog(request, downloadLogData);
+			if (result != null && result)
+				return Response.status(Status.OK).entity("Download logged").build();
+			return Response.status(Status.NOT_ACCEPTABLE).build();
+
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
