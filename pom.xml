@@ -231,37 +231,34 @@
 			<artifactId>HikariCP</artifactId>
 			<version>3.4.2</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/de.undercouch/citeproc-java -->
 		<dependency>
-		    <groupId>de.undercouch</groupId>
-		    <artifactId>citeproc-java</artifactId>
-		    <version>2.0.0</version>
+			<groupId>de.undercouch</groupId>
+			<artifactId>citeproc-java</artifactId>
+			<version>2.0.0</version>
 		</dependency>
-				
+
 		<!-- https://mvnrepository.com/artifact/org.citationstyles/styles -->
 		<dependency>
-		    <groupId>org.citationstyles</groupId>
-		    <artifactId>styles</artifactId>
-		    <version>2.0.0</version>
+			<groupId>org.citationstyles</groupId>
+			<artifactId>styles</artifactId>
+			<version>2.0.0</version>
 		</dependency>
-				
+
 		<!-- https://mvnrepository.com/artifact/org.citationstyles/locales -->
 		<dependency>
-		    <groupId>org.citationstyles</groupId>
-		    <artifactId>locales</artifactId>
-		    <version>2.0.0</version>
+			<groupId>org.citationstyles</groupId>
+			<artifactId>locales</artifactId>
+			<version>2.0.0</version>
 		</dependency>
-		
+
 		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
 		<dependency>
-		    <groupId>org.apache.poi</groupId>
-		    <artifactId>poi-ooxml</artifactId>
-		    <version>4.1.2</version>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>4.1.2</version>
 		</dependency>
-	
-				
-						
 
 		<dependency>
 			<groupId>com.strandls.biodiv</groupId>
@@ -280,30 +277,30 @@
 			<artifactId>user-client</artifactId>
 			<version>1.0.0</version>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>com.strandls.biodiv</groupId>
-		    <artifactId>userGroup-client</artifactId>
-		    <version>1.0.0</version>
+			<groupId>com.strandls.biodiv</groupId>
+			<artifactId>userGroup-client</artifactId>
+			<version>1.0.0</version>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>com.strandls.biodiv</groupId>
-		    <artifactId>resource-client</artifactId>
-		    <version>1.0.0</version>
+			<groupId>com.strandls.biodiv</groupId>
+			<artifactId>resource-client</artifactId>
+			<version>1.0.0</version>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>com.strandls.biodiv</groupId>
-		    <artifactId>activity-client</artifactId>
-		    <version>1.0.0</version>
+			<groupId>com.strandls.biodiv</groupId>
+			<artifactId>activity-client</artifactId>
+			<version>1.0.0</version>
 		</dependency>
-		
+
 		<dependency>
-		    <groupId>com.strandls.biodiv</groupId>
-		    <artifactId>geoentities-client</artifactId>
-		    <version>1.0.0</version>
-		</dependency>    
+			<groupId>com.strandls.biodiv</groupId>
+			<artifactId>geoentities-client</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.strandls.biodiv</groupId>
@@ -312,12 +309,10 @@
 		</dependency>
 
 		<dependency>
-		    <groupId>biodiv</groupId>
-		    <artifactId>file-upload-client</artifactId>
-		    <version>1.0.0</version>
+			<groupId>biodiv</groupId>
+			<artifactId>file-upload-client</artifactId>
+			<version>1.0.0</version>
 		</dependency>
-		
-
 	</dependencies>
 
 	<build>
