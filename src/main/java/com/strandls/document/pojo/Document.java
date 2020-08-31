@@ -680,7 +680,7 @@ public class Document implements Serializable {
 		this.dateAccuracy = dateAccuracy;
 	}
 
-	@Column(name = "author")
+	@Column(name = "author", columnDefinition = "TEXT")
 	public String getAuthor() {
 		return author;
 	}
@@ -689,7 +689,7 @@ public class Document implements Serializable {
 		this.author = author;
 	}
 
-	@Column(name = "journal")
+	@Column(name = "journal", columnDefinition = "TEXT")
 	public String getJournal() {
 		return journal;
 	}
@@ -698,7 +698,7 @@ public class Document implements Serializable {
 		this.journal = journal;
 	}
 
-	@Column(name = "book_title")
+	@Column(name = "book_title", columnDefinition = "TEXT")
 	public String getBookTitle() {
 		return bookTitle;
 	}
@@ -752,7 +752,7 @@ public class Document implements Serializable {
 		this.pages = pages;
 	}
 
-	@Column(name = "publisher")
+	@Column(name = "publisher", columnDefinition = "TEXT")
 	public String getPublisher() {
 		return publisher;
 	}
@@ -770,7 +770,7 @@ public class Document implements Serializable {
 		this.school = school;
 	}
 
-	@Column(name = "edition")
+	@Column(name = "edition", columnDefinition = "TEXT")
 	public String getEdition() {
 		return edition;
 	}
@@ -779,7 +779,7 @@ public class Document implements Serializable {
 		this.edition = edition;
 	}
 
-	@Column(name = "series")
+	@Column(name = "series", columnDefinition = "TEXT")
 	public String getSeries() {
 		return series;
 	}
@@ -788,7 +788,7 @@ public class Document implements Serializable {
 		this.series = series;
 	}
 
-	@Column(name = "address")
+	@Column(name = "address", columnDefinition = "TEXT")
 	public String getAddress() {
 		return address;
 	}
@@ -797,7 +797,7 @@ public class Document implements Serializable {
 		this.address = address;
 	}
 
-	@Column(name = "chapter")
+	@Column(name = "chapter", columnDefinition = "TEXT")
 	public String getChapter() {
 		return chapter;
 	}
@@ -806,7 +806,7 @@ public class Document implements Serializable {
 		this.chapter = chapter;
 	}
 
-	@Column(name = "note")
+	@Column(name = "note", columnDefinition = "TEXT")
 	public String getNote() {
 		return note;
 	}
@@ -815,7 +815,7 @@ public class Document implements Serializable {
 		this.note = note;
 	}
 
-	@Column(name = "editor")
+	@Column(name = "editor", columnDefinition = "TEXT")
 	public String getEditor() {
 		return editor;
 	}
@@ -824,7 +824,7 @@ public class Document implements Serializable {
 		this.editor = editor;
 	}
 
-	@Column(name = "organization")
+	@Column(name = "organization", columnDefinition = "TEXT")
 	public String getOrganization() {
 		return organization;
 	}
@@ -851,7 +851,7 @@ public class Document implements Serializable {
 		this.institution = institution;
 	}
 
-	@Column(name = "extra")
+	@Column(name = "extra", columnDefinition = "TEXT")
 	public String getExtra() {
 		return extra;
 	}
@@ -860,7 +860,7 @@ public class Document implements Serializable {
 		this.extra = extra;
 	}
 
-	@Column(name = "url")
+	@Column(name = "url", columnDefinition = "TEXT")
 	public String getUrl() {
 		return url;
 	}
@@ -878,7 +878,7 @@ public class Document implements Serializable {
 		this.language = language;
 	}
 
-	@Column(name = "file")
+	@Column(name = "file", columnDefinition = "TEXT")
 	public String getFile() {
 		return file;
 	}

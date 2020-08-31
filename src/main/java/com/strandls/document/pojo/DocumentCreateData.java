@@ -38,8 +38,6 @@ public class DocumentCreateData {
 	private List<Long> habitatIds;
 
 //	-----Location Data--------
-
-	private List<Long> geoentitiesId;
 	private List<DocumentCoverageData> docCoverageData;
 
 //	-----User Group Data-----
@@ -139,14 +137,6 @@ public class DocumentCreateData {
 
 	public void setHabitatIds(List<Long> habitatIds) {
 		this.habitatIds = habitatIds;
-	}
-
-	public List<Long> getGeoentitiesId() {
-		return geoentitiesId;
-	}
-
-	public void setGeoentitiesId(List<Long> geoentitiesId) {
-		this.geoentitiesId = geoentitiesId;
 	}
 
 	public List<DocumentCoverageData> getDocCoverageData() {
