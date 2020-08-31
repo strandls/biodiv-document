@@ -514,6 +514,7 @@ public class DocumentServiceImpl implements DocumentService {
 //				ufile
 
 				String fileName = dataRow.getCell(fieldMapping.get("file")).getStringCellValue();
+				fileName = fileName + ".pdf";
 				System.out.println("file name" + fileName);
 				FilesDTO filesDto = new FilesDTO();
 				filesDto.setFiles(Arrays.asList(fileName));
