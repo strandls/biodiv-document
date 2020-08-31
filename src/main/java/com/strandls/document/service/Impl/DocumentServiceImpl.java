@@ -490,7 +490,6 @@ public class DocumentServiceImpl implements DocumentService {
 	@Override
 	public String bulkUploadExcel(HttpServletRequest request, BulkUploadExcelData bulkUploadData) {
 		try {
-			System.out.println(bulkUploadData.getFileName());
 			FileInputStream fileInputStream = new FileInputStream(new File(bulkUploadData.getFileName()));
 
 			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
@@ -501,8 +500,6 @@ public class DocumentServiceImpl implements DocumentService {
 			XSSFSheet dataSheet = workBook.getSheetAt(0);
 			XSSFSheet notCitedData = workBook.getSheetAt(1);
 			Map<String, Integer> fieldMapping = bulkUploadData.getFieldMapping();
-
-			System.out.println(workBook);
 
 			Iterator<Row> dataSheetIterator = dataSheet.iterator();
 			int count = 1;
@@ -517,6 +514,7 @@ public class DocumentServiceImpl implements DocumentService {
 //				ufile
 
 				String fileName = dataRow.getCell(fieldMapping.get("file")).getStringCellValue();
+				System.out.println("file name" + fileName);
 				FilesDTO filesDto = new FilesDTO();
 				filesDto.setFiles(Arrays.asList(fileName));
 				filesDto.setFolder("DOCUMENT");
