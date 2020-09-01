@@ -651,49 +651,53 @@ public class DocumentServiceImpl implements DocumentService {
 
 //				NOT CITED AREA
 
-				if (fieldMapping.get("notCitedArea") != null && fieldMapping.get("notCitedName") != null
-						&& fieldMapping.get("wktData") != null) {
+				try {
+					if (fieldMapping.get("notCitedArea") != null && fieldMapping.get("notCitedName") != null
+							&& fieldMapping.get("wktData") != null) {
 
-					String notCited = null;
-					Cell cell = dataRow.getCell(fieldMapping.get("notCitedArea"),
-							MissingCellPolicy.RETURN_BLANK_AS_NULL);
-					if (cell != null) {
-						cell.setCellType(CellType.STRING);
-						notCited = cell.getStringCellValue();
-					}
-					if (notCited != null) {
-
-						List<String> notCitedNames = Arrays.asList(notCited.split(","));
-
-						Iterator<Row> notCitedIterator = notCitedData.iterator();
-						while (notCitedIterator.hasNext()) {
-							Row notCitedDataRow = notCitedIterator.next();
-
-							String citeName = null;
-							Cell notCitedCell = notCitedDataRow.getCell(fieldMapping.get("notCitedName"),
-									MissingCellPolicy.RETURN_BLANK_AS_NULL);
-							if (notCitedCell != null) {
-								notCitedCell.setCellType(CellType.STRING);
-								citeName = notCitedCell.getStringCellValue();
-							}
-							if (notCitedNames.contains(citeName)) {
-								String wktData = null;
-								Cell wktCell = notCitedDataRow.getCell(fieldMapping.get("wktData"),
-										MissingCellPolicy.RETURN_BLANK_AS_NULL);
-								if (wktCell != null) {
-									wktCell.setCellType(CellType.STRING);
-									wktData = wktCell.getStringCellValue();
-								}
-								WKTReader reader = new WKTReader(geometryFactory);
-								Geometry topology = reader.read(wktData);
-								DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(), citeName,
-										topology);
-								docCoverageDao.save(docCoverage);
-
-							}
+						String notCited = null;
+						Cell cell = dataRow.getCell(fieldMapping.get("notCitedArea"),
+								MissingCellPolicy.RETURN_BLANK_AS_NULL);
+						if (cell != null) {
+							cell.setCellType(CellType.STRING);
+							notCited = cell.getStringCellValue();
 						}
+						if (notCited != null) {
 
+							List<String> notCitedNames = Arrays.asList(notCited.split(","));
+
+							Iterator<Row> notCitedIterator = notCitedData.iterator();
+							while (notCitedIterator.hasNext()) {
+								Row notCitedDataRow = notCitedIterator.next();
+
+								String citeName = null;
+								Cell notCitedCell = notCitedDataRow.getCell(fieldMapping.get("notCitedName"),
+										MissingCellPolicy.RETURN_BLANK_AS_NULL);
+								if (notCitedCell != null) {
+									notCitedCell.setCellType(CellType.STRING);
+									citeName = notCitedCell.getStringCellValue();
+								}
+								if (notCitedNames.contains(citeName)) {
+									String wktData = null;
+									Cell wktCell = notCitedDataRow.getCell(fieldMapping.get("wktData"),
+											MissingCellPolicy.RETURN_BLANK_AS_NULL);
+									if (wktCell != null) {
+										wktCell.setCellType(CellType.STRING);
+										wktData = wktCell.getStringCellValue();
+									}
+									WKTReader reader = new WKTReader(geometryFactory);
+									Geometry topology = reader.read(wktData);
+									DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(),
+											citeName, topology);
+									docCoverageDao.save(docCoverage);
+
+								}
+							}
+
+						}
 					}
+				} catch (Exception e) {
+					logger.error(e.getMessage());
 				}
 
 //				tags
