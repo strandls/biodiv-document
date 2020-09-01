@@ -83,9 +83,9 @@ public class DocumentHelper {
 			if (cell != null) {
 				cell.setCellType(CellType.STRING);
 				title = cell.getStringCellValue();
-				if (title == null || title.isEmpty())
-					return null;
 			}
+			if (cell == null)
+				return null;
 		}
 
 		String type = null;
@@ -94,8 +94,6 @@ public class DocumentHelper {
 			if (cell != null) {
 				cell.setCellType(CellType.STRING);
 				type = cell.getStringCellValue();
-				if (type == null || type.isEmpty())
-					return null;
 			}
 		}
 
@@ -304,6 +302,8 @@ public class DocumentHelper {
 				cell.setCellType(CellType.STRING);
 				itemtype = cell.getStringCellValue();
 			}
+			if (cell == null)
+				return null;
 		}
 
 		String isbn = null;
