@@ -565,11 +565,13 @@ public class DocumentServiceImpl implements DocumentService {
 						String geoEntitesIds[] = geoEntities.split(",");
 						for (String geoEntitiesId : geoEntitesIds) {
 							GeoentitiesWKTData geoEntity = geoEntitiesServices.findGeoentitiesById(geoEntitiesId);
-							WKTReader reader = new WKTReader(geometryFactory);
-							Geometry topology = reader.read(geoEntity.getWktData());
-							DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(),
-									geoEntity.getPlaceName(), topology);
-							docCoverageDao.save(docCoverage);
+							if (geoEntity != null) {
+								WKTReader reader = new WKTReader(geometryFactory);
+								Geometry topology = reader.read(geoEntity.getWktData());
+								DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(),
+										geoEntity.getPlaceName(), topology);
+								docCoverageDao.save(docCoverage);
+							}
 
 						}
 
