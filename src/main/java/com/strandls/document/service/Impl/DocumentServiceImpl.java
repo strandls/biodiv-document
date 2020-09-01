@@ -564,7 +564,7 @@ public class DocumentServiceImpl implements DocumentService {
 					if (geoEntities != null) {
 						String geoEntitesIds[] = geoEntities.split(",");
 						for (String geoEntitiesId : geoEntitesIds) {
-							GeoentitiesWKTData geoEntity = geoEntitiesServices.findGeoentitiesById(geoEntitiesId);
+							GeoentitiesWKTData geoEntity = geoEntitiesServices.findGeoentitiesById(geoEntitiesId.trim());
 							if (geoEntity != null) {
 								WKTReader reader = new WKTReader(geometryFactory);
 								Geometry topology = reader.read(geoEntity.getWktData());
