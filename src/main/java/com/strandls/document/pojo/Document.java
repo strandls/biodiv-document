@@ -408,7 +408,7 @@ public class Document implements Serializable {
 		this.title = title;
 	}
 
-	@Column(name = "type")
+	@Column(name = "type", columnDefinition = "TEXT")
 	public String getType() {
 		return type;
 	}

@@ -519,9 +519,10 @@ public class DocumentServiceImpl implements DocumentService {
 				FilesDTO filesDto = new FilesDTO();
 				filesDto.setFiles(Arrays.asList(fileName));
 				filesDto.setFolder("DOCUMENTS");
+				filesDto.setModule("DOCUMENT");
 
 				fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
-				Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
+				Map<String, Object> fileResponse = fileUpload.handleBulkUploadMoveFiles(filesDto);
 
 				System.out.println(fileResponse);
 
