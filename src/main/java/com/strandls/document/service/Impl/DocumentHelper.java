@@ -83,6 +83,8 @@ public class DocumentHelper {
 			if (cell != null) {
 				cell.setCellType(CellType.STRING);
 				title = cell.getStringCellValue();
+				if (title == null)
+					return null;
 			}
 		}
 
@@ -92,6 +94,8 @@ public class DocumentHelper {
 			if (cell != null) {
 				cell.setCellType(CellType.STRING);
 				type = cell.getStringCellValue();
+				if (type == null)
+					return null;
 			}
 		}
 

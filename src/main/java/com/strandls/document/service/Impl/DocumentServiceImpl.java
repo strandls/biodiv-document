@@ -73,6 +73,8 @@ import com.strandls.file.api.UploadApi;
 import com.strandls.file.model.FilesDTO;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.geoentities.pojo.GeoentitiesWKTData;
+import com.strandls.landscape.controller.LandscapeApi;
+import com.strandls.landscape.pojo.Landscape;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
@@ -101,6 +103,7 @@ import com.strandls.utility.pojo.TagsMapping;
 import com.strandls.utility.pojo.TagsMappingData;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKTReader;
 import com.vividsolutions.jts.io.WKTWriter;
 
@@ -181,6 +184,9 @@ public class DocumentServiceImpl implements DocumentService {
 	@Inject
 	private LogActivities logActivity;
 
+	@Inject
+	private LandscapeApi landScapeService;
+
 	@Override
 	public ShowDocument show(Long documentId) {
 		try {
@@ -234,11 +240,11 @@ public class DocumentServiceImpl implements DocumentService {
 			UFile ufile = null;
 			if (documentCreateData.getResourceURL() != null && documentCreateData.getSize() != null) {
 
-//				file movemoent
+//				file movement
 
 				FilesDTO filesDto = new FilesDTO();
 				filesDto.setFiles(Arrays.asList(documentCreateData.getResourceURL()));
-				filesDto.setFolder("DOCUMENT");
+				filesDto.setFolder("DOCUMENTS");
 
 				fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
 				Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
@@ -505,6 +511,20 @@ public class DocumentServiceImpl implements DocumentService {
 			int count = 1;
 
 			dataSheetIterator.next();
+
+//			EXTRACT SITE NUMBER TO GEOENTITY MAPPING
+			List<Landscape> allLandscape = landScapeService.getAllLandScapes(205L, -1, -1);
+			Map<Long, Long> siteGeoentitiyMapping = new HashMap<Long, Long>();
+			for (Landscape landScape : allLandscape) {
+				siteGeoentitiyMapping.put(landScape.getSiteNumber(), landScape.getGeoEntityId());
+			}
+
+//			EXTRACT CITED NAME TO GEOENTITY MAPPING
+			Map<String, Long> citedNameGeoEntityMapping = new HashMap<String, Long>();
+			for (Landscape landscape : allLandscape) {
+				citedNameGeoEntityMapping.put(landscape.getShortName().toLowerCase(), landscape.getGeoEntityId());
+			}
+
 			while (dataSheetIterator.hasNext()) {
 				Row dataRow = dataSheetIterator.next();
 
@@ -546,11 +566,64 @@ public class DocumentServiceImpl implements DocumentService {
 //				document creation
 				Document document = docHelper.bulkUploadPayload(dataRow, fieldMapping, authorId, ufile);
 
+				if (document == null)
+					continue;
+
 				document = documentDao.save(document);
 
 //				Activity
 				logActivity.LogDocumentActivities(request.getHeader(HttpHeaders.AUTHORIZATION), null, document.getId(),
 						document.getId(), "Document", null, "Document created", null);
+
+//				CITED NAME
+				if (fieldMapping.get("citedName") != null) {
+					String citedNames = null;
+					Cell cell = dataRow.getCell(fieldMapping.get("citedName"), MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					if (cell != null) {
+						cell.setCellType(CellType.STRING);
+						citedNames = cell.getStringCellValue();
+					}
+					if (citedNames != null) {
+						String citedNameArray[] = citedNames.split(",");
+						for (String citedName : citedNameArray) {
+							citedName = citedName.toLowerCase();
+							if (citedNameGeoEntityMapping.containsKey(citedName)) {
+								GeoentitiesWKTData geoEntity = geoEntitiesServices
+										.findGeoentitiesById(citedNameGeoEntityMapping.get(citedName).toString());
+								if (geoEntity != null) {
+									saveDocCoverage(document.getId(), geoEntity);
+								}
+							}
+						}
+					}
+				}
+
+//				PROTECTED CITED AREAS
+				if (fieldMapping.get("siteNumber") != null) {
+
+					String siteNumber = null;
+					Cell cell = dataRow.getCell(fieldMapping.get("siteNumber"), MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					if (cell != null) {
+						cell.setCellType(CellType.STRING);
+						siteNumber = cell.getStringCellValue();
+					}
+					if (siteNumber != null) {
+						String siteNumberArray[] = siteNumber.split(",");
+						for (String site : siteNumberArray) {
+							site = site.toLowerCase();
+							site = site.replace("site ", "");
+							Long siteLong = Long.parseLong(site.trim());
+
+							if (siteGeoentitiyMapping.containsKey(siteLong)) {
+								GeoentitiesWKTData geoEntity = geoEntitiesServices
+										.findGeoentitiesById(siteGeoentitiyMapping.get(siteLong).toString());
+								if (geoEntity != null) {
+									saveDocCoverage(document.getId(), geoEntity);
+								}
+							}
+						}
+					}
+				}
 
 //				GEO ENTITY
 				if (fieldMapping.get("geoentities") != null) {
@@ -564,13 +637,10 @@ public class DocumentServiceImpl implements DocumentService {
 					if (geoEntities != null) {
 						String geoEntitesIds[] = geoEntities.split(",");
 						for (String geoEntitiesId : geoEntitesIds) {
-							GeoentitiesWKTData geoEntity = geoEntitiesServices.findGeoentitiesById(geoEntitiesId.trim());
+							GeoentitiesWKTData geoEntity = geoEntitiesServices
+									.findGeoentitiesById(geoEntitiesId.trim());
 							if (geoEntity != null) {
-								WKTReader reader = new WKTReader(geometryFactory);
-								Geometry topology = reader.read(geoEntity.getWktData());
-								DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(),
-										geoEntity.getPlaceName(), topology);
-								docCoverageDao.save(docCoverage);
+								saveDocCoverage(document.getId(), geoEntity);
 							}
 
 						}
@@ -669,6 +739,18 @@ public class DocumentServiceImpl implements DocumentService {
 		}
 
 		return null;
+	}
+
+	private void saveDocCoverage(Long documentId, GeoentitiesWKTData geoEntity) {
+		try {
+			WKTReader reader = new WKTReader(geometryFactory);
+			Geometry topology = reader.read(geoEntity.getWktData());
+			DocumentCoverage docCoverage = new DocumentCoverage(null, documentId, geoEntity.getPlaceName(), topology);
+			docCoverageDao.save(docCoverage);
+		} catch (ParseException e) {
+			logger.error(e.getMessage());
+		}
+
 	}
 
 	@Override
