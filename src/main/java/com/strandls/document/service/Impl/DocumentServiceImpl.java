@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -328,7 +329,7 @@ public class DocumentServiceImpl implements DocumentService {
 					WKTReader reader = new WKTReader(geometryFactory);
 					Geometry topology = reader.read(docCoverageData.getTopology());
 					DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(),
-							docCoverageData.getPlacename(), topology);
+							docCoverageData.getGeoEntityId(), docCoverageData.getPlacename(), topology);
 					docCoverageDao.save(docCoverage);
 				}
 			}
@@ -358,7 +359,8 @@ public class DocumentServiceImpl implements DocumentService {
 				for (DocumentCoverage docCoverage : docCoverages) {
 					WKTWriter writer = new WKTWriter();
 					String wktData = writer.write(docCoverage.getTopology());
-					docCoverageData.add(new DocumentCoverageData(docCoverage.getPlaceName(), wktData));
+					docCoverageData.add(new DocumentCoverageData(docCoverage.getPlaceName(), wktData,
+							docCoverage.getGeoEntityId()));
 				}
 				UFile ufile = null;
 				if (document.getuFileId() != null)
@@ -591,7 +593,8 @@ public class DocumentServiceImpl implements DocumentService {
 								GeoentitiesWKTData geoEntity = geoEntitiesServices
 										.findGeoentitiesById(citedNameGeoEntityMapping.get(citedName).toString());
 								if (geoEntity != null) {
-									saveDocCoverage(document.getId(), geoEntity);
+									saveDocCoverage(document.getId(), citedNameGeoEntityMapping.get(citedName),
+											geoEntity);
 								}
 							}
 						}
@@ -618,7 +621,7 @@ public class DocumentServiceImpl implements DocumentService {
 								GeoentitiesWKTData geoEntity = geoEntitiesServices
 										.findGeoentitiesById(siteGeoentitiyMapping.get(siteLong).toString());
 								if (geoEntity != null) {
-									saveDocCoverage(document.getId(), geoEntity);
+									saveDocCoverage(document.getId(), siteGeoentitiyMapping.get(siteLong), geoEntity);
 								}
 							}
 						}
@@ -640,7 +643,7 @@ public class DocumentServiceImpl implements DocumentService {
 							GeoentitiesWKTData geoEntity = geoEntitiesServices
 									.findGeoentitiesById(geoEntitiesId.trim());
 							if (geoEntity != null) {
-								saveDocCoverage(document.getId(), geoEntity);
+								saveDocCoverage(document.getId(), Long.parseLong(geoEntitiesId.trim()), geoEntity);
 							}
 
 						}
@@ -664,7 +667,11 @@ public class DocumentServiceImpl implements DocumentService {
 						}
 						if (notCited != null) {
 
-							List<String> notCitedNames = Arrays.asList(notCited.split(","));
+							List<String> originalStrings = Arrays.asList(notCited.split(","));
+
+//							trims out all the white space of all the String in the list
+							List<String> notCitedNames = originalStrings.stream().map(String::trim)
+									.collect(Collectors.toList());
 
 							Iterator<Row> notCitedIterator = notCitedData.iterator();
 							while (notCitedIterator.hasNext()) {
@@ -687,7 +694,7 @@ public class DocumentServiceImpl implements DocumentService {
 									}
 									WKTReader reader = new WKTReader(geometryFactory);
 									Geometry topology = reader.read(wktData);
-									DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(),
+									DocumentCoverage docCoverage = new DocumentCoverage(null, document.getId(), null,
 											citeName, topology);
 									docCoverageDao.save(docCoverage);
 
@@ -745,11 +752,12 @@ public class DocumentServiceImpl implements DocumentService {
 		return null;
 	}
 
-	private void saveDocCoverage(Long documentId, GeoentitiesWKTData geoEntity) {
+	private void saveDocCoverage(Long documentId, Long geoEntityId, GeoentitiesWKTData geoEntity) {
 		try {
 			WKTReader reader = new WKTReader(geometryFactory);
 			Geometry topology = reader.read(geoEntity.getWktData());
-			DocumentCoverage docCoverage = new DocumentCoverage(null, documentId, geoEntity.getPlaceName(), topology);
+			DocumentCoverage docCoverage = new DocumentCoverage(null, documentId, geoEntityId, geoEntity.getPlaceName(),
+					topology);
 			docCoverageDao.save(docCoverage);
 		} catch (ParseException e) {
 			logger.error(e.getMessage());

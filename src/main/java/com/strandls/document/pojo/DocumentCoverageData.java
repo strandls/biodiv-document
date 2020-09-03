@@ -3,14 +3,18 @@
  */
 package com.strandls.document.pojo;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * @author Abhishek Rudra
  *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DocumentCoverageData {
 
 	private String placename;
 	private String topology;
+	private Long geoEntityId;
 
 	/**
 	 * 
@@ -22,11 +26,13 @@ public class DocumentCoverageData {
 	/**
 	 * @param placename
 	 * @param topology
+	 * @param geoEntityId
 	 */
-	public DocumentCoverageData(String placename, String topology) {
+	public DocumentCoverageData(String placename, String topology, Long geoEntityId) {
 		super();
 		this.placename = placename;
 		this.topology = topology;
+		this.geoEntityId = geoEntityId;
 	}
 
 	public String getPlacename() {
@@ -43,6 +49,14 @@ public class DocumentCoverageData {
 
 	public void setTopology(String topology) {
 		this.topology = topology;
+	}
+
+	public Long getGeoEntityId() {
+		return geoEntityId;
+	}
+
+	public void setGeoEntityId(Long geoEntityId) {
+		this.geoEntityId = geoEntityId;
 	}
 
 }

@@ -35,6 +35,7 @@ public class DocumentCoverage implements Serializable {
 	private static final long serialVersionUID = 9149317039031323675L;
 	private Long id;
 	private Long documentId;
+	private Long geoEntityId;
 	private String placeName;
 	private Geometry topology;
 
@@ -48,13 +49,15 @@ public class DocumentCoverage implements Serializable {
 	/**
 	 * @param id
 	 * @param documentId
+	 * @param geoEntityId
 	 * @param placeName
 	 * @param topology
 	 */
-	public DocumentCoverage(Long id, Long documentId, String placeName, Geometry topology) {
+	public DocumentCoverage(Long id, Long documentId, Long geoEntityId, String placeName, Geometry topology) {
 		super();
 		this.id = id;
 		this.documentId = documentId;
+		this.geoEntityId = geoEntityId;
 		this.placeName = placeName;
 		this.topology = topology;
 	}
@@ -77,6 +80,15 @@ public class DocumentCoverage implements Serializable {
 
 	public void setDocumentId(Long documentId) {
 		this.documentId = documentId;
+	}
+
+	@Column(name = "geoentity_id")
+	public Long getGeoEntityId() {
+		return geoEntityId;
+	}
+
+	public void setGeoEntityId(Long geoEntityId) {
+		this.geoEntityId = geoEntityId;
 	}
 
 	@Column(name = "placename")
