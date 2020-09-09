@@ -197,6 +197,19 @@ public class DocumentServiceImpl implements DocumentService {
 				UserIbp userIbp = userService.getUserIbp(document.getAuthorId().toString());
 
 				List<DocumentCoverage> documentCoverages = docCoverageDao.findByDocumentId(documentId);
+
+				List<Landscape> allLandscape = landScapeService.getAllLandScapes(205L, -1, -1);
+				for (DocumentCoverage docCoverage : documentCoverages) {
+					if (docCoverage.getGeoEntityId() != null) {
+						List<Long> landscapeIds = new ArrayList<Long>();
+						for (Landscape landscape : allLandscape) {
+							if (landscape.getGeoEntityId().equals(docCoverage.getGeoEntityId()))
+								landscapeIds.add(landscape.getId());
+						}
+						docCoverage.setLandscapeIds(landscapeIds);
+					}
+				}
+
 				List<UserGroupIbp> userGroup = ugService.getUserGroupByDocId(documentId.toString());
 				List<Featured> featured = ugService.getAllFeatured("content.eml.Document", documentId.toString());
 

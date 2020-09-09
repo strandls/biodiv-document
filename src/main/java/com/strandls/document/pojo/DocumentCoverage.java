@@ -4,6 +4,7 @@
 package com.strandls.document.pojo;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.bedatadriven.jackson.datatype.jts.serialization.GeometryDeserializer;
 import com.bedatadriven.jackson.datatype.jts.serialization.GeometrySerializer;
@@ -38,6 +40,7 @@ public class DocumentCoverage implements Serializable {
 	private Long geoEntityId;
 	private String placeName;
 	private Geometry topology;
+	private List<Long> landscapeIds;
 
 	/**
 	 * 
@@ -60,6 +63,25 @@ public class DocumentCoverage implements Serializable {
 		this.geoEntityId = geoEntityId;
 		this.placeName = placeName;
 		this.topology = topology;
+	}
+
+	/**
+	 * @param id
+	 * @param documentId
+	 * @param geoEntityId
+	 * @param placeName
+	 * @param topology
+	 * @param landscapeIds
+	 */
+	public DocumentCoverage(Long id, Long documentId, Long geoEntityId, String placeName, Geometry topology,
+			List<Long> landscapeIds) {
+		super();
+		this.id = id;
+		this.documentId = documentId;
+		this.geoEntityId = geoEntityId;
+		this.placeName = placeName;
+		this.topology = topology;
+		this.landscapeIds = landscapeIds;
 	}
 
 	@Id
@@ -109,6 +131,15 @@ public class DocumentCoverage implements Serializable {
 
 	public void setTopology(Geometry topology) {
 		this.topology = topology;
+	}
+
+	@Transient
+	public List<Long> getLandscapeIds() {
+		return landscapeIds;
+	}
+
+	public void setLandscapeIds(List<Long> landscapeIds) {
+		this.landscapeIds = landscapeIds;
 	}
 
 }
