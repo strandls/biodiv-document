@@ -4,7 +4,6 @@
 package com.strandls.document.pojo;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -40,7 +39,7 @@ public class DocumentCoverage implements Serializable {
 	private Long geoEntityId;
 	private String placeName;
 	private Geometry topology;
-	private List<Long> landscapeIds;
+	private Long landscapeIds;
 
 	/**
 	 * 
@@ -74,7 +73,7 @@ public class DocumentCoverage implements Serializable {
 	 * @param landscapeIds
 	 */
 	public DocumentCoverage(Long id, Long documentId, Long geoEntityId, String placeName, Geometry topology,
-			List<Long> landscapeIds) {
+			Long landscapeIds) {
 		super();
 		this.id = id;
 		this.documentId = documentId;
@@ -134,11 +133,11 @@ public class DocumentCoverage implements Serializable {
 	}
 
 	@Transient
-	public List<Long> getLandscapeIds() {
+	public Long getLandscapeIds() {
 		return landscapeIds;
 	}
 
-	public void setLandscapeIds(List<Long> landscapeIds) {
+	public void setLandscapeIds(Long landscapeIds) {
 		this.landscapeIds = landscapeIds;
 	}
 

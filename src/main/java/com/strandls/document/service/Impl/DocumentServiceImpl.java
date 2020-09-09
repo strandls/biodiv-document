@@ -201,12 +201,13 @@ public class DocumentServiceImpl implements DocumentService {
 				List<Landscape> allLandscape = landScapeService.getAllLandScapes(205L, -1, -1);
 				for (DocumentCoverage docCoverage : documentCoverages) {
 					if (docCoverage.getGeoEntityId() != null) {
-						List<Long> landscapeIds = new ArrayList<Long>();
 						for (Landscape landscape : allLandscape) {
-							if (landscape.getGeoEntityId().equals(docCoverage.getGeoEntityId()))
-								landscapeIds.add(landscape.getId());
+							if (landscape.getGeoEntityId().equals(docCoverage.getGeoEntityId())) {
+								docCoverage.setLandscapeIds(docCoverage.getLandscapeIds());
+								break;
+							}
 						}
-						docCoverage.setLandscapeIds(landscapeIds);
+
 					}
 				}
 
