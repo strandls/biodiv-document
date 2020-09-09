@@ -203,7 +203,7 @@ public class DocumentServiceImpl implements DocumentService {
 					if (docCoverage.getGeoEntityId() != null) {
 						for (Landscape landscape : allLandscape) {
 							if (landscape.getGeoEntityId().equals(docCoverage.getGeoEntityId())) {
-								docCoverage.setLandscapeIds(docCoverage.getLandscapeIds());
+								docCoverage.setLandscapeIds(landscape.getId());
 								break;
 							}
 						}
