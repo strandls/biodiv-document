@@ -5,6 +5,7 @@ package com.strandls.document.service.Impl;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -64,12 +65,17 @@ import com.strandls.document.pojo.DocumentCoverageData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentHabitat;
+import com.strandls.document.pojo.DocumentListData;
 import com.strandls.document.pojo.DocumentSpeciesGroup;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLog;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
+import com.strandls.esmodule.controllers.EsServicesApi;
+import com.strandls.esmodule.pojo.MapDocument;
+import com.strandls.esmodule.pojo.MapResponse;
+import com.strandls.esmodule.pojo.MapSearchQuery;
 import com.strandls.file.api.UploadApi;
 import com.strandls.file.model.FilesDTO;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
@@ -187,6 +193,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Inject
 	private LandscapeApi landScapeService;
+	
+	@Inject
+	private EsServicesApi esService;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -1159,6 +1168,33 @@ public class DocumentServiceImpl implements DocumentService {
 		if (downloadLog.getId() != null)
 			return true;
 		return false;
+	}
+
+	@SuppressWarnings("null")
+	@Override
+	public DocumentListData getDocumentList(String index, String type, MapSearchQuery querys) {
+		
+		DocumentListData listData = null;
+
+		try {
+			MapResponse result = esService.search(index,type, "location", 1, null,null, querys);
+			List<MapDocument> documents = result.getDocuments();
+			List<ShowDocument> DocumentList = null;
+			for (MapDocument document : documents) {
+				try {
+					DocumentList.add(objectMapper.readValue(String.valueOf(document.getDocument()),
+							ShowDocument.class));
+				} catch (IOException e) {
+					logger.error(e.getMessage());
+				}
+			}
+			
+			listData = new DocumentListData(DocumentList);
+		}catch(Exception e) {	
+			logger.error(e.getMessage());	
+		}
+		
+		return listData;
 	}
 
 }

@@ -19,9 +19,11 @@ import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
+import com.strandls.document.pojo.DocumentListData;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
+import com.strandls.esmodule.pojo.MapSearchQuery;
 import com.strandls.taxonomy.pojo.SpeciesGroup;
 import com.strandls.user.pojo.Follow;
 import com.strandls.userGroup.pojo.Featured;
@@ -98,5 +100,7 @@ public interface DocumentService {
 	public List<Language> getLanguages(Boolean isDirty);
 
 	public Boolean documentDownloadLog(HttpServletRequest request, DownloadLogData downloadLogData);
+	
+	public DocumentListData getDocumentList(String index, String type,MapSearchQuery querys);
 
 }

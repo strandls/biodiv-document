@@ -319,6 +319,11 @@
 		    <artifactId>landscape-client</artifactId>
 		    <version>1.0.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>com.strandls.biodiv</groupId>
+			<artifactId>esmodule-client</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>

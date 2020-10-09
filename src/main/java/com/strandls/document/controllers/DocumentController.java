@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -30,15 +31,20 @@ import com.strandls.activity.pojo.Activity;
 import com.strandls.activity.pojo.CommentLoggingData;
 import com.strandls.authentication_utility.filter.ValidateUser;
 import com.strandls.document.ApiConstants;
+import com.strandls.document.es.util.ESUtility;
 import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
+import com.strandls.document.pojo.DocumentListData;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
+import com.strandls.esmodule.pojo.MapSearchParams;
+import com.strandls.esmodule.pojo.MapSearchQuery;
+import com.strandls.esmodule.pojo.MapSearchParams.SortTypeEnum;
 import com.strandls.taxonomy.pojo.SpeciesGroup;
 import com.strandls.user.pojo.Follow;
 import com.strandls.userGroup.pojo.Featured;
@@ -68,6 +74,9 @@ public class DocumentController {
 
 	@Inject
 	private DocumentService docService;
+
+	@Inject
+	private ESUtility esUtility;
 
 	@GET
 	@Path(ApiConstants.PING)
@@ -604,6 +613,48 @@ public class DocumentController {
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
+	}
+
+	@GET
+	@Path(ApiConstants.LIST + "/{index}/{type}")
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	public Response DocumentList(@PathParam("index") String index, @PathParam("type") String type,
+			@DefaultValue("10") @QueryParam("max") Integer max, @DefaultValue("0") @QueryParam("offset") Integer offset,
+			@DefaultValue("list") @QueryParam("view") String view,
+			@DefaultValue("last_revised") @QueryParam("sort") String sortOn, @QueryParam("tags") String tags,
+			@QueryParam("createdOnMaxDate") String createdOnMaxDate,
+			@QueryParam("createdOnMinDate") String createdOnMinDate,
+			@QueryParam("revisedOnMaxDate") String revisedOnMaxDate,
+			@QueryParam("revisedOnMinDate") String revisedOnMinDate,
+			@DefaultValue("") @QueryParam("isFlagged") String isFlagged,
+			@DefaultValue("") @QueryParam("user") String user, @DefaultValue("") @QueryParam("sGroup") String sGroup,
+			@DefaultValue("") @QueryParam("habitatIds") String habitatIds,
+			@DefaultValue("") @QueryParam("flags") String flags,
+			@DefaultValue("") @QueryParam("featured") String featured,
+			@DefaultValue("") @QueryParam("userGroupList") String userGroupList) {
+		try {
+
+			if (max > 50) {
+				max = 50;
+			}
+
+			MapSearchParams mapSearchParams = new MapSearchParams();
+			mapSearchParams.setFrom(offset);
+			mapSearchParams.setLimit(max);
+			mapSearchParams.setSortOn(sortOn);
+			mapSearchParams.setSortType(SortTypeEnum.DESC);
+
+			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user,
+					flags, createdOnMaxDate,createdOnMinDate, featured, userGroupList, isFlagged,revisedOnMaxDate,revisedOnMinDate,mapSearchParams);
+			DocumentListData result = docService.getDocumentList(index, type, mapSearchQuery);
+
+			return Response.status(Status.OK).entity(result).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+
 	}
 
 }

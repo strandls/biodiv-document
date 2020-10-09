@@ -37,7 +37,10 @@ import com.google.inject.servlet.ServletModule;
 import com.strandls.activity.controller.ActivitySerivceApi;
 import com.strandls.document.controllers.DocumentControllerModule;
 import com.strandls.document.dao.DocumentDaoModule;
+import com.strandls.document.es.util.ESUtilModule;
+import com.strandls.document.es.util.ESUtility;
 import com.strandls.document.service.Impl.DocumentServiceModule;
+import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.file.api.UploadApi;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.landscape.controller.LandscapeApi;
@@ -91,6 +94,7 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 
 				bind(SessionFactory.class).toInstance(sessionFactory);
 				bind(Headers.class).in(Scopes.SINGLETON);
+				bind(EsServicesApi.class).in(Scopes.SINGLETON);
 				bind(UserServiceApi.class).in(Scopes.SINGLETON);
 				bind(UserGroupSerivceApi.class).in(Scopes.SINGLETON);
 				bind(ResourceServicesApi.class).in(Scopes.SINGLETON);
@@ -99,13 +103,14 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 				bind(ActivitySerivceApi.class).in(Scopes.SINGLETON);
 				bind(SpeciesServicesApi.class).in(Scopes.SINGLETON);
 				bind(UploadApi.class).in(Scopes.SINGLETON);
+				bind(UtilityServiceApi.class).in(Scopes.SINGLETON);
 				bind(ActivitySerivceApi.class).in(Scopes.SINGLETON);
 				bind(LandscapeApi.class).in(Scopes.SINGLETON);
 				bind(ServletContainer.class).in(Scopes.SINGLETON);
 
 				serve("/api/*").with(ServletContainer.class, props);
 			}
-		}, new DocumentControllerModule(), new DocumentDaoModule(), new DocumentServiceModule());
+		}, new DocumentControllerModule(), new DocumentDaoModule(), new DocumentServiceModule(),new ESUtilModule());
 
 		return injector;
 
