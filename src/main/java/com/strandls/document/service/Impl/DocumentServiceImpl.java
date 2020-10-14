@@ -66,6 +66,7 @@ import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentHabitat;
 import com.strandls.document.pojo.DocumentListData;
+import com.strandls.document.pojo.DocumentMappingList;
 import com.strandls.document.pojo.DocumentSpeciesGroup;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLog;
@@ -1170,20 +1171,21 @@ public class DocumentServiceImpl implements DocumentService {
 		return false;
 	}
 
-	@SuppressWarnings("null")
+	
 	@Override
 	public DocumentListData getDocumentList(String index, String type, MapSearchQuery querys) {
 		
 		DocumentListData listData = null;
 
 		try {
-			MapResponse result = esService.search(index,type, "location", 1, null,null, querys);
+			MapResponse result = esService.search(index,type,null,null, false,null, querys);
 			List<MapDocument> documents = result.getDocuments();
-			List<ShowDocument> DocumentList = null;
+			List<DocumentMappingList> DocumentList = new ArrayList<DocumentMappingList>();
 			for (MapDocument document : documents) {
 				try {
+					
 					DocumentList.add(objectMapper.readValue(String.valueOf(document.getDocument()),
-							ShowDocument.class));
+							DocumentMappingList.class));
 				} catch (IOException e) {
 					logger.error(e.getMessage());
 				}

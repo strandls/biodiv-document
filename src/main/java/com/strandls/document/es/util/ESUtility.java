@@ -150,7 +150,7 @@ public class ESUtility {
 			String[] habitatList = habitatIds.split(",");
 			if (habitatList.length > 1) {
 				for (String o : habitatList) {
-					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.habitatList.getValue(), o));
+					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.habitatIds.getValue(), o));
 				}
 
 			}

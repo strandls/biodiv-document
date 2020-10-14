@@ -11,28 +11,28 @@ import java.util.List;
 
 public class DocumentListData {
 	
-	private List<ShowDocument> observationList;
+	private List<DocumentMappingList> documentList;
 //	private Long totalCount;
 	
 	/**
 	 * 
-	 * @param observationList
+	 * @param documentList
 	 * @param totalCount
 	 */
 	
-	public DocumentListData(List<ShowDocument> observationList) {
+	public DocumentListData(List<DocumentMappingList> documentList) {
 		super();
-		this.observationList = observationList;
+		this.documentList = documentList;
 //		this.totalCount = totalCount;
 	}
 	
 	
-	public List<ShowDocument> getObservationList() {
-		return observationList;
+	public List<DocumentMappingList> getObservationList() {
+		return documentList;
 	}
 	
-	public void setObservationList(List<ShowDocument> observationList) {
-		this.observationList = observationList;
+	public void setObservationList(List<DocumentMappingList> documentList) {
+		this.documentList = documentList;
 	}
 	
 //	public Long getTotalCount() {

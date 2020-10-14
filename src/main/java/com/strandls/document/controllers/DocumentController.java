@@ -623,7 +623,7 @@ public class DocumentController {
 	public Response DocumentList(@PathParam("index") String index, @PathParam("type") String type,
 			@DefaultValue("10") @QueryParam("max") Integer max, @DefaultValue("0") @QueryParam("offset") Integer offset,
 			@DefaultValue("list") @QueryParam("view") String view,
-			@DefaultValue("last_revised") @QueryParam("sort") String sortOn, @QueryParam("tags") String tags,
+			@DefaultValue("document.last_revised") @QueryParam("sort") String sortOn, @QueryParam("tags") String tags,
 			@QueryParam("createdOnMaxDate") String createdOnMaxDate,
 			@QueryParam("createdOnMinDate") String createdOnMinDate,
 			@QueryParam("revisedOnMaxDate") String revisedOnMaxDate,
