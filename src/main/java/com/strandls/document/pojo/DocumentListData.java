@@ -27,11 +27,11 @@ public class DocumentListData {
 	}
 	
 	
-	public List<DocumentMappingList> getObservationList() {
+	public List<DocumentMappingList> getDocumentList() {
 		return documentList;
 	}
 	
-	public void setObservationList(List<DocumentMappingList> documentList) {
+	public void setDocumentList(List<DocumentMappingList> documentList) {
 		this.documentList = documentList;
 	}
 	
