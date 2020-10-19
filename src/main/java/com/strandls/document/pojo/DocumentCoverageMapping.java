@@ -19,10 +19,8 @@ public class DocumentCoverageMapping {
 	private Long geoEntityId;
 	private String placeName;
 	private Long landscapeIds;
-
-	/**
-	 * 
-	 */
+	private Object topology;
+	
 	public DocumentCoverageMapping() {
 		super();
 	}
@@ -34,31 +32,17 @@ public class DocumentCoverageMapping {
 	 * @param placeName
 	 * @param topology
 	 */
+	
 	public DocumentCoverageMapping(Long id, Long documentId, Long geoEntityId, String placeName, Object topology) {
 		super();
 		this.id = id;
 		this.documentId = documentId;
 		this.geoEntityId = geoEntityId;
 		this.placeName = placeName;
+		this.topology = topology;
 		}
 
-	/**
-	 * @param id
-	 * @param documentId
-	 * @param geoEntityId
-	 * @param placeName
-	 * @param topology
-	 * @param landscapeIds
-	 */
-	public DocumentCoverageMapping(Long id, Long documentId, Long geoEntityId, String placeName,
-			Long landscapeIds) {
-		super();
-		this.id = id;
-		this.documentId = documentId;
-		this.geoEntityId = geoEntityId;
-		this.placeName = placeName;
-		this.landscapeIds = landscapeIds;
-	}
+	
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -98,11 +82,6 @@ public class DocumentCoverageMapping {
 		this.placeName = placeName;
 	}
 
-	@Column(name = "topology", columnDefinition = "Geometry", nullable = false)
-	@JsonSerialize(using = GeometrySerializer.class)
-	@JsonDeserialize(contentUsing = GeometryDeserializer.class)
-	
-
 	@Transient
 	public Long getLandscapeIds() {
 		return landscapeIds;
@@ -110,6 +89,15 @@ public class DocumentCoverageMapping {
 
 	public void setLandscapeIds(Long landscapeIds) {
 		this.landscapeIds = landscapeIds;
+	}
+	
+	@Transient
+	public Object getTopology() {
+		return topology;
+	}
+
+	public void setTopology(Object topology) {
+		this.topology = topology;
 	}
 
 }
