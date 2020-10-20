@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.strandls.resource.pojo.UFile;
+import com.strandls.user.pojo.UserIbp;
 //import com.strandls.user.pojo.UserIbp;
 import com.strandls.userGroup.pojo.Featured;
 import com.strandls.userGroup.pojo.UserGroupIbp;
@@ -21,6 +22,7 @@ public class DocumentMappingList {
 	private List<Long> habitatIds;
 	private List<Long> speciesGroupIds;
 	private List<FlagShow> flag;
+	private  Object userIbp;
 	private List<Object> tags;
 	
 	
@@ -44,7 +46,7 @@ public class DocumentMappingList {
 	 * @param tags
 	 */
 	public DocumentMappingList(Document document, List<DocumentCoverageMapping> documentCoverages,
-			List<UserGroupIbp> userGroupIbp, List<Featured> featured, UFile uFile, List<Long> habitatIds,
+			List<UserGroupIbp> userGroupIbp, List<Featured> featured, Object userIbp	,UFile uFile, List<Long> habitatIds,
 			List<Long> speciesGroupIds, List<FlagShow> flag, List<Object> tags) {
 		super();
 		this.document = document;
@@ -55,6 +57,7 @@ public class DocumentMappingList {
 		this.uFile = uFile;
 		this.habitatIds = habitatIds;
 		this.speciesGroupIds = speciesGroupIds;
+		this.userIbp = userIbp;
 		this.flag = flag;
 		this.tags = tags;
 	}
@@ -130,6 +133,14 @@ public class DocumentMappingList {
 
 	public void setTags(List<Object> tags) {
 		this.tags = tags;
+	}
+	
+	public Object getUserIbp() {
+		return userIbp;
+	}
+
+	public void setUserIbp(Object userIbp) {
+		this.userIbp = userIbp;
 	}
 
 }
