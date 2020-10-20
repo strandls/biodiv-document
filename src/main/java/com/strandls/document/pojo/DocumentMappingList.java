@@ -16,7 +16,7 @@ public class DocumentMappingList {
 	
 	private Document document;
 	private List<DocumentCoverageMapping> documentCoverages;
-	private List<UserGroupIbp> userGroupIbp;
+	private List<Object> userGroupIbp;
 	private List<Featured> featured;
 	private UFile uFile;
 	private List<Long> habitatIds;
@@ -46,7 +46,7 @@ public class DocumentMappingList {
 	 * @param tags
 	 */
 	public DocumentMappingList(Document document, List<DocumentCoverageMapping> documentCoverages,
-			List<UserGroupIbp> userGroupIbp, List<Featured> featured, Object userIbp	,UFile uFile, List<Long> habitatIds,
+			List<Object> userGroupIbp, List<Featured> featured, Object userIbp	,UFile uFile, List<Long> habitatIds,
 			List<Long> speciesGroupIds, List<FlagShow> flag, List<Object> tags) {
 		super();
 		this.document = document;
@@ -79,11 +79,11 @@ public class DocumentMappingList {
 		this.documentCoverages = documentCoverages;
 	}
 
-	public List<UserGroupIbp> getUserGroupIbp() {
+	public List<Object> getUserGroupIbp() {
 		return userGroupIbp;
 	}
 
-	public void setUserGroupIbp(List<UserGroupIbp> userGroupIbp) {
+	public void setUserGroupIbp(List<Object> userGroupIbp) {
 		this.userGroupIbp = userGroupIbp;
 	}
 
