@@ -14,7 +14,7 @@ import com.strandls.utility.pojo.FlagShow;
 public class DocumentMappingList {
 
 	
-	private Document document;
+	private Object document;
 	private List<DocumentCoverageMapping> documentCoverages;
 	private List<Object> userGroupIbp;
 	private List<Featured> featured;
@@ -45,7 +45,7 @@ public class DocumentMappingList {
 	 * @param flag
 	 * @param tags
 	 */
-	public DocumentMappingList(Document document, List<DocumentCoverageMapping> documentCoverages,
+	public DocumentMappingList(Object document, List<DocumentCoverageMapping> documentCoverages,
 			List<Object> userGroupIbp, List<Featured> featured, Object userIbp	,UFile uFile, List<Long> habitatIds,
 			List<Long> speciesGroupIds, List<FlagShow> flag, List<Object> tags) {
 		super();
@@ -66,7 +66,7 @@ public class DocumentMappingList {
 		return document;
 	}
 
-	public void setDocument(Document document) {
+	public void setDocument(Object	 document) {
 		this.document = document;
 	}
 
