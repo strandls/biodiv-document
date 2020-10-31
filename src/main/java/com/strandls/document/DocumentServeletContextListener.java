@@ -34,6 +34,7 @@ import com.google.inject.Injector;
 import com.google.inject.Scopes;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
+import com.rabbitmq.client.Channel;
 import com.strandls.activity.controller.ActivitySerivceApi;
 import com.strandls.document.controllers.DocumentControllerModule;
 import com.strandls.document.dao.DocumentDaoModule;
@@ -44,6 +45,8 @@ import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.file.api.UploadApi;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.landscape.controller.LandscapeApi;
+import com.strandls.document.es.util.RabbitMQConsumer;
+import com.strandls.document.RabbitMqConnection;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.taxonomy.controllers.SpeciesServicesApi;
 import com.strandls.user.controller.UserServiceApi;
@@ -81,6 +84,18 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 				configuration = configuration.configure();
 				SessionFactory sessionFactory = configuration.buildSessionFactory();
 
+				
+//				Rabbit MQ initialization
+				RabbitMqConnection rabbitConnetion = new RabbitMqConnection();
+				Channel channel = null;
+				try {
+					channel = rabbitConnetion.setRabbitMQConnetion();
+				} catch (Exception e) {
+					logger.error(e.getMessage());
+				}
+
+				bind(Channel.class).toInstance(channel);
+				
 				GeometryFactory geofactory = new GeometryFactory(new PrecisionModel(), 4326);
 				bind(GeometryFactory.class).toInstance(geofactory);
 
@@ -110,6 +125,13 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 			}
 		}, new DocumentControllerModule(), new DocumentDaoModule(), new DocumentServiceModule(),new ESUtilModule());
 
+		
+		try {
+			injector.getInstance(RabbitMQConsumer.class).elasticUpdate();
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+		
 		return injector;
 
 	}

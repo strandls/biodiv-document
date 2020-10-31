@@ -101,6 +101,7 @@ import com.strandls.userGroup.pojo.UserGroupMappingCreateData;
 import com.strandls.userGroup.pojo.UserGroupMemberRole;
 import com.strandls.userGroup.pojo.UserGroupPermissions;
 import com.strandls.utility.controller.UtilityServiceApi;
+import com.strandls.document.es.util.RabbitMQProducer;
 import com.strandls.utility.pojo.FlagCreateData;
 import com.strandls.utility.pojo.FlagIbp;
 import com.strandls.utility.pojo.FlagShow;
@@ -197,6 +198,9 @@ public class DocumentServiceImpl implements DocumentService {
 	
 	@Inject
 	private EsServicesApi esService;
+	
+	@Inject 
+	private RabbitMQProducer producer;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -358,9 +362,10 @@ public class DocumentServiceImpl implements DocumentService {
 				}
 			}
 
+			produceToRabbitMQ(document.getId().toString(),"new document");	
 			return show(document.getId());
 		} catch (
-
+	
 		Exception e) {
 			logger.error(e.getMessage());
 		}
@@ -1170,6 +1175,18 @@ public class DocumentServiceImpl implements DocumentService {
 			return true;
 		return false;
 	}
+	
+	
+	@Override
+	public void produceToRabbitMQ(String documentId, String updateType) {
+		try {
+			producer.setMessage("esmodule", documentId, updateType);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
+	}
+
 
 	
 	@Override

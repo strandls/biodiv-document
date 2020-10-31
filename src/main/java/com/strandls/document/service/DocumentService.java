@@ -103,4 +103,6 @@ public interface DocumentService {
 	
 	public DocumentListData getDocumentList(String index, String type,MapSearchQuery querys);
 
+	void produceToRabbitMQ(String documentId, String updateType);
+
 }
