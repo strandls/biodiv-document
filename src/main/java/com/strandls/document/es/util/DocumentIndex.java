@@ -5,13 +5,13 @@ public enum DocumentIndex {
 	index("document"),
 	type("document_records"), 
 	sGroup("speciesGroupIds"),
-	user("document.author_id"),
+	user("document.authorId"),
 	featured("featured.id"),
-	flagCount("document.flag_count"),
+	flagCount("document.flagCount"),
 	flag("flag.id"),
 	userGroupList("userGroupIbp.id"),
-	createdOn("document.created_on"),
-	lastRevised("document.last_revised"),
+	createdOn("document.createdOn"),
+	lastRevised("document.lastRevised"),
 	tags("tags.name.keyword"),
 	habitatIds("habitatIds")
 	;
