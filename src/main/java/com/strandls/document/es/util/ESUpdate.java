@@ -1,5 +1,7 @@
 package com.strandls.document.es.util;
 
+import java.text.SimpleDateFormat;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -32,8 +34,8 @@ public class ESUpdate {
 			System.out.println("Document getting UPDATED to elastic, ID:" + documentId);
 			Long docId = Long.parseLong(documentId);
 			ShowDocument result = docService.show(docId);
-//			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-//			om.setDateFormat(df);
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+			om.setDateFormat(df);
 			String resultString = om.writeValueAsString(result);
 			MapDocument doc = new MapDocument();
 			doc.setDocument(resultString);

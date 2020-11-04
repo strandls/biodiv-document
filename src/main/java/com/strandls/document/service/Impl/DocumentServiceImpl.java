@@ -73,16 +73,20 @@ import com.strandls.document.pojo.DownloadLog;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
+import com.strandls.esmodule.ApiException;
 import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.esmodule.pojo.MapDocument;
+import com.strandls.esmodule.pojo.MapQueryResponse;
 import com.strandls.esmodule.pojo.MapResponse;
 import com.strandls.esmodule.pojo.MapSearchQuery;
+import com.strandls.esmodule.pojo.MapQueryResponse.ResultEnum;
 import com.strandls.file.api.UploadApi;
 import com.strandls.file.model.FilesDTO;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.geoentities.pojo.GeoentitiesWKTData;
 import com.strandls.landscape.controller.LandscapeApi;
 import com.strandls.landscape.pojo.Landscape;
+import com.strandls.document.es.util.DocumentIndex;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
@@ -195,11 +199,11 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Inject
 	private LandscapeApi landScapeService;
-	
+
 	@Inject
 	private EsServicesApi esService;
-	
-	@Inject 
+
+	@Inject
 	private RabbitMQProducer producer;
 
 	@Override
@@ -249,7 +253,6 @@ public class DocumentServiceImpl implements DocumentService {
 
 				ShowDocument showDoc = new ShowDocument(document, userIbp, documentCoverages, userGroup, featured,
 						resource, docHabitatIds, docSGroupIds, flag, tags);
-
 				return showDoc;
 			}
 		} catch (Exception e) {
@@ -362,10 +365,10 @@ public class DocumentServiceImpl implements DocumentService {
 				}
 			}
 
-			produceToRabbitMQ(document.getId().toString(),"new document");	
+			produceToRabbitMQ(document.getId().toString(), "new document");
 			return show(document.getId());
 		} catch (
-	
+
 		Exception e) {
 			logger.error(e.getMessage());
 		}
@@ -460,14 +463,29 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Override
 	public Boolean removeDocument(HttpServletRequest request, Long documentId) {
-		CommonProfile profile = AuthUtil.getProfileFromRequest(request);
-		Long userId = Long.parseLong(profile.getId());
-		JSONArray userRoles = (JSONArray) profile.getAttribute("roles");
-		Document document = documentDao.findById(documentId);
-		if (document.getAuthorId().equals(userId) || userRoles.contains("ROLE_ADMIN")) {
-			document.setIsDeleted(true);
-			documentDao.update(document);
-			return true;
+		try {
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			Long userId = Long.parseLong(profile.getId());
+			JSONArray userRoles = (JSONArray) profile.getAttribute("roles");
+			Document document = documentDao.findById(documentId);
+
+			MapQueryResponse esResponse;
+
+			esResponse = esService.delete(DocumentIndex.index.getValue(), DocumentIndex.type.getValue(),
+					documentId.toString());
+
+			ResultEnum result = esResponse.getResult();
+
+			if (result.getValue().equals("DELETED")
+					|| (document.getAuthorId().equals(userId) || userRoles.contains("ROLE_ADMIN"))) {
+				document.setIsDeleted(true);
+				documentDao.update(document);
+				System.out.print("===deleted docuemnt===" + documentId + "returned" + result.getValue());
+				return true;
+			}
+
+		} catch (ApiException e) {
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -1175,8 +1193,7 @@ public class DocumentServiceImpl implements DocumentService {
 			return true;
 		return false;
 	}
-	
-	
+
 	@Override
 	public void produceToRabbitMQ(String documentId, String updateType) {
 		try {
@@ -1187,32 +1204,30 @@ public class DocumentServiceImpl implements DocumentService {
 
 	}
 
-
-	
 	@Override
 	public DocumentListData getDocumentList(String index, String type, MapSearchQuery querys) {
-		
+
 		DocumentListData listData = null;
 
 		try {
-			MapResponse result = esService.search(index,type,null,null, false,null, querys);
+			MapResponse result = esService.search(index, type, null, null, false, null, querys);
 			List<MapDocument> documents = result.getDocuments();
 			List<DocumentMappingList> DocumentList = new ArrayList<DocumentMappingList>();
 			for (MapDocument document : documents) {
 				try {
-					
-					DocumentList.add(objectMapper.readValue(String.valueOf(document.getDocument()),
-							DocumentMappingList.class));
+
+					DocumentList.add(
+							objectMapper.readValue(String.valueOf(document.getDocument()), DocumentMappingList.class));
 				} catch (IOException e) {
 					logger.error(e.getMessage());
 				}
 			}
-			
+
 			listData = new DocumentListData(DocumentList);
-		}catch(Exception e) {	
-			logger.error(e.getMessage());	
+		} catch (Exception e) {
+			logger.error(e.getMessage());
 		}
-		
+
 		return listData;
 	}
 
