@@ -15,24 +15,24 @@ import com.strandls.esmodule.pojo.MapQueryResponse;
 public class ESUpdate {
 
 	private final Logger logger = LoggerFactory.getLogger(ESUpdate.class);
-	
+
 	@Inject
 	private EsServicesApi esService;
 
 	@Inject
-	private ObjectMapper om;
+	private ObjectMapper objectMapper;
 
 	public void updateESInstance(String documentData) {
 		try {
 			System.out.println("--------------------document es Update---------");
 			System.out.println();
 			System.out.println("------started----------");
-			ShowDocument result = om.readValue(documentData, ShowDocument.class);
+			ShowDocument result = objectMapper.readValue(documentData, ShowDocument.class);
 			String documentId = result.getDocument().getId().toString();
 			System.out.println("Document getting UPDATED to elastic,ID:" + documentId);
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-			om.setDateFormat(df);
-			String resultString = om.writeValueAsString(result);
+			objectMapper.setDateFormat(df);
+			String resultString = objectMapper.writeValueAsString(result);
 			MapDocument doc = new MapDocument();
 			doc.setDocument(resultString);
 			MapQueryResponse response = esService.create(DocumentIndex.index.getValue(), DocumentIndex.type.getValue(),
