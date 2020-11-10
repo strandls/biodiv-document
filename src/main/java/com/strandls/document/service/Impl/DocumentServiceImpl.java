@@ -367,7 +367,7 @@ public class DocumentServiceImpl implements DocumentService {
             ShowDocument res = show(document.getId());
             String docString =  objectMapper.writeValueAsString(res);
 			produceToRabbitMQ(docString, "new document");
-			return show(document.getId());
+			return res;
 		} catch (
 
 		Exception e) {
