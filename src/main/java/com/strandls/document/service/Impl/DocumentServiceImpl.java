@@ -364,8 +364,9 @@ public class DocumentServiceImpl implements DocumentService {
 					docCoverageDao.save(docCoverage);
 				}
 			}
-
-			produceToRabbitMQ(document.getId().toString(), "new document");
+            ShowDocument res = show(document.getId());
+            String docString =  objectMapper.writeValueAsString(res);
+			produceToRabbitMQ(docString, "new document");
 			return show(document.getId());
 		} catch (
 
@@ -1195,9 +1196,9 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
-	public void produceToRabbitMQ(String documentId, String updateType) {
+	public void produceToRabbitMQ(String documentData, String updateType) {
 		try {
-			producer.setMessage("esmodule", documentId, updateType);
+			producer.setMessage("esmodule", documentData, updateType);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
