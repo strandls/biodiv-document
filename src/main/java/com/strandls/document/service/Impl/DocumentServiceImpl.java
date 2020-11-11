@@ -87,6 +87,8 @@ import com.strandls.geoentities.pojo.GeoentitiesWKTData;
 import com.strandls.landscape.controller.LandscapeApi;
 import com.strandls.landscape.pojo.Landscape;
 import com.strandls.document.es.util.DocumentIndex;
+import com.strandls.document.es.util.ESUpdate;
+import com.strandls.document.es.util.ESUpdateThread;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
@@ -205,6 +207,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Inject
 	private RabbitMQProducer producer;
+	
+	@Inject 
+	private ESUpdate esUpdate;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -366,7 +371,10 @@ public class DocumentServiceImpl implements DocumentService {
 			}
             ShowDocument res = show(document.getId());
             String docString =  objectMapper.writeValueAsString(res);
-			produceToRabbitMQ(docString, "new document");
+//            esUpdate.updateESInstance(docString);       
+            ESUpdateThread updateThread = new ESUpdateThread(esUpdate, docString);
+			Thread thread = new Thread(updateThread);
+			thread.start();
 			return res;
 		} catch (
 
