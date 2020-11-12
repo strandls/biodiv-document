@@ -38,7 +38,7 @@ public class RabbitMQConsumer {
 			thread.start();
 
 		};
-		channel.basicConsume(QUEUE_ELASTIC, false, deliverCallback, consumerTag -> {
+		channel.basicConsume(QUEUE_ELASTIC, true, deliverCallback, consumerTag -> {
 		});
 	}
 
