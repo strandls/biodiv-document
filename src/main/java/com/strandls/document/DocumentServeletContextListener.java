@@ -186,6 +186,14 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 
 		SessionFactory sessionFactory = injector.getInstance(SessionFactory.class);
 		sessionFactory.close();
+		
+		Channel channel = injector.getInstance(Channel.class);
+		try {
+			channel.getConnection().close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		super.contextDestroyed(servletContextEvent);
 		// ... First close any background tasks which may be using the DB ...
