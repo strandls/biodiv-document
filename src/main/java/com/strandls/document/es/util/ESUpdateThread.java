@@ -11,6 +11,7 @@ public class ESUpdateThread implements Runnable {
 
 	private ESUpdate esUpdate;
 	private String documentId;
+	private String documentData;
 
 	/**
 	 * 
@@ -23,15 +24,16 @@ public class ESUpdateThread implements Runnable {
 	 * @param esUpdate
 	 * @param observationId
 	 */
-	public ESUpdateThread(ESUpdate esUpdate, String documentId) {
+	public ESUpdateThread(ESUpdate esUpdate, String documentData,String documentId) {
 		super();
 		this.esUpdate = esUpdate;
+		this.documentData  = documentData;
 		this.documentId = documentId;
 	}
 
 	@Override
 	public void run() {
-		esUpdate.updateESInstance(documentId);
+		esUpdate.updateESInstance(documentId,documentData);
 	}
 
 }

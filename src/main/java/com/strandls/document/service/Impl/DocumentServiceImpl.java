@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -87,7 +88,6 @@ import com.strandls.geoentities.pojo.GeoentitiesWKTData;
 import com.strandls.landscape.controller.LandscapeApi;
 import com.strandls.landscape.pojo.Landscape;
 import com.strandls.document.es.util.DocumentIndex;
-import com.strandls.document.es.util.ESUpdate;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
@@ -207,8 +207,6 @@ public class DocumentServiceImpl implements DocumentService {
 	@Inject
 	private RabbitMQProducer producer;
 	
-	@Inject 
-	private ESUpdate esUpdate;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -369,8 +367,10 @@ public class DocumentServiceImpl implements DocumentService {
 				}
 			}
             ShowDocument res = show(document.getId());
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+			objectMapper.setDateFormat(df);
             String docString =  objectMapper.writeValueAsString(res);    
-            produceToRabbitMQ(docString, "new document");
+            produceToRabbitMQ(docString, document.getId().toString());
 			return res;
 		} catch (
 
@@ -425,7 +425,7 @@ public class DocumentServiceImpl implements DocumentService {
 	@Override
 	public ShowDocument updateDocument(HttpServletRequest request, DocumentEditData docEditData) {
 		try {
-			Document document = docEditData.getDocument();
+//			Document document = docEditData.getDocument();
 //			documentDao.
 
 		} catch (Exception e) {
@@ -1200,9 +1200,9 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
-	public void produceToRabbitMQ(String documentData, String updateType) {
+	public void produceToRabbitMQ(String documentData, String documentId) {
 		try {
-			producer.setMessage("esmodule", documentData, updateType);
+			producer.setMessage("esmodule", documentData, documentId);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}

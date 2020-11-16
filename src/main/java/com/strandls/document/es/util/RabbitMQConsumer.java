@@ -28,12 +28,12 @@ public class RabbitMQConsumer {
 		DeliverCallback deliverCallback = (consumerTag, delivery) -> {
 			String message = new String(delivery.getBody(), "UTF-8");
 			BasicProperties properties = delivery.getProperties();
-			String updateType = properties.getType();
+			String documentId = properties.getType();
 			System.out.println("----[RABBIT MQ CONSUMER]---");
 			System.out.println("consuming observation Id :" + message);
-			System.out.println("Updating :" + updateType);
+			System.out.println("Updating :" + documentId);
 
-			ESUpdateThread updateThread = new ESUpdateThread(esUpdate, message);
+			ESUpdateThread updateThread = new ESUpdateThread(esUpdate, message,documentId);
 			Thread thread = new Thread(updateThread);
 			thread.start();
 
