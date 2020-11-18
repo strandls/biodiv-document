@@ -35,6 +35,7 @@ import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
+import com.strandls.document.pojo.DocumentMeta;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
@@ -601,6 +602,24 @@ public class DocumentController {
 				return Response.status(Status.OK).entity("Download logged").build();
 			return Response.status(Status.NOT_ACCEPTABLE).build();
 
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+	}
+
+	@GET
+	@Path(ApiConstants.TAXONOMY + "/{taxonConceptId}")
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ApiOperation(value = "fetch document on basis of taxonConceptId", notes = "Return the document meta data list", response = DocumentMeta.class, responseContainer = "List")
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to return the data", response = String.class) })
+
+	public Response getDocumentByTaxonConceptId(@PathParam("taxonConceptId") String taxonConceptId) {
+		try {
+			Long taxonomyConceptId = Long.parseLong(taxonConceptId);
+			List<DocumentMeta> result = docService.getDocumentByTaxonId(taxonomyConceptId);
+			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}

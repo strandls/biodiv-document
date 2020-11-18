@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -48,6 +49,7 @@ import com.strandls.document.Headers;
 import com.strandls.document.dao.BibTexFieldTypeDao;
 import com.strandls.document.dao.BibTexItemFieldMappingDao;
 import com.strandls.document.dao.BibTexItemTypeDao;
+import com.strandls.document.dao.DocSciNameDao;
 import com.strandls.document.dao.DocumentCoverageDao;
 import com.strandls.document.dao.DocumentDao;
 import com.strandls.document.dao.DocumentHabitatDao;
@@ -58,12 +60,14 @@ import com.strandls.document.pojo.BibTexFieldType;
 import com.strandls.document.pojo.BibTexItemFieldMapping;
 import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.BulkUploadExcelData;
+import com.strandls.document.pojo.DocSciName;
 import com.strandls.document.pojo.Document;
 import com.strandls.document.pojo.DocumentCoverage;
 import com.strandls.document.pojo.DocumentCoverageData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentHabitat;
+import com.strandls.document.pojo.DocumentMeta;
 import com.strandls.document.pojo.DocumentSpeciesGroup;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLog;
@@ -187,6 +191,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Inject
 	private LandscapeApi landScapeService;
+
+	@Inject
+	private DocSciNameDao docSciNameDao;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -1156,6 +1163,29 @@ public class DocumentServiceImpl implements DocumentService {
 		if (downloadLog.getId() != null)
 			return true;
 		return false;
+	}
+
+	@Override
+	public List<DocumentMeta> getDocumentByTaxonId(Long taxonConceptId) {
+		try {
+			List<DocumentMeta> result = new ArrayList<DocumentMeta>();
+			List<DocSciName> docSciNameList = docSciNameDao.findByTaxonConceptId(taxonConceptId);
+			for (DocSciName docSciName : docSciNameList) {
+				Document document = documentDao.findById(docSciName.getDocumentId());
+				UserIbp author = userService.getUserIbp(document.getAuthorId().toString());
+				result.add(new DocumentMeta(document.getId(), document.getTitle(), document.getNotes(), author,
+						document.getCreatedOn(), docSciName.getDisplayOrder()));
+			}
+			Collections.sort(result, Collections.reverseOrder());
+
+			return result;
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
+		return null;
+
 	}
 
 }

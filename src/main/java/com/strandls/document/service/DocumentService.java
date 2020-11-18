@@ -19,6 +19,7 @@ import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
+import com.strandls.document.pojo.DocumentMeta;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
@@ -98,5 +99,7 @@ public interface DocumentService {
 	public List<Language> getLanguages(Boolean isDirty);
 
 	public Boolean documentDownloadLog(HttpServletRequest request, DownloadLogData downloadLogData);
+
+	public List<DocumentMeta> getDocumentByTaxonId(Long taxonConceptId);
 
 }
