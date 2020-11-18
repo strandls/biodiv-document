@@ -139,16 +139,18 @@ public class ESUtility {
 			}
 
 //			speciesGroupList
-			String[] sgList = sGroup.split(",");
-			if (sgList.length >= 1) {
+			
+			if (sGroup.length() >= 1) {
+				String[] sgList = sGroup.split(",");
 				for (String o : sgList) {
 					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.sGroup.getValue(), o));
 				}
 
 			}
 //			habitatId List
-			String[] habitatList = habitatIds.split(",");
-			if (habitatList.length >= 1) {
+			
+			if (habitatIds.length() >= 1) {
+				String[] habitatList = habitatIds.split(",");
 				for (String o : habitatList) {
 					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.habitatIds.getValue(), o));
 				}
