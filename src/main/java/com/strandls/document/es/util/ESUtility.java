@@ -140,7 +140,7 @@ public class ESUtility {
 
 //			speciesGroupList
 			String[] sgList = sGroup.split(",");
-			if (sgList.length > 1) {
+			if (sgList.length >= 1) {
 				for (String o : sgList) {
 					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.sGroup.getValue(), o));
 				}
@@ -148,7 +148,7 @@ public class ESUtility {
 			}
 //			habitatId List
 			String[] habitatList = habitatIds.split(",");
-			if (habitatList.length > 1) {
+			if (habitatList.length >= 1) {
 				for (String o : habitatList) {
 					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.habitatIds.getValue(), o));
 				}
@@ -240,16 +240,16 @@ public class ESUtility {
 			}
 			if (revisedOnMinDateValue != null && revisedOnMaxDateValue != null) {
 
-				rangeAndLists.add(assignAndRange(DocumentIndex.lastRevised.getValue(), revisedOnMinDateValue,
-						revisedOnMaxDateValue, null));
+				rangeAndLists.add(assignAndRange(DocumentIndex.lastRevised.getValue(), revisedOnMaxDateValue,
+						revisedOnMinDateValue, null));
 			}
 			if (revisedOnMinDateValue != null && revisedOnMaxDateValue == null) {
-				rangeAndLists.add(assignAndRange(DocumentIndex.lastRevised.getValue(), revisedOnMinDateValue,
-						out.format(date), null));
+				rangeAndLists.add(assignAndRange(DocumentIndex.lastRevised.getValue(), out.format(date),
+						revisedOnMinDateValue, null));
 			}
 			if (revisedOnMinDateValue == null && revisedOnMaxDateValue != null) {
-				rangeAndLists.add(assignAndRange(DocumentIndex.lastRevised.getValue(), out.format(date),
-						revisedOnMaxDateValue, null));
+				rangeAndLists.add(assignAndRange(DocumentIndex.lastRevised.getValue(), revisedOnMaxDateValue,
+						out.format(date), null));
 			}
 
 			/**
@@ -266,7 +266,7 @@ public class ESUtility {
 			mapSearchQuery.setAndMatchPhraseQueries(andMatchPhraseQueries);
 			mapSearchQuery.setOrMatchPhraseQueries(orMatchPhraseQueriesnew);
 			mapSearchQuery.setSearchParams(mapSearchParams);
-			
+
 			return mapSearchQuery;
 
 		} catch (Exception e) {
