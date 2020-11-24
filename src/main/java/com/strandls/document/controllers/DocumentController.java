@@ -4,8 +4,10 @@
 package com.strandls.document.controllers;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -42,6 +44,9 @@ import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
+import com.strandls.esmodule.pojo.MapBoundParams;
+import com.strandls.esmodule.pojo.MapBounds;
+import com.strandls.esmodule.pojo.MapGeoPoint;
 import com.strandls.esmodule.pojo.MapSearchParams;
 import com.strandls.esmodule.pojo.MapSearchQuery;
 import com.strandls.esmodule.pojo.MapSearchParams.SortTypeEnum;
@@ -628,26 +633,56 @@ public class DocumentController {
 			@QueryParam("createdOnMinDate") String createdOnMinDate,
 			@QueryParam("revisedOnMaxDate") String revisedOnMaxDate,
 			@QueryParam("revisedOnMinDate") String revisedOnMinDate,
+			@QueryParam("location") String location,
 			@DefaultValue("") @QueryParam("isFlagged") String isFlagged,
 			@DefaultValue("") @QueryParam("user") String user, @DefaultValue("") @QueryParam("sGroup") String sGroup,
 			@DefaultValue("") @QueryParam("habitatIds") String habitatIds,
 			@DefaultValue("") @QueryParam("flags") String flags,
 			@DefaultValue("") @QueryParam("featured") String featured,
+			@QueryParam("left") Double left, @QueryParam("right") Double right, @QueryParam("top") Double top,
+			@QueryParam("bottom") Double bottom,@QueryParam("state") String state,
 			@DefaultValue("") @QueryParam("userGroupList") String userGroupList) {
 		try {
 
 			if (max > 50) {
 				max = 50;
 			}
+			
+			MapBounds bounds = null;
+			if (top != null || bottom != null || left != null || right != null) {
+				bounds = new MapBounds();
+				bounds.setBottom(bottom);
+				bounds.setLeft(left);
+				bounds.setRight(right);
+				bounds.setTop(top);
+			}
+			
+			List<MapGeoPoint> polygon = new ArrayList<MapGeoPoint>();
+			if (location != null) {
+				double[] point = Stream.of(location.split(",")).mapToDouble(Double::parseDouble).toArray();
+				for (int i = 0; i < point.length; i = i + 2) {
+					String singlePoint = point[i + 1] + "," + point[i];
 
+					int comma = singlePoint.indexOf(',');
+					if (comma != -1) {
+						MapGeoPoint geoPoint = new MapGeoPoint();
+						geoPoint.setLat(Double.parseDouble(singlePoint.substring(0, comma).trim()));
+						geoPoint.setLon(Double.parseDouble(singlePoint.substring(comma + 1).trim()));
+						polygon.add(geoPoint);
+					}
+				}
+			}
+
+			MapBoundParams mapBoundsParams = new MapBoundParams();	
 			MapSearchParams mapSearchParams = new MapSearchParams();
 			mapSearchParams.setFrom(offset);
+			mapBoundsParams.setPolygon(polygon);
 			mapSearchParams.setLimit(max);
 			mapSearchParams.setSortOn(sortOn);
 			mapSearchParams.setSortType(SortTypeEnum.DESC);
 
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user,
-					flags, createdOnMaxDate,createdOnMinDate, featured, userGroupList, isFlagged,revisedOnMaxDate,revisedOnMinDate,mapSearchParams);
+					flags, createdOnMaxDate,createdOnMinDate, featured, userGroupList, isFlagged,revisedOnMaxDate,revisedOnMinDate,state,mapSearchParams);
 			DocumentListData result = docService.getDocumentList(index, type, mapSearchQuery);
 
 			return Response.status(Status.OK).entity(result).build();

@@ -109,7 +109,7 @@ public class ESUtility {
 
 	public MapSearchQuery getMapSearchQuery(String sGroup, String habitatIds, String tags, String user, String flags,
 			String createdOnMaxDate, String createdOnMinDate, String featured, String userGroupList, String isFlagged,
-			String revisedOnMinDate, String revisedOnMaxDate, MapSearchParams mapSearchParams) {
+			String revisedOnMinDate, String revisedOnMaxDate, String state, MapSearchParams mapSearchParams) {
 
 		List<MapAndBoolQuery> boolAndLists = new ArrayList<MapAndBoolQuery>();
 		List<MapOrBoolQuery> boolOrLists = new ArrayList<MapOrBoolQuery>();
@@ -139,7 +139,7 @@ public class ESUtility {
 			}
 
 //			speciesGroupList
-			
+
 			if (sGroup.length() >= 1) {
 				String[] sgList = sGroup.split(",");
 				for (String o : sgList) {
@@ -148,7 +148,7 @@ public class ESUtility {
 
 			}
 //			habitatId List
-			
+
 			if (habitatIds.length() >= 1) {
 				String[] habitatList = habitatIds.split(",");
 				for (String o : habitatList) {
@@ -254,6 +254,17 @@ public class ESUtility {
 						out.format(date), null));
 			}
 
+//			state
+			List<Object> stateList = cSTSOT(state);
+			if (!stateList.isEmpty()) {
+				List<Object> lowerCaseList = new ArrayList<Object>();
+				for (Object o : stateList) {
+					String result = o.toString().toLowerCase();
+					lowerCaseList.add(result);
+				}
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.state.getValue(), lowerCaseList));
+
+			}
 			/**
 			 * combine all the queries
 			 * 
