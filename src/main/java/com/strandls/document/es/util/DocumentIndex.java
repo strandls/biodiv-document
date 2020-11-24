@@ -12,7 +12,7 @@ public enum DocumentIndex {
 	userGroupList("userGroupIbp.id"),
 	createdOn("document.createdOn"),
 	lastRevised("document.lastRevised"),
-	state("documentCoverages.placename"),
+	state("documentCoverages.placename.keyword"),
 	tags("tags.name.keyword"),
 	habitatIds("habitatIds")
 	;

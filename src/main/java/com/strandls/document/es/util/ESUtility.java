@@ -257,13 +257,7 @@ public class ESUtility {
 //			state
 			List<Object> stateList = cSTSOT(state);
 			if (!stateList.isEmpty()) {
-				List<Object> lowerCaseList = new ArrayList<Object>();
-				for (Object o : stateList) {
-					String result = o.toString().toLowerCase();
-					lowerCaseList.add(result);
-				}
-				boolAndLists.add(assignBoolAndQuery(DocumentIndex.state.getValue(), lowerCaseList));
-
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.state.getValue(), stateList));
 			}
 			/**
 			 * combine all the queries

@@ -15,7 +15,7 @@ public class DocumentMappingList {
 
 	
 	private Object document;
-	private List<DocumentCoverageMapping> documentCoverages;
+	private List<Object> documentCoverages;
 	private List<Object> userGroupIbp;
 	private List<Featured> featured;
 	private UFile uFile;
@@ -45,7 +45,7 @@ public class DocumentMappingList {
 	 * @param flag
 	 * @param tags
 	 */
-	public DocumentMappingList(Object document, List<DocumentCoverageMapping> documentCoverages,
+	public DocumentMappingList(Object document, List<Object> documentCoverages,
 			List<Object> userGroupIbp, List<Featured> featured, Object userIbp	,UFile uFile, List<Long> habitatIds,
 			List<Long> speciesGroupIds, List<FlagShow> flag, List<Object> tags) {
 		super();
@@ -71,11 +71,11 @@ public class DocumentMappingList {
 	}
 
 	
-	public List<DocumentCoverageMapping> getDocumentCoverages() {
+	public List<Object> getDocumentCoverages() {
 		return documentCoverages;
 	}
 
-	public void setDocumentCoverages(List<DocumentCoverageMapping> documentCoverages) {
+	public void setDocumentCoverages(List<Object> documentCoverages) {
 		this.documentCoverages = documentCoverages;
 	}
 
