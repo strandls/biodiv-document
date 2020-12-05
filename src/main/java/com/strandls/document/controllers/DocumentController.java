@@ -632,22 +632,25 @@ public class DocumentController {
 			@QueryParam("createdOnMaxDate") String createdOnMaxDate,
 			@QueryParam("createdOnMinDate") String createdOnMinDate,
 			@QueryParam("revisedOnMaxDate") String revisedOnMaxDate,
-			@QueryParam("revisedOnMinDate") String revisedOnMinDate,
-			@QueryParam("location") String location,
+			@QueryParam("revisedOnMinDate") String revisedOnMinDate, @QueryParam("location") String location,
 			@DefaultValue("") @QueryParam("isFlagged") String isFlagged,
 			@DefaultValue("") @QueryParam("user") String user, @DefaultValue("") @QueryParam("sGroup") String sGroup,
 			@DefaultValue("") @QueryParam("habitatIds") String habitatIds,
 			@DefaultValue("") @QueryParam("flags") String flags,
-			@DefaultValue("") @QueryParam("featured") String featured,
-			@QueryParam("left") Double left, @QueryParam("right") Double right, @QueryParam("top") Double top,
-			@QueryParam("bottom") Double bottom,@QueryParam("state") String state,
-			@DefaultValue("") @QueryParam("userGroupList") String userGroupList) {
+			@DefaultValue("") @QueryParam("featured") String featured, @QueryParam("left") Double left,
+			@QueryParam("right") Double right, @QueryParam("top") Double top, @QueryParam("bottom") Double bottom,
+			@QueryParam("state") String state, @DefaultValue("") @QueryParam("userGroupList") String userGroupList,
+			@QueryParam("geoAggregationField") String geoAggregationField,
+			@DefaultValue("documentCoverages.topology") @QueryParam("geoShapeFilterField") String geoShapeFilterField,
+			@DefaultValue("documentCoverages") @QueryParam("nestedField") String nestedField,
+			@DefaultValue("1") @QueryParam("geoAggegationPrecision") Integer geoAggegationPrecision,
+			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation) {
 		try {
 
 			if (max > 50) {
 				max = 50;
 			}
-			
+
 			MapBounds bounds = null;
 			if (top != null || bottom != null || left != null || right != null) {
 				bounds = new MapBounds();
@@ -656,7 +659,7 @@ public class DocumentController {
 				bounds.setRight(right);
 				bounds.setTop(top);
 			}
-			
+
 			List<MapGeoPoint> polygon = new ArrayList<MapGeoPoint>();
 			if (location != null) {
 				double[] point = Stream.of(location.split(",")).mapToDouble(Double::parseDouble).toArray();
@@ -673,17 +676,20 @@ public class DocumentController {
 				}
 			}
 
-			MapBoundParams mapBoundsParams = new MapBoundParams();	
+			MapBoundParams mapBoundsParams = new MapBoundParams();
 			MapSearchParams mapSearchParams = new MapSearchParams();
 			mapSearchParams.setFrom(offset);
+			mapBoundsParams.setBounds(bounds);
 			mapBoundsParams.setPolygon(polygon);
 			mapSearchParams.setLimit(max);
 			mapSearchParams.setSortOn(sortOn);
 			mapSearchParams.setSortType(SortTypeEnum.DESC);
+			mapSearchParams.setMapBoundParams(mapBoundsParams);
 
-			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user,
-					flags, createdOnMaxDate,createdOnMinDate, featured, userGroupList, isFlagged,revisedOnMaxDate,revisedOnMinDate,state,mapSearchParams);
-			DocumentListData result = docService.getDocumentList(index, type, mapSearchQuery);
+			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags,
+					createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
+					revisedOnMinDate, state, mapSearchParams);
+			DocumentListData result = docService.getDocumentList(index, type,geoAggregationField ,geoShapeFilterField,nestedField,mapSearchQuery);
 
 			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {

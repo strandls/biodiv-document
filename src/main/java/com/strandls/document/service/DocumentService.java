@@ -100,9 +100,10 @@ public interface DocumentService {
 	public List<Language> getLanguages(Boolean isDirty);
 
 	public Boolean documentDownloadLog(HttpServletRequest request, DownloadLogData downloadLogData);
-	
-	public DocumentListData getDocumentList(String index, String type,MapSearchQuery querys);
 
 	void produceToRabbitMQ(String documentId, String updateType);
+
+	public DocumentListData getDocumentList(String index, String type, String geoAggregationField,
+			String geoShapeFilterField,String nestedField,MapSearchQuery querys);
 
 }

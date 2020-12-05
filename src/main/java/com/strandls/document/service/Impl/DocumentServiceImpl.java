@@ -1210,12 +1210,12 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
-	public DocumentListData getDocumentList(String index, String type, MapSearchQuery querys) {
+	public DocumentListData getDocumentList(String index, String type, String geoAggregationField ,String geoShapeFilterField,String nestedField,MapSearchQuery querys) {
 
 		DocumentListData listData = null;
 
 		try {
-			MapResponse result = esService.search(index, type, null, null, false, null, querys);
+			MapResponse result = esService.search(index, type, geoAggregationField, null, false, null, geoShapeFilterField, nestedField, querys);
 			List<MapDocument> documents = result.getDocuments();
 			List<DocumentMappingList> DocumentList = new ArrayList<DocumentMappingList>();
 			for (MapDocument document : documents) {
