@@ -641,8 +641,8 @@ public class DocumentController {
 			@QueryParam("right") Double right, @QueryParam("top") Double top, @QueryParam("bottom") Double bottom,
 			@QueryParam("state") String state, @DefaultValue("") @QueryParam("userGroupList") String userGroupList,
 			@QueryParam("geoAggregationField") String geoAggregationField,
-			@DefaultValue("documentCoverages.topology") @QueryParam("geoShapeFilterField") String geoShapeFilterField,
-			@DefaultValue("documentCoverages") @QueryParam("nestedField") String nestedField,
+			@QueryParam("geoShapeFilterField") String geoShapeFilterField,
+			@QueryParam("nestedField") String nestedField,
 			@DefaultValue("1") @QueryParam("geoAggegationPrecision") Integer geoAggegationPrecision,
 			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation) {
 		try {
@@ -689,7 +689,8 @@ public class DocumentController {
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags,
 					createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
 					revisedOnMinDate, state, mapSearchParams);
-			DocumentListData result = docService.getDocumentList(index, type,geoAggregationField ,geoShapeFilterField,nestedField,mapSearchQuery);
+			DocumentListData result = docService.getDocumentList(index, type, geoAggregationField, geoShapeFilterField,
+					nestedField, mapSearchQuery);
 
 			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {
