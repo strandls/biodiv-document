@@ -40,6 +40,7 @@ import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentListData;
+import com.strandls.document.pojo.DocumentListParams;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
@@ -620,9 +621,9 @@ public class DocumentController {
 		}
 	}
 
-	@GET
+	@POST
 	@Path(ApiConstants.LIST + "/{index}/{type}")
-	@Consumes(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 
 	public Response DocumentList(@PathParam("index") String index, @PathParam("type") String type,
@@ -632,7 +633,7 @@ public class DocumentController {
 			@QueryParam("createdOnMaxDate") String createdOnMaxDate,
 			@QueryParam("createdOnMinDate") String createdOnMinDate,
 			@QueryParam("revisedOnMaxDate") String revisedOnMaxDate,
-			@QueryParam("revisedOnMinDate") String revisedOnMinDate, @QueryParam("location") String location,
+			@QueryParam("revisedOnMinDate") String revisedOnMinDate,
 			@DefaultValue("") @QueryParam("isFlagged") String isFlagged,
 			@DefaultValue("") @QueryParam("user") String user, @DefaultValue("") @QueryParam("sGroup") String sGroup,
 			@DefaultValue("") @QueryParam("habitatIds") String habitatIds,
@@ -644,7 +645,9 @@ public class DocumentController {
 			@QueryParam("geoShapeFilterField") String geoShapeFilterField,
 			@QueryParam("nestedField") String nestedField,
 			@DefaultValue("1") @QueryParam("geoAggegationPrecision") Integer geoAggegationPrecision,
-			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation) {
+			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation,
+			@ApiParam(name = "location") DocumentListParams location
+			) {
 		try {
 
 			if (max > 50) {
@@ -661,8 +664,9 @@ public class DocumentController {
 			}
 
 			List<MapGeoPoint> polygon = new ArrayList<MapGeoPoint>();
-			if (location != null) {
-				double[] point = Stream.of(location.split(",")).mapToDouble(Double::parseDouble).toArray();
+			String loc = location.getLocation();
+			if ( loc != null) {
+				double[] point = Stream.of(loc.split(",")).mapToDouble(Double::parseDouble).toArray();
 				for (int i = 0; i < point.length; i = i + 2) {
 					String singlePoint = point[i + 1] + "," + point[i];
 
