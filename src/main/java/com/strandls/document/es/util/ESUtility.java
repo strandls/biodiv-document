@@ -257,9 +257,13 @@ public class ESUtility {
 //			state
 			List<Object> stateList = cSTSOT(state);
 			if (!stateList.isEmpty()) {
-				MapAndBoolQuery query = assignBoolAndQuery(DocumentIndex.state.getValue(), stateList);
-				query.setPath("documentCoverages");
-				boolAndLists.add(query);
+				List<Object> lowerCaseList = new ArrayList<Object>();
+				for (Object o : stateList) {
+					String result = o.toString();
+					lowerCaseList.add(result);
+				}
+				
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.state.getValue(), lowerCaseList));
 			}
 			/**
 			 * combine all the queries
