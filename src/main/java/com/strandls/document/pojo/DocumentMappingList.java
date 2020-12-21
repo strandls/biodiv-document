@@ -4,24 +4,25 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.userGroup.pojo.Featured;
+import com.strandls.userGroup.pojo.UserGroupIbp;
+import com.strandls.userGroup.pojo.UserIbp;
 import com.strandls.utility.pojo.FlagShow;
+import com.strandls.utility.pojo.Tags;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DocumentMappingList {
 
-	
-	private Object document;
-	private List<Object> documentCoverages;
-	private List<Object> userGroupIbp;
+	private Document document;
+	private List<DocumentCoverageData> documentCoverages;
+	private List<UserGroupIbp> userGroupIbp;
 	private List<Featured> featured;
 	private UFile uFile;
 	private List<Long> habitatIds;
 	private List<Long> speciesGroupIds;
 	private List<FlagShow> flag;
-	private  Object userIbp;
-	private List<Object> tags;
-	
-	
+	private UserIbp userIbp;
+	private List<Tags> tags;
+
 	/**
 	 * 
 	 */
@@ -41,12 +42,12 @@ public class DocumentMappingList {
 	 * @param flag
 	 * @param tags
 	 */
-	public DocumentMappingList(Object document, List<Object> documentCoverages,
-			List<Object> userGroupIbp, List<Featured> featured, Object userIbp	,UFile uFile, List<Long> habitatIds,
-			List<Long> speciesGroupIds, List<FlagShow> flag, List<Object> tags) {
+	public DocumentMappingList(Document document, List<DocumentCoverageData> documentCoverages, List<UserGroupIbp> userGroupIbp,
+			List<Featured> featured, UserIbp userIbp, UFile uFile, List<Long> habitatIds, List<Long> speciesGroupIds,
+			List<FlagShow> flag, List<Tags> tags) {
 		super();
 		this.document = document;
-		
+
 		this.documentCoverages = documentCoverages;
 		this.userGroupIbp = userGroupIbp;
 		this.featured = featured;
@@ -62,24 +63,23 @@ public class DocumentMappingList {
 		return document;
 	}
 
-	public void setDocument(Object	 document) {
+	public void setDocument(Document document) {
 		this.document = document;
 	}
 
-	
-	public List<Object> getDocumentCoverages() {
+	public List<DocumentCoverageData> getDocumentCoverages() {
 		return documentCoverages;
 	}
 
-	public void setDocumentCoverages(List<Object> documentCoverages) {
+	public void setDocumentCoverages(List<DocumentCoverageData> documentCoverages) {
 		this.documentCoverages = documentCoverages;
 	}
 
-	public List<Object> getUserGroupIbp() {
+	public List<UserGroupIbp> getUserGroupIbp() {
 		return userGroupIbp;
 	}
 
-	public void setUserGroupIbp(List<Object> userGroupIbp) {
+	public void setUserGroupIbp(List<UserGroupIbp> userGroupIbp) {
 		this.userGroupIbp = userGroupIbp;
 	}
 
@@ -123,19 +123,19 @@ public class DocumentMappingList {
 		this.flag = flag;
 	}
 
-	public List<Object> getTags() {
+	public List<Tags> getTags() {
 		return tags;
 	}
 
-	public void setTags(List<Object> tags) {
+	public void setTags(List<Tags> tags) {
 		this.tags = tags;
 	}
-	
+
 	public Object getUserIbp() {
 		return userIbp;
 	}
 
-	public void setUserIbp(Object userIbp) {
+	public void setUserIbp(UserIbp userIbp) {
 		this.userIbp = userIbp;
 	}
 

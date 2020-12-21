@@ -120,11 +120,11 @@ public class DocumentCoverage implements Serializable {
 		this.placeName = placeName;
 	}
 
-	@Column(name = "topology", nullable = false)
+	@Column(name = "topology", columnDefinition = "Geometry",nullable = false)
 	@JsonSerialize(using = GeometrySerializer.class)
 	public Geometry getTopology() {
 		return topology;
-	}
+	}					
 
 	public void setTopology(Geometry topology) {
 		this.topology = topology;

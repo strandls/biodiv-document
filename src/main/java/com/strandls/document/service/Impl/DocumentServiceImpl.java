@@ -398,7 +398,7 @@ public class DocumentServiceImpl implements DocumentService {
 				for (DocumentCoverage docCoverage : docCoverages) {
 					WKTWriter writer = new WKTWriter();
 					String wktData = writer.write(docCoverage.getTopology());
-					docCoverageData.add(new DocumentCoverageData(docCoverage.getPlaceName(), wktData,
+					docCoverageData.add(new DocumentCoverageData(null,null,null,docCoverage.getPlaceName(), wktData,
 							docCoverage.getGeoEntityId()));
 				}
 				UFile ufile = null;
