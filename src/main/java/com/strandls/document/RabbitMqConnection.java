@@ -9,6 +9,9 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -20,7 +23,10 @@ import com.strandls.document.util.PropertyFileUtil;
  */
 public class RabbitMqConnection {
 
-	private final static String QUEUE_ELASTIC = "elastic";
+	private final Logger logger = LoggerFactory.getLogger(RabbitMqConnection.class);
+
+	
+	private final static String QUEUE_ELASTIC = "document";
 	private final static String ROUTING_ELASTIC = "esmodule";
 
 	public final static String EXCHANGE_BIODIV;
@@ -38,7 +44,7 @@ public class RabbitMqConnection {
 		try {
 			properties.load(in);
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 
 		String rabbitmqHost = properties.getProperty("rabbitmq_host");

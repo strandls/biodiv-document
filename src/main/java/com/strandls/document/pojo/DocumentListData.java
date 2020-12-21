@@ -12,7 +12,6 @@ import java.util.List;
 public class DocumentListData {
 	
 	private List<DocumentMappingList> documentList;
-//	private Long totalCount;
 	
 	/**
 	 * 
@@ -23,7 +22,6 @@ public class DocumentListData {
 	public DocumentListData(List<DocumentMappingList> documentList) {
 		super();
 		this.documentList = documentList;
-//		this.totalCount = totalCount;
 	}
 	
 	
@@ -35,14 +33,4 @@ public class DocumentListData {
 		this.documentList = documentList;
 	}
 	
-//	public Long getTotalCount() {
-//		return totalCount;
-//	}
-	
-//	public void setTotalCount(Long totalCount) {
-//		this.totalCount = totalCount;
-//	}
-	
-	
-
 }

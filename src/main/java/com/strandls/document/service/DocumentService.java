@@ -101,7 +101,7 @@ public interface DocumentService {
 
 	public Boolean documentDownloadLog(HttpServletRequest request, DownloadLogData downloadLogData);
 
-	void produceToRabbitMQ(String documentId, String updateType);
+	public void produceToRabbitMQ(String documentId, String updateType);
 
 	public DocumentListData getDocumentList(String index, String type, String geoAggregationField,
 			String geoShapeFilterField,String nestedField,MapSearchQuery querys);

@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-//import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +18,6 @@ import com.strandls.esmodule.pojo.MapExistQuery;
 import com.strandls.esmodule.pojo.MapOrBoolQuery;
 import com.strandls.esmodule.pojo.MapOrMatchPhraseQuery;
 import com.strandls.esmodule.pojo.MapOrRangeQuery;
-//import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.esmodule.pojo.MapSearchParams;
 import com.strandls.esmodule.pojo.MapSearchQuery;
 
@@ -31,10 +28,7 @@ import com.strandls.esmodule.pojo.MapSearchQuery;
  */
 
 public class ESUtility {
-	private final Logger logger = LoggerFactory.getLogger(ESUtility.class);
-
-//	@Inject
-//	private EsServicesApi esService;
+	private Logger logger = LoggerFactory.getLogger(ESUtility.class);
 
 	private List<Object> cSTSOT(String str) {
 		if (str == null || str == "" || str.isEmpty())
@@ -107,6 +101,14 @@ public class ESUtility {
 		return orRange;
 	}
 
+	// for comma separated string ids 
+	private void assignOrMatchPhraseArray(String ids, String key, List<MapOrMatchPhraseQuery> orMatchPhraseQueriesnew) {
+		String[] list = ids.split(",");
+		for (String o : list) {
+			orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.sGroup.getValue(), o));
+		}
+	}
+
 	public MapSearchQuery getMapSearchQuery(String sGroup, String habitatIds, String tags, String user, String flags,
 			String createdOnMaxDate, String createdOnMinDate, String featured, String userGroupList, String isFlagged,
 			String revisedOnMinDate, String revisedOnMaxDate, String state, MapSearchParams mapSearchParams) {
@@ -135,26 +137,16 @@ public class ESUtility {
 //			userGroupList
 			List<Object> ugList = cSTSOT(userGroupList);
 			if (!ugList.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(DocumentIndex.userGroupList.getValue(), ugList));
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.userGroupId.getValue(), ugList));
 			}
 
 //			speciesGroupList
-
 			if (sGroup.length() >= 1) {
-				String[] sgList = sGroup.split(",");
-				for (String o : sgList) {
-					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.sGroup.getValue(), o));
-				}
-
+				assignOrMatchPhraseArray(sGroup, DocumentIndex.sGroup.getValue(), orMatchPhraseQueriesnew);
 			}
 //			habitatId List
-
 			if (habitatIds.length() >= 1) {
-				String[] habitatList = habitatIds.split(",");
-				for (String o : habitatList) {
-					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.habitatIds.getValue(), o));
-				}
-
+				assignOrMatchPhraseArray(habitatIds, DocumentIndex.habitatIds.getValue(), orMatchPhraseQueriesnew);
 			}
 //			tags
 			List<Object> tagList = cSTSOT(tags);
@@ -262,7 +254,7 @@ public class ESUtility {
 					String result = o.toString();
 					lowerCaseList.add(result);
 				}
-				
+
 				boolAndLists.add(assignBoolAndQuery(DocumentIndex.state.getValue(), lowerCaseList));
 			}
 			/**

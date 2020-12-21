@@ -490,7 +490,7 @@ public class DocumentServiceImpl implements DocumentService {
 			}
 
 		} catch (ApiException e) {
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 		return false;
 	}
@@ -1215,7 +1215,7 @@ public class DocumentServiceImpl implements DocumentService {
 		DocumentListData listData = null;
 
 		try {
-			MapResponse result = esService.search(index, type, geoAggregationField, null, false, null, geoShapeFilterField, nestedField, querys);
+			MapResponse result = esService.search(index, type, geoAggregationField, null, false, null, geoShapeFilterField, querys);
 			List<MapDocument> documents = result.getDocuments();
 			List<DocumentMappingList> DocumentList = new ArrayList<DocumentMappingList>();
 			for (MapDocument document : documents) {

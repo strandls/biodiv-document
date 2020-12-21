@@ -1,13 +1,9 @@
 package com.strandls.document.pojo;
 
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.strandls.resource.pojo.UFile;
-import com.strandls.user.pojo.UserIbp;
-//import com.strandls.user.pojo.UserIbp;
 import com.strandls.userGroup.pojo.Featured;
-import com.strandls.userGroup.pojo.UserGroupIbp;
 import com.strandls.utility.pojo.FlagShow;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

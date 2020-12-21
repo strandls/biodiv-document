@@ -9,7 +9,7 @@ public enum DocumentIndex {
 	featured("featured.id"),
 	flagCount("document.flagCount"),
 	flag("flag.id"),
-	userGroupList("userGroupIbp.id"),
+	userGroupId("userGroupIbp.id"),
 	createdOn("document.createdOn"),
 	lastRevised("document.lastRevised"),
 	state("documentCoverages.placename.keyword"),
