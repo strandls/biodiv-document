@@ -6,20 +6,20 @@ import com.strandls.resource.pojo.UFile;
 import com.strandls.userGroup.pojo.Featured;
 import com.strandls.userGroup.pojo.UserGroupIbp;
 import com.strandls.userGroup.pojo.UserIbp;
-import com.strandls.utility.pojo.FlagShow;
+import com.strandls.utility.pojo.Flag;
 import com.strandls.utility.pojo.Tags;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DocumentMappingList {
 
 	private Document document;
-	private List<DocumentCoverageData> documentCoverages;
+	private List<DocumentCoverage> documentCoverages; 
 	private List<UserGroupIbp> userGroupIbp;
 	private List<Featured> featured;
 	private UFile uFile;
 	private List<Long> habitatIds;
 	private List<Long> speciesGroupIds;
-	private List<FlagShow> flag;
+	private List<Flag> flag;
 	private UserIbp userIbp;
 	private List<Tags> tags;
 
@@ -42,9 +42,9 @@ public class DocumentMappingList {
 	 * @param flag
 	 * @param tags
 	 */
-	public DocumentMappingList(Document document, List<DocumentCoverageData> documentCoverages, List<UserGroupIbp> userGroupIbp,
+	public DocumentMappingList(Document document, List<DocumentCoverage> documentCoverages, List<UserGroupIbp> userGroupIbp,
 			List<Featured> featured, UserIbp userIbp, UFile uFile, List<Long> habitatIds, List<Long> speciesGroupIds,
-			List<FlagShow> flag, List<Tags> tags) {
+			List<Flag> flag, List<Tags> tags) {
 		super();
 		this.document = document;
 
@@ -67,11 +67,11 @@ public class DocumentMappingList {
 		this.document = document;
 	}
 
-	public List<DocumentCoverageData> getDocumentCoverages() {
+	public List<DocumentCoverage> getDocumentCoverages() {
 		return documentCoverages;
 	}
 
-	public void setDocumentCoverages(List<DocumentCoverageData> documentCoverages) {
+	public void setDocumentCoverages(List<DocumentCoverage> documentCoverages) {
 		this.documentCoverages = documentCoverages;
 	}
 
@@ -115,11 +115,11 @@ public class DocumentMappingList {
 		this.speciesGroupIds = speciesGroupIds;
 	}
 
-	public List<FlagShow> getFlag() {
+	public List<Flag> getFlag() {
 		return flag;
 	}
 
-	public void setFlag(List<FlagShow> flag) {
+	public void setFlag(List<Flag> flag) {
 		this.flag = flag;
 	}
 
