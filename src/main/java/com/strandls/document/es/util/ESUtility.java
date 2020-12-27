@@ -105,7 +105,7 @@ public class ESUtility {
 	private void assignOrMatchPhraseArray(String ids, String key, List<MapOrMatchPhraseQuery> orMatchPhraseQueriesnew) {
 		String[] list = ids.split(",");
 		for (String o : list) {
-			orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.sGroup.getValue(), o));
+			orMatchPhraseQueriesnew.add(assignOrMatchPhrase(key, o));
 		}
 	}
 
@@ -146,7 +146,7 @@ public class ESUtility {
 			}
 //			habitatId List
 			if (habitatIds.length() >= 1) {
-				assignOrMatchPhraseArray(habitatIds, DocumentIndex.habitatIds.getValue(), orMatchPhraseQueriesnew);
+			assignOrMatchPhraseArray(habitatIds, DocumentIndex.habitatIds.getValue(), orMatchPhraseQueriesnew);
 			}
 //			tags
 			List<Object> tagList = cSTSOT(tags);

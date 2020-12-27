@@ -38,7 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.strandls.activity.controller.ActivitySerivceApi;
 import com.strandls.activity.pojo.Activity;
 import com.strandls.activity.pojo.CommentLoggingData;
@@ -1219,10 +1221,12 @@ public class DocumentServiceImpl implements DocumentService {
 			List<MapDocument> documents = result.getDocuments();
 			List<DocumentMappingList> DocumentList = new ArrayList<DocumentMappingList>();
 			for (MapDocument document : documents) {
+				JsonNode rootNode = objectMapper.readTree(document.getDocument().toString());
+				((ObjectNode) rootNode).replace("documentCoverages", null);
 				try {
 
 					DocumentList.add(
-							objectMapper.readValue(String.valueOf(document.getDocument()), DocumentMappingList.class));
+							objectMapper.readValue(String.valueOf(rootNode), DocumentMappingList.class));
 				} catch (IOException e) {
 					logger.error(e.getMessage());
 				}
