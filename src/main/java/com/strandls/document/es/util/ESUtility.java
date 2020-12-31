@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,7 @@ import com.strandls.esmodule.pojo.MapAndBoolQuery;
 import com.strandls.esmodule.pojo.MapAndMatchPhraseQuery;
 import com.strandls.esmodule.pojo.MapAndRangeQuery;
 import com.strandls.esmodule.pojo.MapExistQuery;
+import com.strandls.esmodule.pojo.MapGeoPoint;
 import com.strandls.esmodule.pojo.MapOrBoolQuery;
 import com.strandls.esmodule.pojo.MapOrMatchPhraseQuery;
 import com.strandls.esmodule.pojo.MapOrRangeQuery;
@@ -101,12 +103,36 @@ public class ESUtility {
 		return orRange;
 	}
 
-	// for comma separated string ids 
+	// for comma separated string ids
 	private void assignOrMatchPhraseArray(String ids, String key, List<MapOrMatchPhraseQuery> orMatchPhraseQueriesnew) {
 		String[] list = ids.split(",");
 		for (String o : list) {
 			orMatchPhraseQueriesnew.add(assignOrMatchPhrase(key, o));
 		}
+	}
+
+	public List<MapGeoPoint> polygonGenerator(String locationArray) {
+		List<MapGeoPoint> polygon = new ArrayList<MapGeoPoint>();
+		double[] point = Stream.of(locationArray.split(",")).mapToDouble(Double::parseDouble).toArray();
+		for (int i = 0; i < point.length; i = i + 2) {
+			String singlePoint = point[i + 1] + "," + point[i];
+			int comma = singlePoint.indexOf(',');
+			if (comma != -1) {
+				MapGeoPoint geoPoint = new MapGeoPoint();
+				geoPoint.setLat(Double.parseDouble(singlePoint.substring(0, comma).trim()));
+				geoPoint.setLon(Double.parseDouble(singlePoint.substring(comma + 1).trim()));
+				polygon.add(geoPoint);
+			}
+		}
+		return polygon;
+	}
+
+	public List<List<MapGeoPoint>> multiPolygonGenerator(String[] locationArray) {
+		List<List<MapGeoPoint>> mutlipolygon = new ArrayList<>();
+		for (int j = 0; j < locationArray.length; j++) {
+			mutlipolygon.add(polygonGenerator(locationArray[j]));
+		}
+		return mutlipolygon;
 	}
 
 	public MapSearchQuery getMapSearchQuery(String sGroup, String habitatIds, String tags, String user, String flags,
@@ -146,7 +172,7 @@ public class ESUtility {
 			}
 //			habitatId List
 			if (habitatIds.length() >= 1) {
-			assignOrMatchPhraseArray(habitatIds, DocumentIndex.habitatIds.getValue(), orMatchPhraseQueriesnew);
+				assignOrMatchPhraseArray(habitatIds, DocumentIndex.habitatIds.getValue(), orMatchPhraseQueriesnew);
 			}
 //			tags
 			List<Object> tagList = cSTSOT(tags);

@@ -646,8 +646,7 @@ public class DocumentController {
 			@QueryParam("nestedField") String nestedField,
 			@DefaultValue("1") @QueryParam("geoAggegationPrecision") Integer geoAggegationPrecision,
 			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation,
-			@ApiParam(name = "location") DocumentListParams location
-			) {
+			@ApiParam(name = "location") DocumentListParams location) {
 		try {
 
 			if (max > 50) {
@@ -663,32 +662,25 @@ public class DocumentController {
 				bounds.setTop(top);
 			}
 
-			List<MapGeoPoint> polygon = new ArrayList<MapGeoPoint>();
-			String loc = location.getLocation();
-			if ( loc != null) {
-				double[] point = Stream.of(loc.split(",")).mapToDouble(Double::parseDouble).toArray();
-				for (int i = 0; i < point.length; i = i + 2) {
-					String singlePoint = point[i + 1] + "," + point[i];
-
-					int comma = singlePoint.indexOf(',');
-					if (comma != -1) {
-						MapGeoPoint geoPoint = new MapGeoPoint();
-						geoPoint.setLat(Double.parseDouble(singlePoint.substring(0, comma).trim()));
-						geoPoint.setLon(Double.parseDouble(singlePoint.substring(comma + 1).trim()));
-						polygon.add(geoPoint);
-					}
-				}
-			}
-
 			MapBoundParams mapBoundsParams = new MapBoundParams();
 			MapSearchParams mapSearchParams = new MapSearchParams();
 			mapSearchParams.setFrom(offset);
 			mapBoundsParams.setBounds(bounds);
-			mapBoundsParams.setPolygon(polygon);
 			mapSearchParams.setLimit(max);
 			mapSearchParams.setSortOn(sortOn);
 			mapSearchParams.setSortType(SortTypeEnum.DESC);
 			mapSearchParams.setMapBoundParams(mapBoundsParams);
+
+			String loc = location.getLocation();
+			if (loc != null) {
+				String[] locationArray = loc.split("/");
+				if (locationArray.length >= 2) {
+					List<List<MapGeoPoint>> demo = esUtility.multiPolygonGenerator(locationArray);
+					mapBoundsParams.setMultipolygon(demo);
+				} else {
+					mapBoundsParams.setPolygon(esUtility.polygonGenerator(loc));
+				}
+			}
 
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags,
 					createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
