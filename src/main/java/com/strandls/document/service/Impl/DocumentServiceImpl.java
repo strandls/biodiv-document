@@ -1219,6 +1219,7 @@ public class DocumentServiceImpl implements DocumentService {
 		try {
 			MapResponse result = esService.search(index, type, geoAggregationField, null, false, null, geoShapeFilterField, querys);
 			List<MapDocument> documents = result.getDocuments();
+			Long totalCount = result.getTotalDocuments();
 			List<DocumentMappingList> DocumentList = new ArrayList<DocumentMappingList>();
 			for (MapDocument document : documents) {
 				JsonNode rootNode = objectMapper.readTree(document.getDocument().toString());
@@ -1232,7 +1233,7 @@ public class DocumentServiceImpl implements DocumentService {
 				}
 			}
 
-			listData = new DocumentListData(DocumentList);
+			listData = new DocumentListData(DocumentList,totalCount);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
