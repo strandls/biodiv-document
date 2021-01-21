@@ -14,7 +14,12 @@ public enum DocumentIndex {
 	lastRevised("document.lastRevised"),
 	state("documentCoverages.placename.keyword"),
 	tags("tags.name.keyword"),
-	habitatIds("habitatIds")
+	habitatIds("habitatIds"),
+	itemType("document.itemtype"),//all below match_phrase_prefix
+	yearOfPublication("document.year"),//
+	author("document.author"),//
+	publisher("document.publisher"),//
+	title("document.title"),//
 	;
 	
 	

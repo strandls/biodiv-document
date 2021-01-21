@@ -137,7 +137,8 @@ public class ESUtility {
 
 	public MapSearchQuery getMapSearchQuery(String sGroup, String habitatIds, String tags, String user, String flags,
 			String createdOnMaxDate, String createdOnMinDate, String featured, String userGroupList, String isFlagged,
-			String revisedOnMinDate, String revisedOnMaxDate, String state, MapSearchParams mapSearchParams) {
+			String revisedOnMinDate, String revisedOnMaxDate, String state, String itemType, String year, String author,
+			String publisher, String title, MapSearchParams mapSearchParams) {
 
 		List<MapAndBoolQuery> boolAndLists = new ArrayList<MapAndBoolQuery>();
 		List<MapOrBoolQuery> boolOrLists = new ArrayList<MapOrBoolQuery>();
@@ -283,6 +284,48 @@ public class ESUtility {
 
 				boolAndLists.add(assignBoolAndQuery(DocumentIndex.state.getValue(), lowerCaseList));
 			}
+
+			// title
+			List<Object> titleList = cSTSOT(title);
+			if (!titleList.isEmpty()) {
+				for (Object o : titleList) {
+					String result = o.toString().toLowerCase();
+					andMatchPhraseQueries.add(assignAndMatchPhrase(DocumentIndex.title.getValue(), result));
+				}
+			}
+
+			List<Object> yearList = cSTSOT(year);
+			if (!yearList.isEmpty()) {
+				for (Object o : yearList) {
+					String result = o.toString().toLowerCase();
+					andMatchPhraseQueries.add(assignAndMatchPhrase(DocumentIndex.yearOfPublication.getValue(), result));
+				}
+			}
+
+			List<Object> publisherList = cSTSOT(publisher);
+			if (!titleList.isEmpty()) {
+				for (Object o : publisherList) {
+					String result = o.toString().toLowerCase();
+					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.publisher.getValue(), result));
+				}
+			}
+
+			List<Object> authorList = cSTSOT(author);
+			if (!authorList.isEmpty()) {
+				for (Object o : authorList) {
+					String result = o.toString().toLowerCase();
+					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.author.getValue(), result));
+				}
+			}
+
+			List<Object> itemTypeList = cSTSOT(itemType);
+			if (!itemTypeList.isEmpty()) {
+				for (Object o : itemTypeList) {
+					String result = o.toString().toLowerCase();
+					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.itemType.getValue(), result));
+				}
+			}
+
 			/**
 			 * combine all the queries
 			 * 

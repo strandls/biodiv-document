@@ -23,7 +23,9 @@ import com.strandls.document.pojo.DocumentListData;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
+import com.strandls.esmodule.pojo.MapSearchParams;
 import com.strandls.esmodule.pojo.MapSearchQuery;
+import com.strandls.document.pojo.MapAggregationResponse;
 import com.strandls.taxonomy.pojo.SpeciesGroup;
 import com.strandls.user.pojo.Follow;
 import com.strandls.userGroup.pojo.Featured;
@@ -102,8 +104,14 @@ public interface DocumentService {
 	public Boolean documentDownloadLog(HttpServletRequest request, DownloadLogData downloadLogData);
 
 	public void produceToRabbitMQ(String documentId, String updateType);
-
+	
+	
 	public DocumentListData getDocumentList(String index, String type, String geoAggregationField,
-			String geoShapeFilterField,String nestedField,MapSearchQuery querys);
+			String geoShapeFilterField,String nestedField,MapAggregationResponse aggregationResult,MapSearchQuery querys);
+
+	public MapAggregationResponse mapAggregate(String index, String type, String sGroup, String habitatIds, String tags,
+			String user, String flags, String createdOnMaxDate, String createdOnMinDate, String featured,
+			String userGroupList, String isFlagged, String revisedOnMaxDate, String revisedOnMinDate, String state,
+			String itemType, String year, String author, String publisher, String title,MapSearchParams mapSearchParams);
 
 }

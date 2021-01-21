@@ -51,6 +51,7 @@ import com.strandls.esmodule.pojo.MapGeoPoint;
 import com.strandls.esmodule.pojo.MapSearchParams;
 import com.strandls.esmodule.pojo.MapSearchQuery;
 import com.strandls.esmodule.pojo.MapSearchParams.SortTypeEnum;
+import com.strandls.document.pojo.MapAggregationResponse;
 import com.strandls.taxonomy.pojo.SpeciesGroup;
 import com.strandls.user.pojo.Follow;
 import com.strandls.userGroup.pojo.Featured;
@@ -644,6 +645,11 @@ public class DocumentController {
 			@QueryParam("geoAggregationField") String geoAggregationField,
 			@QueryParam("geoShapeFilterField") String geoShapeFilterField,
 			@QueryParam("nestedField") String nestedField,
+
+			@QueryParam("itemType") String itemType, @QueryParam("year") String year,
+			@QueryParam("author") String author, @QueryParam("publisher") String publisher,
+			@QueryParam("title") String title,
+
 			@DefaultValue("1") @QueryParam("geoAggegationPrecision") Integer geoAggegationPrecision,
 			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation,
 			@ApiParam(name = "location") DocumentListParams location) {
@@ -682,11 +688,20 @@ public class DocumentController {
 				}
 			}
 
+			MapAggregationResponse aggregationResult = null;
+
+			if (offset == 0) {
+				aggregationResult = docService.mapAggregate(index, type, sGroup, habitatIds, tags, user, flags, createdOnMaxDate,
+						createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate, revisedOnMinDate, state,
+						itemType, year, author, publisher, title,mapSearchParams);
+			}
+
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags,
 					createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
-					revisedOnMinDate, state, mapSearchParams);
+					revisedOnMinDate, state, itemType, year, author, publisher, title, mapSearchParams);
+			
 			DocumentListData result = docService.getDocumentList(index, type, geoAggregationField, geoShapeFilterField,
-					nestedField, mapSearchQuery);
+					nestedField,aggregationResult,mapSearchQuery);
 
 			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {

@@ -2,7 +2,6 @@ package com.strandls.document.pojo;
 
 import java.util.List;
 
-
 /**
  * 
  * @author vishnu
@@ -12,6 +11,7 @@ import java.util.List;
 public class DocumentListData {
 	
 	private List<DocumentMappingList> documentList;
+	private MapAggregationResponse aggregationData;
 	private long totalCount;
 	
 	/**
@@ -20,9 +20,10 @@ public class DocumentListData {
 	 * @param totalCount
 	 */
 	
-	public DocumentListData(List<DocumentMappingList> documentList,long totalCount) {
+	public DocumentListData(List<DocumentMappingList> documentList,MapAggregationResponse aggregationData,long totalCount) {
 		super();
 		this.documentList = documentList;
+		this.aggregationData = aggregationData;
 		this.setTotalCount(totalCount);
 	}
 	
@@ -43,6 +44,16 @@ public class DocumentListData {
 
 	public void setTotalCount(long totalCount) {
 		this.totalCount = totalCount;
+	}
+
+
+	public MapAggregationResponse getAggregationData() {
+		return aggregationData;
+	}
+
+
+	public void setAggregationData(MapAggregationResponse aggregationData) {
+		this.aggregationData = aggregationData;
 	}
 	
 }
