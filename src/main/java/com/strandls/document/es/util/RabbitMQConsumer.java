@@ -16,7 +16,7 @@ import com.rabbitmq.client.DeliverCallback;
  */
 public class RabbitMQConsumer {
 
-	private final static String QUEUE_ELASTIC = "elastic";
+	private final static String QUEUE_ELASTIC = "document";
 
 	@Inject
 	private ESUpdate esUpdate;
@@ -30,7 +30,7 @@ public class RabbitMQConsumer {
 			BasicProperties properties = delivery.getProperties();
 			String documentId = properties.getType();
 			System.out.println("----[RABBIT MQ CONSUMER]---");
-			System.out.println("consuming observation Id :" + message);
+			System.out.println("consuming document Id :" + message);
 			System.out.println("Updating :" + documentId);
 
 			ESUpdateThread updateThread = new ESUpdateThread(esUpdate, message,documentId);
