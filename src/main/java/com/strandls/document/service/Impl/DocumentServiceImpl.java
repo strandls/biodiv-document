@@ -93,7 +93,6 @@ import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.geoentities.pojo.GeoentitiesWKTData;
 import com.strandls.landscape.controller.LandscapeApi;
 import com.strandls.landscape.pojo.Landscape;
-import com.strandls.document.service.Impl.LatchThreadWorker;
 import com.strandls.document.es.util.DocumentIndex;
 import com.strandls.document.es.util.ESUtility;
 import com.strandls.resource.controllers.ResourceServicesApi;
