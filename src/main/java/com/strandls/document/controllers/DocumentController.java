@@ -679,10 +679,10 @@ public class DocumentController {
 
 			String loc = location.getLocation();
 			if (loc != null) {
-				String[] locationArray = loc.split("/");
-				if (locationArray.length >= 2) {
-					List<List<MapGeoPoint>> demo = esUtility.multiPolygonGenerator(locationArray);
-					mapBoundsParams.setMultipolygon(demo);
+				if (loc.contains("/")) {
+					String[] locationArray = loc.split("/");
+					List<List<MapGeoPoint>> multiPolygonPoint = esUtility.multiPolygonGenerator(locationArray);
+					mapBoundsParams.setMultipolygon(multiPolygonPoint);
 				} else {
 					mapBoundsParams.setPolygon(esUtility.polygonGenerator(loc));
 				}
@@ -691,17 +691,17 @@ public class DocumentController {
 			MapAggregationResponse aggregationResult = null;
 
 			if (offset == 0) {
-				aggregationResult = docService.mapAggregate(index, type, sGroup, habitatIds, tags, user, flags, createdOnMaxDate,
-						createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate, revisedOnMinDate, state,
-						itemType, year, author, publisher, title,mapSearchParams);
+				aggregationResult = docService.mapAggregate(index, type, sGroup, habitatIds, tags, user, flags,
+						createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
+						revisedOnMinDate, state, itemType, year, author, publisher, title, mapSearchParams);
 			}
 
 			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags,
 					createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
 					revisedOnMinDate, state, itemType, year, author, publisher, title, mapSearchParams);
-			
+
 			DocumentListData result = docService.getDocumentList(index, type, geoAggregationField, geoShapeFilterField,
-					nestedField,aggregationResult,mapSearchQuery);
+					nestedField, aggregationResult, mapSearchQuery);
 
 			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {
