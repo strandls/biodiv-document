@@ -13,7 +13,7 @@ public enum DocumentIndex {
 	createdOn("document.createdOn"),
 	lastRevised("document.lastRevised"),
 	state("documentCoverages.placename.keyword"),
-	tags("tags.name.keyword"),
+	tags("tags.name.raw"),
 	habitatIds("habitatIds"),
 	itemType("document.itemtype"),//all below match_phrase_prefix
 	yearOfPublication("document.year"),//

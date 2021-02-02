@@ -140,6 +140,7 @@ public class ESUtility {
 			String revisedOnMinDate, String revisedOnMaxDate, String state, String itemType, String year, String author,
 			String publisher, String title, MapSearchParams mapSearchParams) {
 
+		MapSearchQuery mapSearchQuery = new MapSearchQuery();
 		List<MapAndBoolQuery> boolAndLists = new ArrayList<MapAndBoolQuery>();
 		List<MapOrBoolQuery> boolOrLists = new ArrayList<MapOrBoolQuery>();
 		List<MapOrRangeQuery> rangeOrLists = new ArrayList<MapOrRangeQuery>();
@@ -303,7 +304,7 @@ public class ESUtility {
 			}
 
 			List<Object> publisherList = cSTSOT(publisher);
-			if (!titleList.isEmpty()) {
+			if (!publisherList.isEmpty()) {
 				for (Object o : publisherList) {
 					String result = o.toString().toLowerCase();
 					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.publisher.getValue(), result));
@@ -330,8 +331,6 @@ public class ESUtility {
 			 * combine all the queries
 			 * 
 			 */
-			MapSearchQuery mapSearchQuery = new MapSearchQuery();
-
 			mapSearchQuery.setAndBoolQueries(boolAndLists);
 			mapSearchQuery.setOrBoolQueries(boolOrLists);
 			mapSearchQuery.setAndRangeQueries(rangeAndLists);
@@ -339,14 +338,12 @@ public class ESUtility {
 			mapSearchQuery.setAndExistQueries(andMapExistQueries);
 			mapSearchQuery.setAndMatchPhraseQueries(andMatchPhraseQueries);
 			mapSearchQuery.setOrMatchPhraseQueries(orMatchPhraseQueriesnew);
-			mapSearchQuery.setSearchParams(mapSearchParams);
-
-			return mapSearchQuery;
 
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
+		mapSearchQuery.setSearchParams(mapSearchParams);
+		return mapSearchQuery;
 
-		return null;
 	}
 }

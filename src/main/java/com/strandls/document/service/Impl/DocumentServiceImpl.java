@@ -1282,7 +1282,7 @@ public class DocumentServiceImpl implements DocumentService {
 
 //      number refers to total field to aggregate
 		int totalLatch = 4;
-		
+
 //		latch count down
 		CountDownLatch latch = new CountDownLatch(totalLatch);
 
@@ -1320,28 +1320,25 @@ public class DocumentServiceImpl implements DocumentService {
 					createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate, revisedOnMinDate, state,
 					omiter, year, author, publisher, title, mapSearchParams);
 
-			getAggregateLatch(index, type,"document.itemtype.keyword", null, mapSearchQueryFilter,
-					mapAggResponse, latch, null);
+			getAggregateLatch(index, type, "document.itemtype.raw", null, mapSearchQueryFilter, mapAggResponse, latch,
+					null);
 
 		} else {
-			getAggregateLatch(index, type, "document.itemtype.keyword", null, mapSearchQuery, mapAggResponse,
-					latch, null);
+			getAggregateLatch(index, type, "document.itemtype.raw", null, mapSearchQuery, mapAggResponse, latch, null);
 		}
-		
+
 		if (year != null && !year.isEmpty()) {
 
 			mapSearchQueryFilter = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags, createdOnMaxDate,
 					createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate, revisedOnMinDate, state,
 					itemType, omiter, author, publisher, title, mapSearchParams);
 
-			getAggregateLatch(index, type,"document.year.keyword", null, mapSearchQueryFilter,
-					mapAggResponse, latch, null);
+			getAggregateLatch(index, type, "document.year.keyword", null, mapSearchQueryFilter, mapAggResponse, latch,
+					null);
 
 		} else {
-			getAggregateLatch(index, type, "document.year.keyword", null, mapSearchQuery, mapAggResponse,
-					latch, null);
+			getAggregateLatch(index, type, "document.year.keyword", null, mapSearchQuery, mapAggResponse, latch, null);
 		}
-		
 
 		try {
 			latch.await();
@@ -1354,9 +1351,10 @@ public class DocumentServiceImpl implements DocumentService {
 
 		aggregationResponse.setGroupState(mapAggResponse.get(DocumentIndex.state.getValue()).getGroupAggregation());
 
-		aggregationResponse.setGroupTypeOfDocument(mapAggResponse.get("document.itemtype.keyword").getGroupAggregation());
+		aggregationResponse.setGroupTypeOfDocument(mapAggResponse.get("document.itemtype.raw").getGroupAggregation());
 
-		aggregationResponse.setGroupYearofPublication(mapAggResponse.get("document.year.keyword").getGroupAggregation());
+		aggregationResponse
+				.setGroupYearofPublication(mapAggResponse.get("document.year.keyword").getGroupAggregation());
 
 		return aggregationResponse;
 	}
