@@ -4,10 +4,8 @@
 package com.strandls.document.controllers;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -45,6 +43,7 @@ import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
+import com.strandls.document.service.Impl.DocumentListServiceImpl;
 import com.strandls.esmodule.pojo.MapBoundParams;
 import com.strandls.esmodule.pojo.MapBounds;
 import com.strandls.esmodule.pojo.MapGeoPoint;
@@ -82,6 +81,10 @@ public class DocumentController {
 	@Inject
 	private DocumentService docService;
 
+	
+	@Inject 
+	private DocumentListServiceImpl docListService;
+	
 	@Inject
 	private ESUtility esUtility;
 
@@ -691,7 +694,7 @@ public class DocumentController {
 			MapAggregationResponse aggregationResult = null;
 
 			if (offset == 0) {
-				aggregationResult = docService.mapAggregate(index, type, sGroup, habitatIds, tags, user, flags,
+				aggregationResult = docListService.mapAggregate(index, type, sGroup, habitatIds, tags, user, flags,
 						createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
 						revisedOnMinDate, state, itemType, year, author, publisher, title, mapSearchParams);
 			}
@@ -700,7 +703,7 @@ public class DocumentController {
 					createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
 					revisedOnMinDate, state, itemType, year, author, publisher, title, mapSearchParams);
 
-			DocumentListData result = docService.getDocumentList(index, type, geoAggregationField, geoShapeFilterField,
+			DocumentListData result = docListService.getDocumentList(index, type, geoAggregationField, geoShapeFilterField,
 					nestedField, aggregationResult, mapSearchQuery);
 
 			return Response.status(Status.OK).entity(result).build();

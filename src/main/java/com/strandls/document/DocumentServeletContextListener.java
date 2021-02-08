@@ -39,19 +39,16 @@ import com.strandls.activity.controller.ActivitySerivceApi;
 import com.strandls.document.controllers.DocumentControllerModule;
 import com.strandls.document.dao.DocumentDaoModule;
 import com.strandls.document.es.util.ESUtilModule;
-import com.strandls.document.es.util.ESUtility;
 import com.strandls.document.service.Impl.DocumentServiceModule;
 import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.file.api.UploadApi;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.landscape.controller.LandscapeApi;
 import com.strandls.document.es.util.RabbitMQConsumer;
-import com.strandls.document.RabbitMqConnection;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.taxonomy.controllers.SpeciesServicesApi;
 import com.strandls.user.controller.UserServiceApi;
 import com.strandls.userGroup.controller.UserGroupSerivceApi;
-import com.strandls.utility.controller.UtilityServiceApi;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
@@ -84,7 +81,6 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 				configuration = configuration.configure();
 				SessionFactory sessionFactory = configuration.buildSessionFactory();
 
-				
 //				Rabbit MQ initialization
 				RabbitMqConnection rabbitConnetion = new RabbitMqConnection();
 				Channel channel = null;
@@ -95,7 +91,7 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 				}
 
 				bind(Channel.class).toInstance(channel);
-				
+
 				GeometryFactory geofactory = new GeometryFactory(new PrecisionModel(), 4326);
 				bind(GeometryFactory.class).toInstance(geofactory);
 
@@ -123,16 +119,15 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 
 				serve("/api/*").with(ServletContainer.class, props);
 			}
-		}, new DocumentControllerModule(), new DocumentDaoModule(), new DocumentServiceModule(),new ESUtilModule());
+		}, new DocumentControllerModule(), new DocumentDaoModule(), new DocumentServiceModule(), new ESUtilModule());
 
-		
 		try {
-			
+
 			injector.getInstance(RabbitMQConsumer.class).elasticUpdate();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
-		
+
 		return injector;
 
 	}
@@ -186,13 +181,12 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 
 		SessionFactory sessionFactory = injector.getInstance(SessionFactory.class);
 		sessionFactory.close();
-		
+
 		Channel channel = injector.getInstance(Channel.class);
 		try {
 			channel.getConnection().close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error(e.getMessage());
 		}
 
 		super.contextDestroyed(servletContextEvent);

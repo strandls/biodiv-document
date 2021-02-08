@@ -16,6 +16,7 @@ public class DocumentServiceModule extends AbstractModule {
 	@Override
 	protected void configure() {
 		bind(DocumentService.class).to(DocumentServiceImpl.class).in(Scopes.SINGLETON);
+		bind(DocumentListServiceImpl.class).in(Scopes.SINGLETON);
 		bind(MailMetaDataConverter.class).in(Scopes.SINGLETON);
 		bind(DocumentHelper.class).in(Scopes.SINGLETON);
 		bind(LogActivities.class).in(Scopes.SINGLETON);

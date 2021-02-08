@@ -421,8 +421,8 @@
 							<locations>
 								${location}
 							</locations>
-							<schemes>httpx</schemes>
-							<host>localhostx</host>
+							<schemes>http</schemes>
+							<host>localhost:8080</host>
 							<basePath>${base-path}</basePath>
 							<info>
 								<title>Swagger file generation</title>

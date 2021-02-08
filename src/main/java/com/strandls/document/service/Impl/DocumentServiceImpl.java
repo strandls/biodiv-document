@@ -5,7 +5,6 @@ package com.strandls.document.service.Impl;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -39,9 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.strandls.activity.controller.ActivitySerivceApi;
 import com.strandls.activity.pojo.Activity;
 import com.strandls.activity.pojo.CommentLoggingData;
@@ -58,6 +54,7 @@ import com.strandls.document.dao.DocumentDao;
 import com.strandls.document.dao.DocumentHabitatDao;
 import com.strandls.document.dao.DocumentSpeciesGroupDao;
 import com.strandls.document.dao.DownloadLogDao;
+import com.strandls.document.es.util.DocumentIndex;
 import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexFieldType;
 import com.strandls.document.pojo.BibTexItemFieldMapping;
@@ -69,23 +66,15 @@ import com.strandls.document.pojo.DocumentCoverageData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentHabitat;
-import com.strandls.document.pojo.DocumentListData;
-import com.strandls.document.pojo.DocumentMappingList;
 import com.strandls.document.pojo.DocumentSpeciesGroup;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLog;
 import com.strandls.document.pojo.DownloadLogData;
-import com.strandls.document.pojo.MapAggregationResponse;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
 import com.strandls.esmodule.ApiException;
 import com.strandls.esmodule.controllers.EsServicesApi;
-import com.strandls.esmodule.pojo.AggregationResponse;
-import com.strandls.esmodule.pojo.MapDocument;
 import com.strandls.esmodule.pojo.MapQueryResponse;
-import com.strandls.esmodule.pojo.MapResponse;
-import com.strandls.esmodule.pojo.MapSearchParams;
-import com.strandls.esmodule.pojo.MapSearchQuery;
 import com.strandls.esmodule.pojo.MapQueryResponse.ResultEnum;
 import com.strandls.file.api.UploadApi;
 import com.strandls.file.model.FilesDTO;
@@ -93,8 +82,6 @@ import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.geoentities.pojo.GeoentitiesWKTData;
 import com.strandls.landscape.controller.LandscapeApi;
 import com.strandls.landscape.pojo.Landscape;
-import com.strandls.document.es.util.DocumentIndex;
-import com.strandls.document.es.util.ESUtility;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
@@ -113,7 +100,6 @@ import com.strandls.userGroup.pojo.UserGroupMappingCreateData;
 import com.strandls.userGroup.pojo.UserGroupMemberRole;
 import com.strandls.userGroup.pojo.UserGroupPermissions;
 import com.strandls.utility.controller.UtilityServiceApi;
-import com.strandls.document.es.util.RabbitMQProducer;
 import com.strandls.utility.pojo.FlagCreateData;
 import com.strandls.utility.pojo.FlagIbp;
 import com.strandls.utility.pojo.FlagShow;
@@ -203,6 +189,10 @@ public class DocumentServiceImpl implements DocumentService {
 	private DownloadLogDao downloadLogDao;
 
 	@Inject
+
+	private DocumentListServiceImpl docListImlp;
+
+	@Inject
 	private LogActivities logActivity;
 
 	@Inject
@@ -210,12 +200,6 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Inject
 	private EsServicesApi esService;
-
-	@Inject
-	private RabbitMQProducer producer;
-
-	@Inject
-	private ESUtility esUtility;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -379,7 +363,7 @@ public class DocumentServiceImpl implements DocumentService {
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			objectMapper.setDateFormat(df);
 			String docString = objectMapper.writeValueAsString(res);
-			produceToRabbitMQ(docString, document.getId().toString());
+			docListImlp.produceToRabbitMQ(docString, document.getId().toString());
 			return res;
 		} catch (
 
@@ -485,7 +469,7 @@ public class DocumentServiceImpl implements DocumentService {
 
 			MapQueryResponse esResponse;
 
-			esResponse = esService.delete(DocumentIndex.index.getValue(), DocumentIndex.type.getValue(),
+			esResponse = esService.delete(DocumentIndex.INDEX.getValue(), DocumentIndex.TYPE.getValue(),
 					documentId.toString());
 
 			ResultEnum result = esResponse.getResult();
@@ -1207,156 +1191,4 @@ public class DocumentServiceImpl implements DocumentService {
 			return true;
 		return false;
 	}
-
-	@Override
-	public void produceToRabbitMQ(String documentData, String documentId) {
-		try {
-			producer.setMessage("esmodule", documentData, documentId);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
-
-	}
-
-	@Override
-	public DocumentListData getDocumentList(String index, String type, String geoAggregationField,
-			String geoShapeFilterField, String nestedField, MapAggregationResponse aggregationResult,
-			MapSearchQuery querys) {
-
-		DocumentListData listData = null;
-
-		try {
-			MapResponse result = esService.search(index, type, geoAggregationField, null, false, null,
-					geoShapeFilterField, querys);
-			List<MapDocument> documents = result.getDocuments();
-			Long totalCount = result.getTotalDocuments();
-			List<DocumentMappingList> DocumentList = new ArrayList<DocumentMappingList>();
-			for (MapDocument document : documents) {
-				JsonNode rootNode = objectMapper.readTree(document.getDocument().toString());
-				((ObjectNode) rootNode).replace("documentCoverages", null);
-				try {
-
-					DocumentList.add(objectMapper.readValue(String.valueOf(rootNode), DocumentMappingList.class));
-				} catch (IOException e) {
-					logger.error(e.getMessage());
-				}
-			}
-
-			listData = new DocumentListData(DocumentList, aggregationResult, totalCount);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
-
-		return listData;
-	}
-
-	private void getAggregateLatch(String index, String type, String filter, String geoAggregationField,
-			MapSearchQuery searchQuery, Map<String, AggregationResponse> mapResponse, CountDownLatch latch,
-			String namedAgg) {
-
-		LatchThreadWorker worker = new LatchThreadWorker(index, type, filter, geoAggregationField, searchQuery,
-				mapResponse, namedAgg, latch, esService);
-		worker.start();
-
-	}
-
-	@Override
-	public MapAggregationResponse mapAggregate(String index, String type, String sGroup, String habitatIds, String tags,
-			String user, String flags, String createdOnMaxDate, String createdOnMinDate, String featured,
-			String userGroupList, String isFlagged, String revisedOnMaxDate, String revisedOnMinDate, String state,
-			String itemType, String year, String author, String publisher, String title,
-			MapSearchParams mapSearchParams) {
-
-		MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags,
-				createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
-				revisedOnMinDate, state, itemType, year, author, publisher, title, mapSearchParams);
-
-		MapSearchQuery mapSearchQueryFilter;
-
-		String omiter = null;
-		MapAggregationResponse aggregationResponse = new MapAggregationResponse();
-
-		Map<String, AggregationResponse> mapAggResponse = new HashMap<String, AggregationResponse>();
-
-//		filter panel data
-
-//      number refers to total field to aggregate
-		int totalLatch = 4;
-
-//		latch count down
-		CountDownLatch latch = new CountDownLatch(totalLatch);
-
-		if (sGroup != null && !sGroup.isEmpty()) {
-
-			mapSearchQueryFilter = esUtility.getMapSearchQuery(omiter, habitatIds, tags, user, flags, createdOnMaxDate,
-					createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate, revisedOnMinDate, state,
-					itemType, year, author, publisher, title, mapSearchParams);
-
-			getAggregateLatch(index, type, DocumentIndex.sGroup.getValue(), null, mapSearchQueryFilter, mapAggResponse,
-					latch, null);
-
-		} else {
-			getAggregateLatch(index, type, DocumentIndex.sGroup.getValue(), null, mapSearchQuery, mapAggResponse, latch,
-					null);
-		}
-
-		if (state != null && !state.isEmpty()) {
-
-			mapSearchQueryFilter = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags, createdOnMaxDate,
-					createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate, revisedOnMinDate, omiter,
-					itemType, year, author, publisher, title, mapSearchParams);
-
-			getAggregateLatch(index, type, DocumentIndex.state.getValue(), null, mapSearchQueryFilter, mapAggResponse,
-					latch, null);
-
-		} else {
-			getAggregateLatch(index, type, DocumentIndex.state.getValue(), null, mapSearchQuery, mapAggResponse, latch,
-					null);
-		}
-
-		if (itemType != null && !itemType.isEmpty()) {
-
-			mapSearchQueryFilter = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags, createdOnMaxDate,
-					createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate, revisedOnMinDate, state,
-					omiter, year, author, publisher, title, mapSearchParams);
-
-			getAggregateLatch(index, type, "document.itemtype.raw", null, mapSearchQueryFilter, mapAggResponse, latch,
-					null);
-
-		} else {
-			getAggregateLatch(index, type, "document.itemtype.raw", null, mapSearchQuery, mapAggResponse, latch, null);
-		}
-
-		if (year != null && !year.isEmpty()) {
-
-			mapSearchQueryFilter = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags, createdOnMaxDate,
-					createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate, revisedOnMinDate, state,
-					itemType, omiter, author, publisher, title, mapSearchParams);
-
-			getAggregateLatch(index, type, "document.year.keyword", null, mapSearchQueryFilter, mapAggResponse, latch,
-					null);
-
-		} else {
-			getAggregateLatch(index, type, "document.year.keyword", null, mapSearchQuery, mapAggResponse, latch, null);
-		}
-
-		try {
-			latch.await();
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
-
-		aggregationResponse
-				.setGroupSpeciesName(mapAggResponse.get(DocumentIndex.sGroup.getValue()).getGroupAggregation());
-
-		aggregationResponse.setGroupState(mapAggResponse.get(DocumentIndex.state.getValue()).getGroupAggregation());
-
-		aggregationResponse.setGroupTypeOfDocument(mapAggResponse.get("document.itemtype.raw").getGroupAggregation());
-
-		aggregationResponse
-				.setGroupYearofPublication(mapAggResponse.get("document.year.keyword").getGroupAggregation());
-
-		return aggregationResponse;
-	}
-
 }

@@ -23,7 +23,7 @@ public class ESUpdate {
 			System.out.println("Document getting UPDATED to elastic,ID:" + documentId);
 			MapDocument doc = new MapDocument();
 			doc.setDocument(documentData);
-			MapQueryResponse response = esService.create(DocumentIndex.index.getValue(), DocumentIndex.type.getValue(),
+			MapQueryResponse response = esService.create(DocumentIndex.INDEX.getValue(), DocumentIndex.TYPE.getValue(),
 					documentId, doc);
 			System.out.println();
 			System.out.println();

@@ -52,25 +52,7 @@ public class ESUtility {
 
 	}
 
-	@SuppressWarnings("unused")
-	private MapOrBoolQuery assOrBoolQuery(String key, List<Object> values) {
-		MapOrBoolQuery orBool = new MapOrBoolQuery();
-		orBool.setKey(key);
-		orBool.setValues(values);
-		return orBool;
-	}
-
-	@SuppressWarnings("unused")
-	private MapExistQuery assignExistsQuery(String key, Boolean values, String path) {
-		MapExistQuery existQuery = new MapExistQuery();
-		existQuery.setKey(key);
-		existQuery.setExists(values);
-		existQuery.setPath(path);
-		return existQuery;
-
-	}
-
-	@SuppressWarnings("unused")
+	
 	private MapAndMatchPhraseQuery assignAndMatchPhrase(String key, String value) {
 		MapAndMatchPhraseQuery andMatchPhrase = new MapAndMatchPhraseQuery();
 		andMatchPhrase.setKey(key);
@@ -92,15 +74,6 @@ public class ESUtility {
 		andRange.setEnd(end);
 		andRange.setPath(path);
 		return andRange;
-	}
-
-	@SuppressWarnings("unused")
-	private MapOrRangeQuery assignOrRange(String key, Object start, Object end) {
-		MapOrRangeQuery orRange = new MapOrRangeQuery();
-		orRange.setKey(key);
-		orRange.setStart(start);
-		orRange.setEnd(end);
-		return orRange;
 	}
 
 	// for comma separated string ids
@@ -159,44 +132,44 @@ public class ESUtility {
 					String result = o.toString().toLowerCase();
 					lowerCaseList.add(result);
 				}
-				boolAndLists.add(assignBoolAndQuery(DocumentIndex.tags.getValue(), lowerCaseList));
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.TAGS.getValue(), lowerCaseList));
 			}
 
 //			userGroupList
 			List<Object> ugList = cSTSOT(userGroupList);
 			if (!ugList.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(DocumentIndex.userGroupId.getValue(), ugList));
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.USERGROUPID.getValue(), ugList));
 			}
 
 //			speciesGroupList
 			if (sGroup.length() >= 1) {
-				assignOrMatchPhraseArray(sGroup, DocumentIndex.sGroup.getValue(), orMatchPhraseQueriesnew);
+				assignOrMatchPhraseArray(sGroup, DocumentIndex.SGROUP.getValue(), orMatchPhraseQueriesnew);
 			}
 //			habitatId List
 			if (habitatIds.length() >= 1) {
-				assignOrMatchPhraseArray(habitatIds, DocumentIndex.habitatIds.getValue(), orMatchPhraseQueriesnew);
+				assignOrMatchPhraseArray(habitatIds, DocumentIndex.HABITATIDS.getValue(), orMatchPhraseQueriesnew);
 			}
 //			tags
 			List<Object> tagList = cSTSOT(tags);
 			if (!tagList.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(DocumentIndex.tags.getValue(), tagList));
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.TAGS.getValue(), tagList));
 			}
 
 //			featured
 			List<Object> featuredList = cSTSOT(featured);
 			if (!featuredList.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(DocumentIndex.featured.getValue(), featuredList));
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.FEATURED.getValue(), featuredList));
 			}
 
 //			flags
 			List<Object> flagList = cSTSOT(flags);
 			if (!flagList.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(DocumentIndex.flag.getValue(), flagList));
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.FLAG.getValue(), flagList));
 			}
 //			user
 			List<Object> authorId = cSTSOT(user);
 			if (!authorId.isEmpty()) {
-				boolAndLists.add(assignBoolAndQuery(DocumentIndex.user.getValue(), authorId));
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.USER.getValue(), authorId));
 			}
 
 //			Data Quality:- Flagged
@@ -207,10 +180,10 @@ public class ESUtility {
 					String first = (String) flagged.toArray()[0];
 					if (first.equalsIgnoreCase("1")) {
 						rangeAndLists
-								.add(assignAndRange(DocumentIndex.flagCount.getValue(), first, Long.MAX_VALUE, null));
+								.add(assignAndRange(DocumentIndex.FLAGCOUNT.getValue(), first, Long.MAX_VALUE, null));
 					}
 					if (first.equalsIgnoreCase("0")) {
-						rangeAndLists.add(assignAndRange(DocumentIndex.flagCount.getValue(), first, first, null));
+						rangeAndLists.add(assignAndRange(DocumentIndex.FLAGCOUNT.getValue(), first, first, null));
 					}
 
 				}
@@ -233,15 +206,15 @@ public class ESUtility {
 			}
 			if (createdOnMinDateValue != null && createdOnMaxDateValue != null) {
 
-				rangeAndLists.add(assignAndRange(DocumentIndex.createdOn.getValue(), createdOnMinDateValue,
+				rangeAndLists.add(assignAndRange(DocumentIndex.CREATEDON.getValue(), createdOnMinDateValue,
 						createdOnMaxDateValue, null));
 			}
 			if (createdOnMinDateValue != null && createdOnMaxDateValue == null) {
-				rangeAndLists.add(assignAndRange(DocumentIndex.createdOn.getValue(), createdOnMinDateValue,
+				rangeAndLists.add(assignAndRange(DocumentIndex.CREATEDON.getValue(), createdOnMinDateValue,
 						out.format(date), null));
 			}
 			if (createdOnMinDateValue == null && createdOnMaxDateValue != null) {
-				rangeAndLists.add(assignAndRange(DocumentIndex.createdOn.getValue(), out.format(date),
+				rangeAndLists.add(assignAndRange(DocumentIndex.CREATEDON.getValue(), out.format(date),
 						createdOnMaxDateValue, null));
 			}
 
@@ -262,15 +235,15 @@ public class ESUtility {
 			}
 			if (revisedOnMinDateValue != null && revisedOnMaxDateValue != null) {
 
-				rangeAndLists.add(assignAndRange(DocumentIndex.lastRevised.getValue(), revisedOnMaxDateValue,
+				rangeAndLists.add(assignAndRange(DocumentIndex.LASTREVISED.getValue(), revisedOnMaxDateValue,
 						revisedOnMinDateValue, null));
 			}
 			if (revisedOnMinDateValue != null && revisedOnMaxDateValue == null) {
-				rangeAndLists.add(assignAndRange(DocumentIndex.lastRevised.getValue(), out.format(date),
+				rangeAndLists.add(assignAndRange(DocumentIndex.LASTREVISED.getValue(), out.format(date),
 						revisedOnMinDateValue, null));
 			}
 			if (revisedOnMinDateValue == null && revisedOnMaxDateValue != null) {
-				rangeAndLists.add(assignAndRange(DocumentIndex.lastRevised.getValue(), revisedOnMaxDateValue,
+				rangeAndLists.add(assignAndRange(DocumentIndex.LASTREVISED.getValue(), revisedOnMaxDateValue,
 						out.format(date), null));
 			}
 
@@ -283,7 +256,7 @@ public class ESUtility {
 					lowerCaseList.add(result);
 				}
 
-				boolAndLists.add(assignBoolAndQuery(DocumentIndex.state.getValue(), lowerCaseList));
+				boolAndLists.add(assignBoolAndQuery(DocumentIndex.STATE.getValue(), lowerCaseList));
 			}
 
 			// title
@@ -291,7 +264,7 @@ public class ESUtility {
 			if (!titleList.isEmpty()) {
 				for (Object o : titleList) {
 					String result = o.toString().toLowerCase();
-					andMatchPhraseQueries.add(assignAndMatchPhrase(DocumentIndex.title.getValue(), result));
+					andMatchPhraseQueries.add(assignAndMatchPhrase(DocumentIndex.TITLE.getValue(), result));
 				}
 			}
 
@@ -299,7 +272,7 @@ public class ESUtility {
 			if (!yearList.isEmpty()) {
 				for (Object o : yearList) {
 					String result = o.toString().toLowerCase();
-					andMatchPhraseQueries.add(assignAndMatchPhrase(DocumentIndex.yearOfPublication.getValue(), result));
+					andMatchPhraseQueries.add(assignAndMatchPhrase(DocumentIndex.YEAROFPUBLICATION.getValue(), result));
 				}
 			}
 
@@ -307,7 +280,7 @@ public class ESUtility {
 			if (!publisherList.isEmpty()) {
 				for (Object o : publisherList) {
 					String result = o.toString().toLowerCase();
-					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.publisher.getValue(), result));
+					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.PUBLISHER.getValue(), result));
 				}
 			}
 
@@ -315,7 +288,7 @@ public class ESUtility {
 			if (!authorList.isEmpty()) {
 				for (Object o : authorList) {
 					String result = o.toString().toLowerCase();
-					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.author.getValue(), result));
+					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.AUTHOR.getValue(), result));
 				}
 			}
 
@@ -323,7 +296,7 @@ public class ESUtility {
 			if (!itemTypeList.isEmpty()) {
 				for (Object o : itemTypeList) {
 					String result = o.toString().toLowerCase();
-					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.itemType.getValue(), result));
+					orMatchPhraseQueriesnew.add(assignOrMatchPhrase(DocumentIndex.ITEMTYPE.getValue(), result));
 				}
 			}
 

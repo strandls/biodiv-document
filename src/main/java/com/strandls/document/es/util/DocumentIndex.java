@@ -2,24 +2,24 @@ package com.strandls.document.es.util;
 
 public enum DocumentIndex {
 
-	index("document"),
-	type("document_records"), 
-	sGroup("speciesGroupIds"),
-	user("document.authorId"),
-	featured("featured.id"),
-	flagCount("document.flagCount"),
-	flag("flag.id"),
-	userGroupId("userGroupIbp.id"),
-	createdOn("document.createdOn"),
-	lastRevised("document.lastRevised"),
-	state("documentCoverages.placename.keyword"),
-	tags("tags.name.raw"),
-	habitatIds("habitatIds"),
-	itemType("document.itemtype"),//all below match_phrase_prefix
-	yearOfPublication("document.year"),//
-	author("document.author"),//
-	publisher("document.publisher"),//
-	title("document.title"),//
+	INDEX("document"),
+	TYPE("document_records"), 
+	SGROUP("speciesGroupIds"),
+	USER("document.authorId"),
+	FEATURED("featured.id"),
+	FLAGCOUNT("document.flagCount"),
+	FLAG("flag.id"),
+	USERGROUPID("userGroupIbp.id"),
+	CREATEDON("document.createdOn"),
+	LASTREVISED("document.lastRevised"),
+	STATE("documentCoverages.placename.keyword"),
+	TAGS("tags.name.raw"),
+	HABITATIDS("habitatIds"),
+	ITEMTYPE("document.itemtype"),//all below match_phrase_prefix
+	YEAROFPUBLICATION("document.year"),//
+	AUTHOR("document.author"),//
+	PUBLISHER("document.publisher"),//
+	TITLE("document.title"),//
 	;
 	
 	
