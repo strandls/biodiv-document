@@ -42,7 +42,7 @@ import com.strandls.file.api.UploadApi;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.landscape.controller.LandscapeApi;
 import com.strandls.resource.controllers.ResourceServicesApi;
-import com.strandls.taxonomy.controllers.TaxonomyServicesApi;
+import com.strandls.taxonomy.controllers.SpeciesServicesApi;
 import com.strandls.user.controller.UserServiceApi;
 import com.strandls.userGroup.controller.UserGroupSerivceApi;
 import com.strandls.utility.controller.UtilityServiceApi;
@@ -97,7 +97,7 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 				bind(UtilityServiceApi.class).in(Scopes.SINGLETON);
 				bind(GeoentitiesServicesApi.class).in(Scopes.SINGLETON);
 				bind(ActivitySerivceApi.class).in(Scopes.SINGLETON);
-				bind(TaxonomyServicesApi.class).in(Scopes.SINGLETON);
+				bind(SpeciesServicesApi.class).in(Scopes.SINGLETON);
 				bind(UploadApi.class).in(Scopes.SINGLETON);
 				bind(ActivitySerivceApi.class).in(Scopes.SINGLETON);
 				bind(LandscapeApi.class).in(Scopes.SINGLETON);
