@@ -367,6 +367,8 @@ public class DocumentServiceImpl implements DocumentService {
 			JSONArray roles = (JSONArray) profile.getAttribute("roles");
 
 			Document document = documentDao.findById(documentId);
+			BibFieldsData bibFieldData = docHelper.convertDocumentToBibField(document);
+
 			if (roles.contains("ROLE_ADMIN") || userId.equals(document.getAuthorId())) {
 				List<DocumentCoverage> docCoverages = docCoverageDao.findByDocumentId(documentId);
 				List<DocumentCoverageData> docCoverageData = new ArrayList<DocumentCoverageData>();
@@ -386,7 +388,8 @@ public class DocumentServiceImpl implements DocumentService {
 					uFileData.setSize(ufile.getSize());
 				}
 
-				DocumentEditData docEditData = new DocumentEditData(document, docCoverageData, uFileData);
+				DocumentEditData docEditData = new DocumentEditData(documentId, bibFieldData.getItemTypeId(), document,
+						bibFieldData, docCoverageData, uFileData);
 				return docEditData;
 			}
 
