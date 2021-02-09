@@ -55,6 +55,7 @@ import com.strandls.document.dao.DocumentHabitatDao;
 import com.strandls.document.dao.DocumentSpeciesGroupDao;
 import com.strandls.document.dao.DownloadLogDao;
 import com.strandls.document.es.util.DocumentIndex;
+import com.strandls.document.es.util.RabbitMQProducer;
 import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexFieldType;
 import com.strandls.document.pojo.BibTexItemFieldMapping;
@@ -189,8 +190,7 @@ public class DocumentServiceImpl implements DocumentService {
 	private DownloadLogDao downloadLogDao;
 
 	@Inject
-
-	private DocumentListServiceImpl docListImlp;
+	private RabbitMQProducer producer;
 
 	@Inject
 	private LogActivities logActivity;
@@ -363,7 +363,7 @@ public class DocumentServiceImpl implements DocumentService {
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			objectMapper.setDateFormat(df);
 			String docString = objectMapper.writeValueAsString(res);
-			docListImlp.produceToRabbitMQ(docString, document.getId().toString());
+			produceToRabbitMQ(docString, document.getId().toString());
 			return res;
 		} catch (
 
@@ -1190,5 +1190,15 @@ public class DocumentServiceImpl implements DocumentService {
 		if (downloadLog.getId() != null)
 			return true;
 		return false;
+	}
+
+	@Override
+	public void produceToRabbitMQ(String documentData, String documentId) {
+		try {
+			producer.setMessage("esmodule", documentData, documentId);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
 	}
 }

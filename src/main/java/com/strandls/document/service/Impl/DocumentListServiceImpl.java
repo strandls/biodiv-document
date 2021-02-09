@@ -17,7 +17,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.strandls.document.es.util.DocumentIndex;
 import com.strandls.document.es.util.ESUtility;
-import com.strandls.document.es.util.RabbitMQProducer;
 import com.strandls.document.pojo.DocumentListData;
 import com.strandls.document.pojo.DocumentMappingList;
 import com.strandls.document.pojo.MapAggregationResponse;
@@ -30,31 +29,17 @@ import com.strandls.esmodule.pojo.MapSearchParams;
 import com.strandls.esmodule.pojo.MapSearchQuery;
 
 public class DocumentListServiceImpl implements DocumentListService {
-	
+
 	private final Logger logger = LoggerFactory.getLogger(DocumentListServiceImpl.class);
-	
+
 	@Inject
 	private ObjectMapper objectMapper;
-
 
 	@Inject
 	private EsServicesApi esService;
 
 	@Inject
-	private RabbitMQProducer producer;
-
-	@Inject
 	private ESUtility esUtility;
-
-	@Override
-	public void produceToRabbitMQ(String documentData, String documentId) {
-		try {
-			producer.setMessage("esmodule", documentData, documentId);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
-
-	}
 
 	@Override
 	public DocumentListData getDocumentList(String index, String type, String geoAggregationField,

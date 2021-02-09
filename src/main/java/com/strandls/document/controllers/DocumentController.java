@@ -42,8 +42,8 @@ import com.strandls.document.pojo.DocumentListParams;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
+import com.strandls.document.service.DocumentListService;
 import com.strandls.document.service.DocumentService;
-import com.strandls.document.service.Impl.DocumentListServiceImpl;
 import com.strandls.esmodule.pojo.MapBoundParams;
 import com.strandls.esmodule.pojo.MapBounds;
 import com.strandls.esmodule.pojo.MapGeoPoint;
@@ -83,7 +83,7 @@ public class DocumentController {
 
 	
 	@Inject 
-	private DocumentListServiceImpl docListService;
+	private DocumentListService docListService;
 	
 	@Inject
 	private ESUtility esUtility;

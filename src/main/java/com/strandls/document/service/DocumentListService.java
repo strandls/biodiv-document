@@ -7,8 +7,6 @@ import com.strandls.esmodule.pojo.MapSearchQuery;
 
 public interface DocumentListService {
 
-	public void produceToRabbitMQ(String documentId, String updateType);
-
 	public DocumentListData getDocumentList(String index, String type, String geoAggregationField,
 			String geoShapeFilterField, String nestedField, MapAggregationResponse aggregationResult,
 			MapSearchQuery querys);
