@@ -34,18 +34,21 @@ import com.google.inject.Injector;
 import com.google.inject.Scopes;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
+import com.rabbitmq.client.Channel;
 import com.strandls.activity.controller.ActivitySerivceApi;
 import com.strandls.document.controllers.DocumentControllerModule;
 import com.strandls.document.dao.DocumentDaoModule;
+import com.strandls.document.es.util.ESUtilModule;
 import com.strandls.document.service.Impl.DocumentServiceModule;
+import com.strandls.esmodule.controllers.EsServicesApi;
 import com.strandls.file.api.UploadApi;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
 import com.strandls.landscape.controller.LandscapeApi;
+import com.strandls.document.es.util.RabbitMQConsumer;
 import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.taxonomy.controllers.SpeciesServicesApi;
 import com.strandls.user.controller.UserServiceApi;
 import com.strandls.userGroup.controller.UserGroupSerivceApi;
-import com.strandls.utility.controller.UtilityServiceApi;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.PrecisionModel;
 
@@ -78,6 +81,17 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 				configuration = configuration.configure();
 				SessionFactory sessionFactory = configuration.buildSessionFactory();
 
+//				Rabbit MQ initialization
+				RabbitMqConnection rabbitConnetion = new RabbitMqConnection();
+				Channel channel = null;
+				try {
+					channel = rabbitConnetion.setRabbitMQConnetion();
+				} catch (Exception e) {
+					logger.error(e.getMessage());
+				}
+
+				bind(Channel.class).toInstance(channel);
+
 				GeometryFactory geofactory = new GeometryFactory(new PrecisionModel(), 4326);
 				bind(GeometryFactory.class).toInstance(geofactory);
 
@@ -91,10 +105,10 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 
 				bind(SessionFactory.class).toInstance(sessionFactory);
 				bind(Headers.class).in(Scopes.SINGLETON);
+				bind(EsServicesApi.class).in(Scopes.SINGLETON);
 				bind(UserServiceApi.class).in(Scopes.SINGLETON);
 				bind(UserGroupSerivceApi.class).in(Scopes.SINGLETON);
 				bind(ResourceServicesApi.class).in(Scopes.SINGLETON);
-				bind(UtilityServiceApi.class).in(Scopes.SINGLETON);
 				bind(GeoentitiesServicesApi.class).in(Scopes.SINGLETON);
 				bind(ActivitySerivceApi.class).in(Scopes.SINGLETON);
 				bind(SpeciesServicesApi.class).in(Scopes.SINGLETON);
@@ -105,7 +119,14 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 
 				serve("/api/*").with(ServletContainer.class, props);
 			}
-		}, new DocumentControllerModule(), new DocumentDaoModule(), new DocumentServiceModule());
+		}, new DocumentControllerModule(), new DocumentDaoModule(), new DocumentServiceModule(), new ESUtilModule());
+
+		try {
+
+			injector.getInstance(RabbitMQConsumer.class).elasticUpdate();
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
 
 		return injector;
 
@@ -160,6 +181,13 @@ public class DocumentServeletContextListener extends GuiceServletContextListener
 
 		SessionFactory sessionFactory = injector.getInstance(SessionFactory.class);
 		sessionFactory.close();
+
+		Channel channel = injector.getInstance(Channel.class);
+		try {
+			channel.getConnection().close();
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+		}
 
 		super.contextDestroyed(servletContextEvent);
 		// ... First close any background tasks which may be using the DB ...

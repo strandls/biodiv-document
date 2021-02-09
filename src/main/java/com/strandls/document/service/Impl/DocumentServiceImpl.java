@@ -6,6 +6,7 @@ package com.strandls.document.service.Impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -53,6 +54,8 @@ import com.strandls.document.dao.DocumentDao;
 import com.strandls.document.dao.DocumentHabitatDao;
 import com.strandls.document.dao.DocumentSpeciesGroupDao;
 import com.strandls.document.dao.DownloadLogDao;
+import com.strandls.document.es.util.DocumentIndex;
+import com.strandls.document.es.util.RabbitMQProducer;
 import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexFieldType;
 import com.strandls.document.pojo.BibTexItemFieldMapping;
@@ -70,6 +73,10 @@ import com.strandls.document.pojo.DownloadLog;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
+import com.strandls.esmodule.ApiException;
+import com.strandls.esmodule.controllers.EsServicesApi;
+import com.strandls.esmodule.pojo.MapQueryResponse;
+import com.strandls.esmodule.pojo.MapQueryResponse.ResultEnum;
 import com.strandls.file.api.UploadApi;
 import com.strandls.file.model.FilesDTO;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
@@ -183,10 +190,16 @@ public class DocumentServiceImpl implements DocumentService {
 	private DownloadLogDao downloadLogDao;
 
 	@Inject
+	private RabbitMQProducer producer;
+
+	@Inject
 	private LogActivities logActivity;
 
 	@Inject
 	private LandscapeApi landScapeService;
+
+	@Inject
+	private EsServicesApi esService;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -235,7 +248,6 @@ public class DocumentServiceImpl implements DocumentService {
 
 				ShowDocument showDoc = new ShowDocument(document, userIbp, documentCoverages, userGroup, featured,
 						resource, docHabitatIds, docSGroupIds, flag, tags);
-
 				return showDoc;
 			}
 		} catch (Exception e) {
@@ -347,8 +359,12 @@ public class DocumentServiceImpl implements DocumentService {
 					docCoverageDao.save(docCoverage);
 				}
 			}
-
-			return show(document.getId());
+			ShowDocument res = show(document.getId());
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+			objectMapper.setDateFormat(df);
+			String docString = objectMapper.writeValueAsString(res);
+			produceToRabbitMQ(docString, document.getId().toString());
+			return res;
 		} catch (
 
 		Exception e) {
@@ -534,14 +550,29 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Override
 	public Boolean removeDocument(HttpServletRequest request, Long documentId) {
-		CommonProfile profile = AuthUtil.getProfileFromRequest(request);
-		Long userId = Long.parseLong(profile.getId());
-		JSONArray userRoles = (JSONArray) profile.getAttribute("roles");
-		Document document = documentDao.findById(documentId);
-		if (document.getAuthorId().equals(userId) || userRoles.contains("ROLE_ADMIN")) {
-			document.setIsDeleted(true);
-			documentDao.update(document);
-			return true;
+		try {
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			Long userId = Long.parseLong(profile.getId());
+			JSONArray userRoles = (JSONArray) profile.getAttribute("roles");
+			Document document = documentDao.findById(documentId);
+
+			MapQueryResponse esResponse;
+
+			esResponse = esService.delete(DocumentIndex.INDEX.getValue(), DocumentIndex.TYPE.getValue(),
+					documentId.toString());
+
+			ResultEnum result = esResponse.getResult();
+
+			if (result.getValue().equals("DELETED")
+					|| (document.getAuthorId().equals(userId) || userRoles.contains("ROLE_ADMIN"))) {
+				document.setIsDeleted(true);
+				documentDao.update(document);
+				System.out.print("===deleted docuemnt===" + documentId + "returned" + result.getValue());
+				return true;
+			}
+
+		} catch (ApiException e) {
+			logger.error(e.getMessage());
 		}
 		return false;
 	}
@@ -1250,4 +1281,13 @@ public class DocumentServiceImpl implements DocumentService {
 		return false;
 	}
 
+	@Override
+	public void produceToRabbitMQ(String documentData, String documentId) {
+		try {
+			producer.setMessage("esmodule", documentData, documentId);
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
+	}
 }
