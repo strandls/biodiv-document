@@ -489,19 +489,45 @@ public class DocumentServiceImpl implements DocumentService {
 //				document core update
 
 				BibFieldsData bibData = docEditData.getBibFieldData();
-
-				document = new Document(docEditData.getDocumentId(), docEditData.getAttribution(),
-						docEditData.getContribution(), bibData.getDescription(), bibData.getDoi(), new Date(),
-						docEditData.getLicenseId(), bibData.getTitle(), bibData.getType(),
-						(ufile != null ? ufile.getId() : null), docEditData.getFromDate(), docEditData.getFromDate(),
-						docEditData.getRating(), bibData.getAuthor(), bibData.getJournal(), bibData.getBooktitle(),
-						bibData.getYear(), bibData.getMonth(), bibData.getVolume(), bibData.getNumber(),
-						bibData.getPages(), bibData.getPublisher(), bibData.getSchool(), bibData.getEdition(),
-						bibData.getSeries(), bibData.getAddress(), bibData.getChapter(), bibData.getNote(),
-						bibData.getEditor(), bibData.getOrganization(), bibData.getHowpublished(),
-						bibData.getInstitution(), bibData.getUrl(), bibData.getLanguage(), bibData.getFile(),
-						bibData.getItemtype(), bibData.getIsbn(), bibData.getExtra());
-
+				
+				document.setAttribution(docEditData.getAttribution());
+				document.setContributors(docEditData.getContribution());
+				document.setNotes(bibData.getDescription());
+				document.setDoi(bibData.getDoi());
+				document.setLastRevised(new Date());
+				document.setLicenseId(docEditData.getLicenseId());
+				document.setTitle(bibData.getTitle());
+				document.setType(bibData.getType());
+				document.setuFileId(ufile != null ? ufile.getId() : null);
+				document.setFromDate(docEditData.getFromDate());
+				document.setToDate(docEditData.getFromDate());
+				document.setRating(docEditData.getRating());
+				document.setAuthor(bibData.getAuthor());
+				document.setJournal(bibData.getJournal());
+				document.setBookTitle(bibData.getBooktitle());
+				document.setYear(bibData.getYear());
+				document.setMonth(bibData.getMonth());
+				document.setVolume(bibData.getVolume());
+				document.setNumber(bibData.getNumber());
+				document.setPages(bibData.getPages());
+				document.setPublisher(bibData.getPublisher());
+				document.setSchool(bibData.getSchool());
+				document.setEdition(bibData.getEdition());
+				document.setSeries(bibData.getSeries());
+				document.setAddress(bibData.getAddress());
+				document.setChapter(bibData.getChapter());
+				document.setNote(bibData.getNote());
+				document.setEditor(bibData.getEditor());
+				document.setOrganization(bibData.getOrganization());
+				document.setHowPublished(bibData.getHowpublished());
+				document.setInstitution(bibData.getInstitution());
+				document.setUrl(bibData.getUrl());
+				document.setLanguage(bibData.getLanguage());
+				document.setFile(bibData.getFile());
+				document.setItemtype(bibData.getItemtype());
+				document.setIsbn(bibData.getIsbn());
+				document.setExtra(bibData.getExtra());
+				
 				documentDao.update(document);
 
 				logActivity.LogDocumentActivities(request.getHeader(HttpHeaders.AUTHORIZATION), null, document.getId(),
