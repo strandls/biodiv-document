@@ -633,6 +633,7 @@ public class DocumentController {
 			@ApiParam("documentDownloadData") DownloadLogData downloadLogData) {
 		try {
 			Boolean result = docService.documentDownloadLog(request, downloadLogData);
+
 			if (result != null && result)
 				return Response.status(Status.OK).entity("Download logged").build();
 			return Response.status(Status.NOT_ACCEPTABLE).build();
