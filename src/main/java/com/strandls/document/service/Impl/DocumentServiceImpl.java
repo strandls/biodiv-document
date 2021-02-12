@@ -407,9 +407,11 @@ public class DocumentServiceImpl implements DocumentService {
 				UFile ufile = docEditData.getUfileData();
 				if (ufile == null) {
 					Long ufileId = document.getuFileId();
-					Boolean result = resourceService.removeUFile(ufileId.toString());
-					if (result == null || (result == false))
-						return null;
+					if(ufileId!=null) {
+						Boolean result = resourceService.removeUFile(ufileId.toString());
+						if (result == null || (result == false))
+							return null;
+					}
 				} else if (ufile.getId() == null) {
 //					remove old uFile
 					Long ufileId = document.getuFileId();
@@ -473,7 +475,7 @@ public class DocumentServiceImpl implements DocumentService {
 //				document core update
 
 				BibFieldsData bibData = docEditData.getBibFieldData();
-				
+
 				document.setAttribution(docEditData.getAttribution());
 				document.setContributors(docEditData.getContribution());
 				document.setNotes(bibData.getDescription());
@@ -508,10 +510,10 @@ public class DocumentServiceImpl implements DocumentService {
 				document.setUrl(bibData.getUrl());
 				document.setLanguage(bibData.getLanguage());
 				document.setFile(bibData.getFile());
-				document.setItemtype(bibData.getItemtype());
+				document.setItemtype(bibTexItemTypeDao.findById(docEditData.getItemTypeId()).getItemType());
 				document.setIsbn(bibData.getIsbn());
 				document.setExtra(bibData.getExtra());
-				
+
 				documentDao.update(document);
 
 				logActivity.LogDocumentActivities(request.getHeader(HttpHeaders.AUTHORIZATION), null, document.getId(),
