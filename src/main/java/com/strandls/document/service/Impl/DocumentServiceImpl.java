@@ -407,7 +407,7 @@ public class DocumentServiceImpl implements DocumentService {
 				UFile ufile = docEditData.getUfileData();
 				if (ufile == null) {
 					Long ufileId = document.getuFileId();
-					if(ufileId!=null) {
+					if (ufileId != null) {
 						Boolean result = resourceService.removeUFile(ufileId.toString());
 						if (result == null || (result == false))
 							return null;
@@ -415,9 +415,11 @@ public class DocumentServiceImpl implements DocumentService {
 				} else if (ufile.getId() == null) {
 //					remove old uFile
 					Long ufileId = document.getuFileId();
-					Boolean result = resourceService.removeUFile(ufileId.toString());
-					if (result == null || (result == false))
-						return null;
+					if (ufileId != null) {
+						Boolean result = resourceService.removeUFile(ufileId.toString());
+						if (result == null || (result == false))
+							return null;
+					}
 
 //					add new uFile
 					FilesDTO filesDto = new FilesDTO();
