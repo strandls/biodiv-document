@@ -424,6 +424,8 @@ public class DocumentServiceImpl implements DocumentService {
 				if (ufile == null) {
 					Long ufileId = document.getuFileId();
 					if (ufileId != null) {
+						resourceService = headers.addResourceHeaders(resourceService,
+								request.getHeader(HttpHeaders.AUTHORIZATION));
 						Boolean result = resourceService.removeUFile(ufileId.toString());
 						if (result == null || (result == false))
 							return null;
@@ -432,6 +434,8 @@ public class DocumentServiceImpl implements DocumentService {
 //					remove old uFile
 					Long ufileId = document.getuFileId();
 					if (ufileId != null) {
+						resourceService = headers.addResourceHeaders(resourceService,
+								request.getHeader(HttpHeaders.AUTHORIZATION));
 						Boolean result = resourceService.removeUFile(ufileId.toString());
 						if (result == null || (result == false))
 							return null;
