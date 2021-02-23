@@ -99,7 +99,11 @@ public class DocumentController {
 	@Path(ApiConstants.CREATE)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
+
 	@ValidateUser
+
+	@ApiOperation(value = "create the document ", notes = "returns the document show page data", response = ShowDocument.class)
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to fetch the data", response = String.class) })
 
 	public Response createDocument(@Context HttpServletRequest request,
 			@ApiParam(name = "documentCreate") DocumentCreateData documentCreate) {
@@ -120,6 +124,9 @@ public class DocumentController {
 
 	@ValidateUser
 
+	@ApiOperation(value = "fetch the document for edit page", notes = "returns the document edit data", response = DocumentEditData.class)
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to fetch the data", response = String.class) })
+
 	public Response getEditDocument(@Context HttpServletRequest request, @PathParam("documentId") String documentId) {
 		try {
 			Long docId = Long.parseLong(documentId);
@@ -133,10 +140,36 @@ public class DocumentController {
 		}
 	}
 
+	@PUT
+	@Path(ApiConstants.UPDATE)
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ValidateUser
+
+	@ApiOperation(value = "update the document", notes = "returns the document show page data", response = ShowDocument.class)
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to fetch the data", response = String.class) })
+
+	public Response updateDocument(@Context HttpServletRequest request,
+			@ApiParam(name = "docEditData") DocumentEditData docEditData) {
+		try {
+			ShowDocument result = docService.updateDocument(request, docEditData);
+			if (result != null)
+				return Response.status(Status.OK).entity(result).build();
+			return Response.status(Status.NOT_MODIFIED).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+
+	}
+
 	@POST
 	@Path(ApiConstants.UPLOAD + ApiConstants.BIB)
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
+
+	@ApiOperation(value = "upload the bib file", notes = "returns the bib file data in a object", response = BibFieldsData.class)
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to fetch the data", response = String.class) })
 
 	public Response uploadBib(@FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail) {
@@ -172,6 +205,9 @@ public class DocumentController {
 	@Produces(MediaType.APPLICATION_JSON)
 
 	@ValidateUser
+
+	@ApiOperation(value = "bulk upload the excel file", notes = "starts the process of bulk upload", response = String.class)
+	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to fetch the data", response = String.class) })
 
 	public Response bulkUploadExcel(@Context HttpServletRequest request,
 			@ApiParam(name = "bulkUploadData") BulkUploadExcelData bulkUploadData) {
@@ -299,7 +335,7 @@ public class DocumentController {
 	public Response addCommnet(@Context HttpServletRequest request,
 			@ApiParam(name = "commentData") CommentLoggingData commentData) {
 		try {
-			Activity result = docService.addDocumentCommet(request, commentData);
+			Activity result = docService.addDocumentComment(request, commentData);
 			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
@@ -597,6 +633,7 @@ public class DocumentController {
 			@ApiParam("documentDownloadData") DownloadLogData downloadLogData) {
 		try {
 			Boolean result = docService.documentDownloadLog(request, downloadLogData);
+
 			if (result != null && result)
 				return Response.status(Status.OK).entity("Download logged").build();
 			return Response.status(Status.NOT_ACCEPTABLE).build();

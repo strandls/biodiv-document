@@ -6,6 +6,8 @@ package com.strandls.document.service.Impl;
 import java.util.Date;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -13,6 +15,8 @@ import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.strandls.document.dao.BibTexItemTypeDao;
+import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.Document;
 import com.strandls.resource.pojo.UFile;
 
@@ -23,6 +27,9 @@ import com.strandls.resource.pojo.UFile;
 public class DocumentHelper {
 
 	private final Logger logger = LoggerFactory.getLogger(DocumentHelper.class);
+
+	@Inject
+	private BibTexItemTypeDao bibTexItemTypeDao;
 
 	@SuppressWarnings("deprecation")
 	public Document bulkUploadPayload(Row dataRow, Map<String, Integer> fieldMapping, Long authorId, UFile ufile) {
@@ -342,6 +349,22 @@ public class DocumentHelper {
 			logger.error(e.getMessage());
 		}
 		return null;
+
+	}
+
+	public BibFieldsData convertDocumentToBibField(Document document) {
+		BibFieldsData bibField = new BibFieldsData(document.getAuthor(), document.getJournal(), document.getBookTitle(),
+				document.getTitle(), document.getYear(), document.getMonth(), document.getVolume(),
+				document.getNumber(), document.getPages(), document.getPublisher(), document.getSchool(),
+				document.getEdition(), document.getSeries(), document.getAddress(), document.getChapter(),
+				document.getNote(), document.getType(), document.getEditor(), document.getOrganization(),
+				document.getHowPublished(), document.getInstitution(), document.getNotes(), document.getDoi(),
+				document.getUrl(), document.getLanguage(), document.getFile(), document.getItemtype(), null,
+				document.getIsbn(), document.getExtra());
+
+		bibField.setItemTypeId(bibTexItemTypeDao.findByName(bibField.getItemtype()).getId());
+
+		return bibField;
 
 	}
 

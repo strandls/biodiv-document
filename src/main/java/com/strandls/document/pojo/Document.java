@@ -355,11 +355,11 @@ public class Document implements Serializable {
 	}
 
 	@Column(name = "doi")
-	public String getDoil() {
+	public String getDoi() {
 		return doi;
 	}
 
-	public void setDoil(String doi) {
+	public void setDoi(String doi) {
 		this.doi = doi;
 	}
 
