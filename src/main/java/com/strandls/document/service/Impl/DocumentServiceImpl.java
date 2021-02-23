@@ -549,33 +549,38 @@ public class DocumentServiceImpl implements DocumentService {
 
 //				ufile
 
-				String fileName = dataRow.getCell(fieldMapping.get("file")).getStringCellValue();
-				fileName = fileName + ".pdf";
-				System.out.println("file name" + fileName);
-				FilesDTO filesDto = new FilesDTO();
-				filesDto.setFiles(Arrays.asList(fileName));
-				filesDto.setFolder("DOCUMENTS");
-				filesDto.setModule("DOCUMENT");
-
-				fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
-				Map<String, Object> fileResponse = fileUpload.handleBulkUploadMoveFiles(filesDto);
-
-				System.out.println(fileResponse);
-
 				UFile ufile = null;
-				if (fileResponse != null && !fileResponse.isEmpty()) {
-					Map<String, String> files = (Map<String, String>) fileResponse.get(fileName);
-					String relativePath = files.get("name").toString();
-					String mimeType = files.get("mimeType").toString();
-					String size = files.get("size").toString();
-					UFileCreateData ufileCreateData = new UFileCreateData();
-					ufileCreateData.setMimeType(mimeType);
-					ufileCreateData.setPath(relativePath);
-					ufileCreateData.setSize(size);
-					ufileCreateData.setWeight(0);
-					resourceService = headers.addResourceHeaders(resourceService,
-							request.getHeader(HttpHeaders.AUTHORIZATION));
-					ufile = resourceService.createUFile(ufileCreateData);
+				Cell fileCell = dataRow.getCell(fieldMapping.get("file"), MissingCellPolicy.RETURN_BLANK_AS_NULL);
+				if (fileCell != null) {
+
+					String fileName = dataRow.getCell(fieldMapping.get("file")).getStringCellValue();
+					fileName = fileName + ".pdf";
+					System.out.println("file name" + fileName);
+					FilesDTO filesDto = new FilesDTO();
+					filesDto.setFiles(Arrays.asList(fileName));
+					filesDto.setFolder("DOCUMENTS");
+					filesDto.setModule("DOCUMENT");
+
+					fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
+					Map<String, Object> fileResponse = fileUpload.handleBulkUploadMoveFiles(filesDto);
+
+					System.out.println(fileResponse);
+
+					if (fileResponse != null && !fileResponse.isEmpty()) {
+						Map<String, String> files = (Map<String, String>) fileResponse.get(fileName);
+						String relativePath = files.get("name").toString();
+						String mimeType = files.get("mimeType").toString();
+						String size = files.get("size").toString();
+						UFileCreateData ufileCreateData = new UFileCreateData();
+						ufileCreateData.setMimeType(mimeType);
+						ufileCreateData.setPath(relativePath);
+						ufileCreateData.setSize(size);
+						ufileCreateData.setWeight(0);
+						resourceService = headers.addResourceHeaders(resourceService,
+								request.getHeader(HttpHeaders.AUTHORIZATION));
+						ufile = resourceService.createUFile(ufileCreateData);
+
+					}
 
 				}
 
