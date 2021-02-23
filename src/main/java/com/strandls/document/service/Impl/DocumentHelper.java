@@ -135,6 +135,7 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					year = cell.getStringCellValue();
+					year = year.replace(".0", "");
 				}
 			}
 
@@ -153,6 +154,7 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					volume = cell.getStringCellValue();
+					volume = volume.replace(".0", "");
 				}
 			}
 
@@ -162,6 +164,7 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					number = cell.getStringCellValue();
+					number = number.replace(".0", "");
 				}
 			}
 
