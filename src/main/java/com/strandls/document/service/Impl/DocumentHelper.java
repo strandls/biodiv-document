@@ -334,7 +334,7 @@ public class DocumentHelper {
 
 			document = new Document(null, 0L, true, attribution, authorId, contributors, null, new Date(), notes, doi,
 					new Date(), Long.parseLong(fieldMapping.get("licenseId").toString()), null, null, title, type,
-					(ufile != null ? ufile.getId() : null), new Date(), null, null, null, null, null, null, null, null,
+					(ufile != null ? ufile.getId() : null), null, null, null, null, null, null, null, null, null,
 					new Date(), null, 0, 0, 205L, null, null, null, null, null, null, null, null, null, 1,
 					(rating != null) ? Integer.parseInt(rating) : 0, false, null, null, authors, journal, bookTitle,
 					year, month, volume, number, pages, publisher, school, edition, series, address, chapter, note,
