@@ -894,7 +894,7 @@ public class DocumentServiceImpl implements DocumentService {
 
 					}
 					if (docTags != null) {
-						String docTag[] = docTags.split(",");
+						String docTag[] = docTags.split(";");
 
 						List<Tags> tags = new ArrayList<Tags>();
 
