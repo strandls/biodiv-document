@@ -115,6 +115,7 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					rating = cell.getStringCellValue();
+					
 				}
 			}
 
@@ -181,6 +182,7 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					pages = cell.getStringCellValue();
+					pages = pages.replace(".0", "");
 				}
 			}
 
@@ -208,6 +210,7 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					edition = cell.getStringCellValue();
+					edition  = edition.replace(".0", "");
 				}
 			}
 
@@ -217,6 +220,7 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					series = cell.getStringCellValue();
+					series = series.replace(".0", "");
 				}
 			}
 
@@ -235,6 +239,7 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					chapter = cell.getStringCellValue();
+					chapter = chapter.replace(".0", "");
 				}
 			}
 
