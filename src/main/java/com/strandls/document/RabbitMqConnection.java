@@ -4,7 +4,6 @@
 package com.strandls.document;
 
 import java.io.IOException;
-
 import java.io.InputStream;
 import java.util.Properties;
 import java.util.concurrent.TimeoutException;
@@ -25,16 +24,15 @@ public class RabbitMqConnection {
 
 	private final Logger logger = LoggerFactory.getLogger(RabbitMqConnection.class);
 
-	
-	private final static String QUEUE_ELASTIC = "document";
-	private final static String ROUTING_ELASTIC = "esmodule";
+	private final static String DOCUMENT_QUEUE = "documentQueue";
+	private final static String ROUTING_DOCUMENT = "document";
 
 	public final static String EXCHANGE_BIODIV;
 
 	static {
 		Properties properties = PropertyFileUtil.fetchProperty("config.properties");
 		EXCHANGE_BIODIV = properties.getProperty("rabbitmq_exchange");
-				}
+	}
 
 	public Channel setRabbitMQConnetion() throws IOException, TimeoutException {
 
@@ -61,8 +59,8 @@ public class RabbitMqConnection {
 		Connection connection = factory.newConnection();
 		Channel channel = connection.createChannel();
 		channel.exchangeDeclare(EXCHANGE_BIODIV, "direct");
-		channel.queueDeclare(QUEUE_ELASTIC, false, false, false, null);
-		channel.queueBind(QUEUE_ELASTIC, EXCHANGE_BIODIV, ROUTING_ELASTIC);
+		channel.queueDeclare(DOCUMENT_QUEUE, false, false, false, null);
+		channel.queueBind(DOCUMENT_QUEUE, EXCHANGE_BIODIV, ROUTING_DOCUMENT);
 
 		return channel;
 

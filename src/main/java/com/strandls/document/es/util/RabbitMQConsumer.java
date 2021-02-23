@@ -16,7 +16,7 @@ import com.rabbitmq.client.DeliverCallback;
  */
 public class RabbitMQConsumer {
 
-	private final static String QUEUE_ELASTIC = "document";
+	private final static String DOCUMENT_QUEUE = "documentQueue";
 
 	@Inject
 	private ESUpdate esUpdate;
@@ -33,12 +33,12 @@ public class RabbitMQConsumer {
 			System.out.println("consuming document Id :" + message);
 			System.out.println("Updating :" + documentId);
 
-			ESUpdateThread updateThread = new ESUpdateThread(esUpdate, message,documentId);
+			ESUpdateThread updateThread = new ESUpdateThread(esUpdate, message, documentId);
 			Thread thread = new Thread(updateThread);
 			thread.start();
 
 		};
-		channel.basicConsume(QUEUE_ELASTIC, true, deliverCallback, consumerTag -> {
+		channel.basicConsume(DOCUMENT_QUEUE, true, deliverCallback, consumerTag -> {
 		});
 	}
 

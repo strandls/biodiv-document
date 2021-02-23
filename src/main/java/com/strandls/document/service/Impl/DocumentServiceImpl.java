@@ -1195,7 +1195,7 @@ public class DocumentServiceImpl implements DocumentService {
 	@Override
 	public void produceToRabbitMQ(String documentData, String documentId) {
 		try {
-			producer.setMessage("esmodule", documentData, documentId);
+			producer.setMessage("document", documentData, documentId);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
