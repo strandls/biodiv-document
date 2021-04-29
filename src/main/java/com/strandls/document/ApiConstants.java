@@ -28,6 +28,7 @@ public class ApiConstants {
 	public static final String ITEM = "/item";
 	public static final String LANGUAGE = "/language";
 	public static final String LOG = "/log";
+	public static final String LIST = "/list";
 	public static final String PING = "/ping";
 	public static final String PERMISSION = "/permission";
 	public static final String SERVICES = "/services";

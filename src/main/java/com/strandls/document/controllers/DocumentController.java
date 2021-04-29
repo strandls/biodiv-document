@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -30,15 +31,26 @@ import com.strandls.activity.pojo.Activity;
 import com.strandls.activity.pojo.CommentLoggingData;
 import com.strandls.authentication_utility.filter.ValidateUser;
 import com.strandls.document.ApiConstants;
+import com.strandls.document.es.util.ESUtility;
 import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.BulkUploadExcelData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
+import com.strandls.document.pojo.DocumentListData;
+import com.strandls.document.pojo.DocumentListParams;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
+import com.strandls.document.service.DocumentListService;
 import com.strandls.document.service.DocumentService;
+import com.strandls.esmodule.pojo.MapBoundParams;
+import com.strandls.esmodule.pojo.MapBounds;
+import com.strandls.esmodule.pojo.MapGeoPoint;
+import com.strandls.esmodule.pojo.MapSearchParams;
+import com.strandls.esmodule.pojo.MapSearchQuery;
+import com.strandls.esmodule.pojo.MapSearchParams.SortTypeEnum;
+import com.strandls.document.pojo.MapAggregationResponse;
 import com.strandls.taxonomy.pojo.SpeciesGroup;
 import com.strandls.user.pojo.Follow;
 import com.strandls.userGroup.pojo.Featured;
@@ -68,6 +80,13 @@ public class DocumentController {
 
 	@Inject
 	private DocumentService docService;
+
+	
+	@Inject 
+	private DocumentListService docListService;
+	
+	@Inject
+	private ESUtility esUtility;
 
 	@GET
 	@Path(ApiConstants.PING)
@@ -641,6 +660,94 @@ public class DocumentController {
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
 		}
+	}
+
+	@POST
+	@Path(ApiConstants.LIST + "/{index}/{type}")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	public Response DocumentList(@PathParam("index") String index, @PathParam("type") String type,
+			@DefaultValue("10") @QueryParam("max") Integer max, @DefaultValue("0") @QueryParam("offset") Integer offset,
+			@DefaultValue("list") @QueryParam("view") String view,
+			@DefaultValue("document.lastRevised") @QueryParam("sort") String sortOn, @QueryParam("tags") String tags,
+			@QueryParam("createdOnMaxDate") String createdOnMaxDate,
+			@QueryParam("createdOnMinDate") String createdOnMinDate,
+			@QueryParam("revisedOnMaxDate") String revisedOnMaxDate,
+			@QueryParam("revisedOnMinDate") String revisedOnMinDate,
+			@DefaultValue("") @QueryParam("isFlagged") String isFlagged,
+			@DefaultValue("") @QueryParam("user") String user, @DefaultValue("") @QueryParam("sGroup") String sGroup,
+			@DefaultValue("") @QueryParam("habitatIds") String habitatIds,
+			@DefaultValue("") @QueryParam("flags") String flags,
+			@DefaultValue("") @QueryParam("featured") String featured, @QueryParam("left") Double left,
+			@QueryParam("right") Double right, @QueryParam("top") Double top, @QueryParam("bottom") Double bottom,
+			@QueryParam("state") String state, @DefaultValue("") @QueryParam("userGroupList") String userGroupList,
+			@QueryParam("geoAggregationField") String geoAggregationField,
+			@QueryParam("geoShapeFilterField") String geoShapeFilterField,
+			@QueryParam("nestedField") String nestedField,
+
+			@QueryParam("itemType") String itemType, @QueryParam("year") String year,
+			@QueryParam("author") String author, @QueryParam("publisher") String publisher,
+			@QueryParam("title") String title,
+
+			@DefaultValue("1") @QueryParam("geoAggegationPrecision") Integer geoAggegationPrecision,
+			@QueryParam("onlyFilteredAggregation") Boolean onlyFilteredAggregation,
+			@ApiParam(name = "location") DocumentListParams location) {
+		try {
+
+			if (max > 50) {
+				max = 50;
+			}
+
+			MapBounds bounds = null;
+			if (top != null || bottom != null || left != null || right != null) {
+				bounds = new MapBounds();
+				bounds.setBottom(bottom);
+				bounds.setLeft(left);
+				bounds.setRight(right);
+				bounds.setTop(top);
+			}
+
+			MapBoundParams mapBoundsParams = new MapBoundParams();
+			MapSearchParams mapSearchParams = new MapSearchParams();
+			mapSearchParams.setFrom(offset);
+			mapBoundsParams.setBounds(bounds);
+			mapSearchParams.setLimit(max);
+			mapSearchParams.setSortOn(sortOn);
+			mapSearchParams.setSortType(SortTypeEnum.DESC);
+			mapSearchParams.setMapBoundParams(mapBoundsParams);
+
+			String loc = location.getLocation();
+			if (loc != null) {
+				if (loc.contains("/")) {
+					String[] locationArray = loc.split("/");
+					List<List<MapGeoPoint>> multiPolygonPoint = esUtility.multiPolygonGenerator(locationArray);
+					mapBoundsParams.setMultipolygon(multiPolygonPoint);
+				} else {
+					mapBoundsParams.setPolygon(esUtility.polygonGenerator(loc));
+				}
+			}
+
+			MapAggregationResponse aggregationResult = null;
+
+			if (offset == 0) {
+				aggregationResult = docListService.mapAggregate(index, type, sGroup, habitatIds, tags, user, flags,
+						createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
+						revisedOnMinDate, state, itemType, year, author, publisher, title, mapSearchParams);
+			}
+
+			MapSearchQuery mapSearchQuery = esUtility.getMapSearchQuery(sGroup, habitatIds, tags, user, flags,
+					createdOnMaxDate, createdOnMinDate, featured, userGroupList, isFlagged, revisedOnMaxDate,
+					revisedOnMinDate, state, itemType, year, author, publisher, title, mapSearchParams);
+
+			DocumentListData result = docListService.getDocumentList(index, type, geoAggregationField, geoShapeFilterField,
+					nestedField, aggregationResult, mapSearchQuery);
+
+			return Response.status(Status.OK).entity(result).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+
 	}
 
 }

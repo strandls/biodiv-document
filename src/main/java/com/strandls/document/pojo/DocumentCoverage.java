@@ -13,10 +13,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import com.bedatadriven.jackson.datatype.jts.serialization.GeometryDeserializer;
+
 import com.bedatadriven.jackson.datatype.jts.serialization.GeometrySerializer;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.vividsolutions.jts.geom.Geometry;
 
@@ -122,12 +121,11 @@ public class DocumentCoverage implements Serializable {
 		this.placeName = placeName;
 	}
 
-	@Column(name = "topology", columnDefinition = "Geometry", nullable = false)
+	@Column(name = "topology", columnDefinition = "Geometry",nullable = false)
 	@JsonSerialize(using = GeometrySerializer.class)
-	@JsonDeserialize(contentUsing = GeometryDeserializer.class)
 	public Geometry getTopology() {
 		return topology;
-	}
+	}					
 
 	public void setTopology(Geometry topology) {
 		this.topology = topology;
