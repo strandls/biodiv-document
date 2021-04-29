@@ -387,25 +387,18 @@ public class DocumentServiceImpl implements DocumentService {
 
 			if (roles.contains("ROLE_ADMIN") || userId.equals(document.getAuthorId())) {
 				List<DocumentCoverage> docCoverages = docCoverageDao.findByDocumentId(documentId);
-				List<DocumentCoverageData> docCoverageData = new ArrayList<DocumentCoverageData>();
 				for (DocumentCoverage docCoverage : docCoverages) {
 					WKTWriter writer = new WKTWriter();
 					String wktData = writer.write(docCoverage.getTopology());
-					docCoverageData.add(new DocumentCoverageData(null, null, null, docCoverage.getPlaceName(), wktData,
-							docCoverage.getGeoEntityId()));
+					docCoverage.setTopologyWKT(wktData);
 				}
 				UFile ufile = null;
 				if (document.getuFileId() != null)
 					ufile = resourceService.getUFilePath(document.getuFileId().toString());
-				UFileCreateData uFileData = new UFileCreateData();
-				if (ufile != null) {
-					uFileData.setMimeType(ufile.getMimeType());
-					uFileData.setPath(ufile.getPath());
-					uFileData.setSize(ufile.getSize());
-				}
 
-				DocumentEditData docEditData = new DocumentEditData(documentId, bibFieldData.getItemTypeId(), document,
-						bibFieldData, docCoverageData, uFileData);
+				DocumentEditData docEditData = new DocumentEditData(documentId, bibFieldData.getItemTypeId(),
+						document.getContributors(), document.getAttribution(), document.getLicenseId(),
+						document.getFromDate(), document.getRating(), bibFieldData, docCoverages, ufile);
 				return docEditData;
 			}
 
@@ -415,12 +408,142 @@ public class DocumentServiceImpl implements DocumentService {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public ShowDocument updateDocument(HttpServletRequest request, DocumentEditData docEditData) {
 		try {
-//			Document document = docEditData.getDocument();
-//			documentDao.
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			Long userId = Long.parseLong(profile.getId());
+			JSONArray roles = (JSONArray) profile.getAttribute("roles");
+			Document document = documentDao.findById(docEditData.getDocumentId());
 
+			if (roles.contains("ROLE_ADMIN") || userId.equals(document.getAuthorId())) {
+
+//				ufile update 
+				UFile ufile = docEditData.getUfileData();
+				if (ufile == null) {
+					Long ufileId = document.getuFileId();
+					if (ufileId != null) {
+						resourceService = headers.addResourceHeaders(resourceService,
+								request.getHeader(HttpHeaders.AUTHORIZATION));
+						Boolean result = resourceService.removeUFile(ufileId.toString());
+						if (result == null || (result == false))
+							return null;
+					}
+				} else if (ufile.getId() == null) {
+//					remove old uFile
+					Long ufileId = document.getuFileId();
+					if (ufileId != null) {
+						resourceService = headers.addResourceHeaders(resourceService,
+								request.getHeader(HttpHeaders.AUTHORIZATION));
+						Boolean result = resourceService.removeUFile(ufileId.toString());
+						if (result == null || (result == false))
+							return null;
+					}
+
+//					add new uFile
+					FilesDTO filesDto = new FilesDTO();
+					filesDto.setFiles(Arrays.asList(ufile.getPath()));
+					filesDto.setFolder("DOCUMENTS");
+
+					fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
+					Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
+
+					if (fileResponse != null && !fileResponse.isEmpty()) {
+						Map<String, String> files = (Map<String, String>) fileResponse.get(ufile.getPath());
+						String relativePath = files.get("name").toString();
+						String mimeType = files.get("mimeType").toString();
+						String size = files.get("size").toString();
+						UFileCreateData ufileCreateData = new UFileCreateData();
+						ufileCreateData.setMimeType(mimeType);
+						ufileCreateData.setPath(relativePath);
+						ufileCreateData.setSize(size);
+						ufileCreateData.setWeight(0);
+						resourceService = headers.addResourceHeaders(resourceService,
+								request.getHeader(HttpHeaders.AUTHORIZATION));
+						ufile = resourceService.createUFile(ufileCreateData);
+					}
+				}
+
+//				GeoEntitiy update
+				List<DocumentCoverage> docCoverages = docEditData.getDocCoverage();
+				List<DocumentCoverage> previousCoverage = docCoverageDao.findByDocumentId(docEditData.getDocumentId());
+				if (docCoverages == null || docCoverages.isEmpty()) {
+					for (DocumentCoverage docC : previousCoverage) {
+						docCoverageDao.delete(docC);
+					}
+				} else {
+//					update the docCoverages which has been added and removed
+					List<Long> newCoveage = new ArrayList<Long>();
+//					add new docCoverage
+					for (DocumentCoverage coverage : docCoverages) {
+						if (coverage.getId() == null) {
+							WKTReader reader = new WKTReader(geometryFactory);
+							Geometry topology = reader.read(coverage.getTopologyWKT());
+							coverage.setDocumentId(docEditData.getDocumentId());
+							coverage.setTopology(topology);
+							coverage = docCoverageDao.save(coverage);
+						}
+						newCoveage.add(coverage.getId());
+					}
+//					remove the document 
+					for (DocumentCoverage previous : previousCoverage) {
+						if (!newCoveage.contains(previous.getId())) {
+							docCoverageDao.delete(previous);
+						}
+					}
+
+				}
+//				document core update
+
+				BibFieldsData bibData = docEditData.getBibFieldData();
+
+				document.setAttribution(docEditData.getAttribution());
+				document.setContributors(docEditData.getContribution());
+				document.setNotes(bibData.getDescription());
+				document.setDoi(bibData.getDoi());
+				document.setLastRevised(new Date());
+				document.setLicenseId(docEditData.getLicenseId());
+				document.setTitle(bibData.getTitle());
+				document.setType(bibData.getType());
+				document.setuFileId(ufile != null ? ufile.getId() : null);
+				document.setFromDate(docEditData.getFromDate());
+				document.setToDate(docEditData.getFromDate());
+				document.setRating(docEditData.getRating());
+				document.setAuthor(bibData.getAuthor());
+				document.setJournal(bibData.getJournal());
+				document.setBookTitle(bibData.getBooktitle());
+				document.setYear(bibData.getYear());
+				document.setMonth(bibData.getMonth());
+				document.setVolume(bibData.getVolume());
+				document.setNumber(bibData.getNumber());
+				document.setPages(bibData.getPages());
+				document.setPublisher(bibData.getPublisher());
+				document.setSchool(bibData.getSchool());
+				document.setEdition(bibData.getEdition());
+				document.setSeries(bibData.getSeries());
+				document.setAddress(bibData.getAddress());
+				document.setChapter(bibData.getChapter());
+				document.setNote(bibData.getNote());
+				document.setEditor(bibData.getEditor());
+				document.setOrganization(bibData.getOrganization());
+				document.setHowPublished(bibData.getHowpublished());
+				document.setInstitution(bibData.getInstitution());
+				document.setUrl(bibData.getUrl());
+				document.setLanguage(bibData.getLanguage());
+				document.setFile(bibData.getFile());
+				document.setItemtype(bibTexItemTypeDao.findById(docEditData.getItemTypeId()).getItemType());
+				document.setIsbn(bibData.getIsbn());
+				document.setExtra(bibData.getExtra());
+
+				documentDao.update(document);
+
+				logActivity.LogDocumentActivities(request.getHeader(HttpHeaders.AUTHORIZATION), null, document.getId(),
+						document.getId(), "Document", null, "Document updated", null);
+
+			}
+
+			return show(docEditData.getDocumentId());
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
@@ -859,7 +982,7 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
-	public Activity addDocumentCommet(HttpServletRequest request, CommentLoggingData loggingData) {
+	public Activity addDocumentComment(HttpServletRequest request, CommentLoggingData loggingData) {
 		try {
 			loggingData.setMailData(generateMailData(loggingData.getRootHolderId()));
 			activityService = headers.addActivityHeaders(activityService, request.getHeader(HttpHeaders.AUTHORIZATION));

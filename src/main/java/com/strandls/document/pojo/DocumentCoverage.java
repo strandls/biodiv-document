@@ -39,6 +39,7 @@ public class DocumentCoverage implements Serializable {
 	private String placeName;
 	private Geometry topology;
 	private Long landscapeIds;
+	private String topologyWKT;
 
 	/**
 	 * 
@@ -137,6 +138,15 @@ public class DocumentCoverage implements Serializable {
 
 	public void setLandscapeIds(Long landscapeIds) {
 		this.landscapeIds = landscapeIds;
+	}
+
+	@Transient
+	public String getTopologyWKT() {
+		return topologyWKT;
+	}
+
+	public void setTopologyWKT(String topologyWKT) {
+		this.topologyWKT = topologyWKT;
 	}
 
 }

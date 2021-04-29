@@ -3,9 +3,10 @@
  */
 package com.strandls.document.pojo;
 
+import java.util.Date;
 import java.util.List;
 
-import com.strandls.resource.pojo.UFileCreateData;
+import com.strandls.resource.pojo.UFile;
 
 /**
  * @author Abhishek Rudra
@@ -15,10 +16,14 @@ public class DocumentEditData {
 
 	private Long documentId;
 	private Long itemTypeId;
-	private Document document;
-	private BibFieldsData bibFieldsData;
-	private List<DocumentCoverageData> docCoverage;
-	private UFileCreateData ufileData;
+	private String contribution;
+	private String attribution;
+	private Long licenseId;
+	private Date fromDate;
+	private Integer rating;
+	private BibFieldsData bibFieldData;
+	private List<DocumentCoverage> docCoverage;
+	private UFile ufileData;
 
 	/**
 	 * 
@@ -30,18 +35,27 @@ public class DocumentEditData {
 	/**
 	 * @param documentId
 	 * @param itemTypeId
-	 * @param document
-	 * @param bibFieldsData
+	 * @param contribution
+	 * @param attribution
+	 * @param licenseId
+	 * @param fromDate
+	 * @param rating
+	 * @param bibFieldData
 	 * @param docCoverage
 	 * @param ufileData
 	 */
-	public DocumentEditData(Long documentId, Long itemTypeId, Document document, BibFieldsData bibFieldsData,
-			List<DocumentCoverageData> docCoverage, UFileCreateData ufileData) {
+	public DocumentEditData(Long documentId, Long itemTypeId, String contribution, String attribution, Long licenseId,
+			Date fromDate, Integer rating, BibFieldsData bibFieldData, List<DocumentCoverage> docCoverage,
+			UFile ufileData) {
 		super();
 		this.documentId = documentId;
 		this.itemTypeId = itemTypeId;
-		this.document = document;
-		this.bibFieldsData = bibFieldsData;
+		this.contribution = contribution;
+		this.attribution = attribution;
+		this.licenseId = licenseId;
+		this.fromDate = fromDate;
+		this.rating = rating;
+		this.bibFieldData = bibFieldData;
 		this.docCoverage = docCoverage;
 		this.ufileData = ufileData;
 	}
@@ -62,35 +76,67 @@ public class DocumentEditData {
 		this.itemTypeId = itemTypeId;
 	}
 
-	public Document getDocument() {
-		return document;
+	public String getContribution() {
+		return contribution;
 	}
 
-	public void setDocument(Document document) {
-		this.document = document;
+	public void setContribution(String contribution) {
+		this.contribution = contribution;
 	}
 
-	public BibFieldsData getBibFieldsData() {
-		return bibFieldsData;
+	public String getAttribution() {
+		return attribution;
 	}
 
-	public void setBibFieldsData(BibFieldsData bibFieldsData) {
-		this.bibFieldsData = bibFieldsData;
+	public void setAttribution(String attribution) {
+		this.attribution = attribution;
 	}
 
-	public List<DocumentCoverageData> getDocCoverage() {
+	public Long getLicenseId() {
+		return licenseId;
+	}
+
+	public void setLicenseId(Long licenseId) {
+		this.licenseId = licenseId;
+	}
+
+	public Date getFromDate() {
+		return fromDate;
+	}
+
+	public void setFromDate(Date fromDate) {
+		this.fromDate = fromDate;
+	}
+
+	public Integer getRating() {
+		return rating;
+	}
+
+	public void setRating(Integer rating) {
+		this.rating = rating;
+	}
+
+	public BibFieldsData getBibFieldData() {
+		return bibFieldData;
+	}
+
+	public void setBibFieldData(BibFieldsData bibFieldData) {
+		this.bibFieldData = bibFieldData;
+	}
+
+	public List<DocumentCoverage> getDocCoverage() {
 		return docCoverage;
 	}
 
-	public void setDocCoverage(List<DocumentCoverageData> docCoverage) {
+	public void setDocCoverage(List<DocumentCoverage> docCoverage) {
 		this.docCoverage = docCoverage;
 	}
 
-	public UFileCreateData getUfileData() {
+	public UFile getUfileData() {
 		return ufileData;
 	}
 
-	public void setUfileData(UFileCreateData ufileData) {
+	public void setUfileData(UFile ufileData) {
 		this.ufileData = ufileData;
 	}
 
