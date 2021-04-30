@@ -57,6 +57,8 @@ import com.strandls.document.dao.DocumentHabitatDao;
 import com.strandls.document.dao.DocumentSpeciesGroupDao;
 import com.strandls.document.dao.DownloadLogDao;
 import com.strandls.document.es.util.DocumentIndex;
+import com.strandls.document.es.util.ESUpdate;
+import com.strandls.document.es.util.ESUpdateThread;
 import com.strandls.document.es.util.RabbitMQProducer;
 import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexFieldType;
@@ -207,6 +209,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Inject
 	private DocSciNameDao docSciNameDao;
+
+	@Inject
+	private ESUpdate esUpdate;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -370,7 +375,10 @@ public class DocumentServiceImpl implements DocumentService {
 			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 			objectMapper.setDateFormat(df);
 			String docString = objectMapper.writeValueAsString(res);
-			produceToRabbitMQ(docString, document.getId().toString());
+
+			ESUpdateThread updateThread = new ESUpdateThread(esUpdate, docString, document.getId().toString());
+			Thread thread = new Thread(updateThread);
+			thread.start();
 			return res;
 		} catch (
 
@@ -547,6 +555,8 @@ public class DocumentServiceImpl implements DocumentService {
 
 				logActivity.LogDocumentActivities(request.getHeader(HttpHeaders.AUTHORIZATION), null, document.getId(),
 						document.getId(), "Document", null, "Document updated", null);
+
+				updateDocumentLastRevised(document.getId());
 
 			}
 
@@ -1012,7 +1022,23 @@ public class DocumentServiceImpl implements DocumentService {
 		document.setLastRevised(new Date());
 		documentDao.update(document);
 
-//		TODO elastic update
+//		update the document in es instance
+		produceToRabbitMQ(documentId);
+
+	}
+
+	private void produceToRabbitMQ(Long documentId) {
+		try {
+			ShowDocument res = show(documentId);
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+			objectMapper.setDateFormat(df);
+			String documentData = objectMapper.writeValueAsString(res);
+
+			producer.setMessage("document", documentData, documentId.toString());
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
 	}
 
 	@Override
@@ -1106,8 +1132,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 			Document document = documentDao.findById(documentId);
 			document.setFlagCount(flagCount);
-			document.setLastRevised(new Date());
 			documentDao.update(document);
+
+			updateDocumentLastRevised(documentId);
 
 			return flagList;
 		} catch (Exception e) {
@@ -1131,8 +1158,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 			Document document = documentDao.findById(documentId);
 			document.setFlagCount(flagCount);
-			document.setLastRevised(new Date());
 			documentDao.update(document);
+
+			updateDocumentLastRevised(documentId);
 			return result;
 		} catch (Exception e) {
 			logger.error(e.getMessage());
@@ -1286,6 +1314,8 @@ public class DocumentServiceImpl implements DocumentService {
 		for (DocumentSpeciesGroup sGroup : newDocSgroup)
 			result.add(sGroup.getSpeciesGroupId());
 
+		updateDocumentLastRevised(documentId);
+
 		return result;
 	}
 
@@ -1309,6 +1339,7 @@ public class DocumentServiceImpl implements DocumentService {
 		for (DocumentHabitat docHabitat : newDocHabitat)
 			habitatId.add(docHabitat.getHabitatId());
 
+		updateDocumentLastRevised(documentId);
 		return habitatId;
 	}
 
@@ -1328,16 +1359,6 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
-
-	public void produceToRabbitMQ(String documentData, String documentId) {
-		try {
-			producer.setMessage("document", documentData, documentId);
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-		}
-
-	}
-
 	public List<DocumentMeta> getDocumentByTaxonId(Long taxonConceptId) {
 		try {
 			List<DocumentMeta> result = new ArrayList<DocumentMeta>();
