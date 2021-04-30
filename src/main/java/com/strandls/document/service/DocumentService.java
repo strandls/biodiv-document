@@ -98,7 +98,5 @@ public interface DocumentService {
 	public List<Language> getLanguages(Boolean isDirty);
 
 	public Boolean documentDownloadLog(HttpServletRequest request, DownloadLogData downloadLogData);
-	
-	public void produceToRabbitMQ(String documentId, String updateType);
 
 }
