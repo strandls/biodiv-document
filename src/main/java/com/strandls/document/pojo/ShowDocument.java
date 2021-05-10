@@ -5,6 +5,7 @@ package com.strandls.document.pojo;
 
 import java.util.List;
 
+import com.strandls.resource.pojo.License;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.user.pojo.UserIbp;
 import com.strandls.userGroup.pojo.Featured;
@@ -28,6 +29,7 @@ public class ShowDocument {
 	private List<Long> speciesGroupIds;
 	private List<FlagShow> flag;
 	private List<Tags> tags;
+	private License documentLicense;
 
 	/**
 	 * 
@@ -47,10 +49,11 @@ public class ShowDocument {
 	 * @param speciesGroupIds
 	 * @param flag
 	 * @param tags
+	 * @param documentLicense
 	 */
 	public ShowDocument(Document document, UserIbp userIbp, List<DocumentCoverage> documentCoverages,
 			List<UserGroupIbp> userGroupIbp, List<Featured> featured, UFile uFile, List<Long> habitatIds,
-			List<Long> speciesGroupIds, List<FlagShow> flag, List<Tags> tags) {
+			List<Long> speciesGroupIds, List<FlagShow> flag, List<Tags> tags, License documentLicense) {
 		super();
 		this.document = document;
 		this.userIbp = userIbp;
@@ -62,6 +65,7 @@ public class ShowDocument {
 		this.speciesGroupIds = speciesGroupIds;
 		this.flag = flag;
 		this.tags = tags;
+		this.documentLicense = documentLicense;
 	}
 
 	public Document getDocument() {
@@ -142,6 +146,14 @@ public class ShowDocument {
 
 	public void setTags(List<Tags> tags) {
 		this.tags = tags;
+	}
+
+	public License getDocumentLicense() {
+		return documentLicense;
+	}
+
+	public void setDocumentLicense(License documentLicense) {
+		this.documentLicense = documentLicense;
 	}
 
 }

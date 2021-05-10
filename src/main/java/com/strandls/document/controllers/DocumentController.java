@@ -662,6 +662,26 @@ public class DocumentController {
 		}
 	}
 
+	@GET
+	@Path(ApiConstants.TAXONOMY + "/{taxonConceptId}")
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
+
+	@ApiOperation(value = "fetch document on basis of taxonConceptId", notes = "Return the document meta data list", response = DocumentMeta.class, responseContainer = "List")
+	@ApiResponses(value = {
+
+			@ApiResponse(code = 400, message = "unable to return the data", response = String.class) })
+
+	public Response getDocumentByTaxonConceptId(@PathParam("taxonConceptId") String taxonConceptId) {
+		try {
+			Long taxonomyConceptId = Long.parseLong(taxonConceptId);
+			List<DocumentMeta> result = docService.getDocumentByTaxonId(taxonomyConceptId);
+			return Response.status(Status.OK).entity(result).build();
+		} catch (Exception e) {
+			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
+		}
+	}
+
 	@POST
 	@Path(ApiConstants.LIST + "/{index}/{type}")
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -743,24 +763,6 @@ public class DocumentController {
 			DocumentListData result = docListService.getDocumentList(index, type, geoAggregationField,
 					geoShapeFilterField, nestedField, aggregationResult, mapSearchQuery);
 
-			return Response.status(Status.OK).entity(result).build();
-		} catch (Exception e) {
-			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();
-		}
-	}
-
-	@GET
-	@Path(ApiConstants.TAXONOMY + "/{taxonConceptId}")
-	@Consumes(MediaType.TEXT_PLAIN)
-	@Produces(MediaType.APPLICATION_JSON)
-
-	@ApiOperation(value = "fetch document on basis of taxonConceptId", notes = "Return the document meta data list", response = DocumentMeta.class, responseContainer = "List")
-	@ApiResponses(value = { @ApiResponse(code = 400, message = "unable to return the data", response = String.class) })
-
-	public Response getDocumentByTaxonConceptId(@PathParam("taxonConceptId") String taxonConceptId) {
-		try {
-			Long taxonomyConceptId = Long.parseLong(taxonConceptId);
-			List<DocumentMeta> result = docService.getDocumentByTaxonId(taxonomyConceptId);
 			return Response.status(Status.OK).entity(result).build();
 		} catch (Exception e) {
 			return Response.status(Status.BAD_REQUEST).entity(e.getMessage()).build();

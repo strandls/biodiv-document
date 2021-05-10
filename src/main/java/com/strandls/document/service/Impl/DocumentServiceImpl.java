@@ -90,6 +90,7 @@ import com.strandls.geoentities.pojo.GeoentitiesWKTData;
 import com.strandls.landscape.controller.LandscapeApi;
 import com.strandls.landscape.pojo.Landscape;
 import com.strandls.resource.controllers.ResourceServicesApi;
+import com.strandls.resource.pojo.License;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
 import com.strandls.taxonomy.controllers.SpeciesServicesApi;
@@ -243,6 +244,8 @@ public class DocumentServiceImpl implements DocumentService {
 				if (document.getuFileId() != null)
 					resource = resourceService.getUFilePath(document.getuFileId().toString());
 
+				License documentLicense = resourceService.getLicenseResource(document.getLicenseId().toString());
+
 				List<FlagShow> flag = utilityService.getFlagByObjectType("content.eml.Document", documentId.toString());
 				List<Tags> tags = utilityService.getTags("document", documentId.toString());
 
@@ -259,7 +262,7 @@ public class DocumentServiceImpl implements DocumentService {
 				}
 
 				ShowDocument showDoc = new ShowDocument(document, userIbp, documentCoverages, userGroup, featured,
-						resource, docHabitatIds, docSGroupIds, flag, tags);
+						resource, docHabitatIds, docSGroupIds, flag, tags, documentLicense);
 				return showDoc;
 			}
 		} catch (Exception e) {
