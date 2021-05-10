@@ -68,7 +68,7 @@ public interface DocumentService {
 
 	public List<Tags> updateTags(HttpServletRequest request, TagsMapping tagsMapping);
 
-	public Activity addDocumentCommet(HttpServletRequest request, CommentLoggingData loggingData);
+	public Activity addDocumentComment(HttpServletRequest request, CommentLoggingData loggingData);
 
 	public List<SpeciesGroup> getAllSpeciesGroup();
 

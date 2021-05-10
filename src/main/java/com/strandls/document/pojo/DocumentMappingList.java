@@ -1,40 +1,32 @@
-/**
- * 
- */
 package com.strandls.document.pojo;
 
 import java.util.List;
-
-import com.strandls.resource.pojo.License;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.strandls.resource.pojo.UFile;
-import com.strandls.user.pojo.UserIbp;
 import com.strandls.userGroup.pojo.Featured;
 import com.strandls.userGroup.pojo.UserGroupIbp;
-import com.strandls.utility.pojo.FlagShow;
+import com.strandls.userGroup.pojo.UserIbp;
+import com.strandls.utility.pojo.Flag;
 import com.strandls.utility.pojo.Tags;
 
-/**
- * @author Abhishek Rudra
- *
- */
-public class ShowDocument {
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class DocumentMappingList {
 
 	private Document document;
-	private UserIbp userIbp;
-	private List<DocumentCoverage> documentCoverages;
+	private List<DocumentCoverage> documentCoverages; 
 	private List<UserGroupIbp> userGroupIbp;
 	private List<Featured> featured;
 	private UFile uFile;
 	private List<Long> habitatIds;
 	private List<Long> speciesGroupIds;
-	private List<FlagShow> flag;
+	private List<Flag> flag;
+	private UserIbp userIbp;
 	private List<Tags> tags;
-	private License documentLicense;
 
 	/**
 	 * 
 	 */
-	public ShowDocument() {
+	public DocumentMappingList() {
 		super();
 	}
 
@@ -49,39 +41,30 @@ public class ShowDocument {
 	 * @param speciesGroupIds
 	 * @param flag
 	 * @param tags
-	 * @param documentLicense
 	 */
-	public ShowDocument(Document document, UserIbp userIbp, List<DocumentCoverage> documentCoverages,
-			List<UserGroupIbp> userGroupIbp, List<Featured> featured, UFile uFile, List<Long> habitatIds,
-			List<Long> speciesGroupIds, List<FlagShow> flag, List<Tags> tags, License documentLicense) {
+	public DocumentMappingList(Document document, List<DocumentCoverage> documentCoverages, List<UserGroupIbp> userGroupIbp,
+			List<Featured> featured, UserIbp userIbp, UFile uFile, List<Long> habitatIds, List<Long> speciesGroupIds,
+			List<Flag> flag, List<Tags> tags) {
 		super();
 		this.document = document;
-		this.userIbp = userIbp;
+
 		this.documentCoverages = documentCoverages;
 		this.userGroupIbp = userGroupIbp;
 		this.featured = featured;
 		this.uFile = uFile;
 		this.habitatIds = habitatIds;
 		this.speciesGroupIds = speciesGroupIds;
+		this.userIbp = userIbp;
 		this.flag = flag;
 		this.tags = tags;
-		this.documentLicense = documentLicense;
 	}
 
-	public Document getDocument() {
+	public Object getDocument() {
 		return document;
 	}
 
 	public void setDocument(Document document) {
 		this.document = document;
-	}
-
-	public UserIbp getUserIbp() {
-		return userIbp;
-	}
-
-	public void setUserIbp(UserIbp userIbp) {
-		this.userIbp = userIbp;
 	}
 
 	public List<DocumentCoverage> getDocumentCoverages() {
@@ -108,7 +91,7 @@ public class ShowDocument {
 		this.featured = featured;
 	}
 
-	public UFile getuFile() {
+	public Object getuFile() {
 		return uFile;
 	}
 
@@ -132,11 +115,11 @@ public class ShowDocument {
 		this.speciesGroupIds = speciesGroupIds;
 	}
 
-	public List<FlagShow> getFlag() {
+	public List<Flag> getFlag() {
 		return flag;
 	}
 
-	public void setFlag(List<FlagShow> flag) {
+	public void setFlag(List<Flag> flag) {
 		this.flag = flag;
 	}
 
@@ -148,12 +131,12 @@ public class ShowDocument {
 		this.tags = tags;
 	}
 
-	public License getDocumentLicense() {
-		return documentLicense;
+	public Object getUserIbp() {
+		return userIbp;
 	}
 
-	public void setDocumentLicense(License documentLicense) {
-		this.documentLicense = documentLicense;
+	public void setUserIbp(UserIbp userIbp) {
+		this.userIbp = userIbp;
 	}
 
 }

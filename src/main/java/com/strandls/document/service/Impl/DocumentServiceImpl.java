@@ -6,6 +6,7 @@ package com.strandls.document.service.Impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,6 +56,10 @@ import com.strandls.document.dao.DocumentDao;
 import com.strandls.document.dao.DocumentHabitatDao;
 import com.strandls.document.dao.DocumentSpeciesGroupDao;
 import com.strandls.document.dao.DownloadLogDao;
+import com.strandls.document.es.util.DocumentIndex;
+import com.strandls.document.es.util.ESUpdate;
+import com.strandls.document.es.util.ESUpdateThread;
+import com.strandls.document.es.util.RabbitMQProducer;
 import com.strandls.document.pojo.BibFieldsData;
 import com.strandls.document.pojo.BibTexFieldType;
 import com.strandls.document.pojo.BibTexItemFieldMapping;
@@ -74,6 +79,10 @@ import com.strandls.document.pojo.DownloadLog;
 import com.strandls.document.pojo.DownloadLogData;
 import com.strandls.document.pojo.ShowDocument;
 import com.strandls.document.service.DocumentService;
+import com.strandls.esmodule.ApiException;
+import com.strandls.esmodule.controllers.EsServicesApi;
+import com.strandls.esmodule.pojo.MapQueryResponse;
+import com.strandls.esmodule.pojo.MapQueryResponse.ResultEnum;
 import com.strandls.file.api.UploadApi;
 import com.strandls.file.model.FilesDTO;
 import com.strandls.geoentities.controllers.GeoentitiesServicesApi;
@@ -81,9 +90,10 @@ import com.strandls.geoentities.pojo.GeoentitiesWKTData;
 import com.strandls.landscape.controller.LandscapeApi;
 import com.strandls.landscape.pojo.Landscape;
 import com.strandls.resource.controllers.ResourceServicesApi;
+import com.strandls.resource.pojo.License;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
-import com.strandls.taxonomy.controllers.TaxonomyServicesApi;
+import com.strandls.taxonomy.controllers.SpeciesServicesApi;
 import com.strandls.taxonomy.pojo.SpeciesGroup;
 import com.strandls.user.controller.UserServiceApi;
 import com.strandls.user.pojo.Follow;
@@ -169,7 +179,7 @@ public class DocumentServiceImpl implements DocumentService {
 	private ActivitySerivceApi activityService;
 
 	@Inject
-	private TaxonomyServicesApi taxonomyService;
+	private SpeciesServicesApi speciesService;
 
 	@Inject
 	private GeoentitiesServicesApi geoEntitiesServices;
@@ -187,6 +197,9 @@ public class DocumentServiceImpl implements DocumentService {
 	private DownloadLogDao downloadLogDao;
 
 	@Inject
+	private RabbitMQProducer producer;
+
+	@Inject
 	private LogActivities logActivity;
 
 	@Inject
@@ -194,6 +207,12 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Inject
 	private DocSciNameDao docSciNameDao;
+
+	@Inject
+	private EsServicesApi esService;
+
+	@Inject
+	private ESUpdate esUpdate;
 
 	@Override
 	public ShowDocument show(Long documentId) {
@@ -225,6 +244,8 @@ public class DocumentServiceImpl implements DocumentService {
 				if (document.getuFileId() != null)
 					resource = resourceService.getUFilePath(document.getuFileId().toString());
 
+				License documentLicense = resourceService.getLicenseResource(document.getLicenseId().toString());
+
 				List<FlagShow> flag = utilityService.getFlagByObjectType("content.eml.Document", documentId.toString());
 				List<Tags> tags = utilityService.getTags("document", documentId.toString());
 
@@ -241,8 +262,7 @@ public class DocumentServiceImpl implements DocumentService {
 				}
 
 				ShowDocument showDoc = new ShowDocument(document, userIbp, documentCoverages, userGroup, featured,
-						resource, docHabitatIds, docSGroupIds, flag, tags);
-
+						resource, docHabitatIds, docSGroupIds, flag, tags, documentLicense);
 				return showDoc;
 			}
 		} catch (Exception e) {
@@ -354,8 +374,15 @@ public class DocumentServiceImpl implements DocumentService {
 					docCoverageDao.save(docCoverage);
 				}
 			}
+			ShowDocument res = show(document.getId());
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+			objectMapper.setDateFormat(df);
+			String docString = objectMapper.writeValueAsString(res);
 
-			return show(document.getId());
+			ESUpdateThread updateThread = new ESUpdateThread(esUpdate, docString, document.getId().toString());
+			Thread thread = new Thread(updateThread);
+			thread.start();
+			return res;
 		} catch (
 
 		Exception e) {
@@ -374,26 +401,22 @@ public class DocumentServiceImpl implements DocumentService {
 			JSONArray roles = (JSONArray) profile.getAttribute("roles");
 
 			Document document = documentDao.findById(documentId);
+			BibFieldsData bibFieldData = docHelper.convertDocumentToBibField(document);
+
 			if (roles.contains("ROLE_ADMIN") || userId.equals(document.getAuthorId())) {
 				List<DocumentCoverage> docCoverages = docCoverageDao.findByDocumentId(documentId);
-				List<DocumentCoverageData> docCoverageData = new ArrayList<DocumentCoverageData>();
 				for (DocumentCoverage docCoverage : docCoverages) {
 					WKTWriter writer = new WKTWriter();
 					String wktData = writer.write(docCoverage.getTopology());
-					docCoverageData.add(new DocumentCoverageData(docCoverage.getPlaceName(), wktData,
-							docCoverage.getGeoEntityId()));
+					docCoverage.setTopologyWKT(wktData);
 				}
 				UFile ufile = null;
 				if (document.getuFileId() != null)
 					ufile = resourceService.getUFilePath(document.getuFileId().toString());
-				UFileCreateData uFileData = new UFileCreateData();
-				if (ufile != null) {
-					uFileData.setMimeType(ufile.getMimeType());
-					uFileData.setPath(ufile.getPath());
-					uFileData.setSize(ufile.getSize());
-				}
 
-				DocumentEditData docEditData = new DocumentEditData(document, docCoverageData, uFileData);
+				DocumentEditData docEditData = new DocumentEditData(documentId, bibFieldData.getItemTypeId(),
+						document.getContributors(), document.getAttribution(), document.getLicenseId(),
+						document.getFromDate(), document.getRating(), bibFieldData, docCoverages, ufile);
 				return docEditData;
 			}
 
@@ -403,12 +426,144 @@ public class DocumentServiceImpl implements DocumentService {
 		return null;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public ShowDocument updateDocument(HttpServletRequest request, DocumentEditData docEditData) {
 		try {
-			Document document = docEditData.getDocument();
-//			documentDao.
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			Long userId = Long.parseLong(profile.getId());
+			JSONArray roles = (JSONArray) profile.getAttribute("roles");
+			Document document = documentDao.findById(docEditData.getDocumentId());
 
+			if (roles.contains("ROLE_ADMIN") || userId.equals(document.getAuthorId())) {
+
+//				ufile update 
+				UFile ufile = docEditData.getUfileData();
+				if (ufile == null) {
+					Long ufileId = document.getuFileId();
+					if (ufileId != null) {
+						resourceService = headers.addResourceHeaders(resourceService,
+								request.getHeader(HttpHeaders.AUTHORIZATION));
+						Boolean result = resourceService.removeUFile(ufileId.toString());
+						if (result == null || (result == false))
+							return null;
+					}
+				} else if (ufile.getId() == null) {
+//					remove old uFile
+					Long ufileId = document.getuFileId();
+					if (ufileId != null) {
+						resourceService = headers.addResourceHeaders(resourceService,
+								request.getHeader(HttpHeaders.AUTHORIZATION));
+						Boolean result = resourceService.removeUFile(ufileId.toString());
+						if (result == null || (result == false))
+							return null;
+					}
+
+//					add new uFile
+					FilesDTO filesDto = new FilesDTO();
+					filesDto.setFiles(Arrays.asList(ufile.getPath()));
+					filesDto.setFolder("DOCUMENTS");
+
+					fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
+					Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
+
+					if (fileResponse != null && !fileResponse.isEmpty()) {
+						Map<String, String> files = (Map<String, String>) fileResponse.get(ufile.getPath());
+						String relativePath = files.get("name").toString();
+						String mimeType = files.get("mimeType").toString();
+						String size = files.get("size").toString();
+						UFileCreateData ufileCreateData = new UFileCreateData();
+						ufileCreateData.setMimeType(mimeType);
+						ufileCreateData.setPath(relativePath);
+						ufileCreateData.setSize(size);
+						ufileCreateData.setWeight(0);
+						resourceService = headers.addResourceHeaders(resourceService,
+								request.getHeader(HttpHeaders.AUTHORIZATION));
+						ufile = resourceService.createUFile(ufileCreateData);
+					}
+				}
+
+//				GeoEntitiy update
+				List<DocumentCoverage> docCoverages = docEditData.getDocCoverage();
+				List<DocumentCoverage> previousCoverage = docCoverageDao.findByDocumentId(docEditData.getDocumentId());
+				if (docCoverages == null || docCoverages.isEmpty()) {
+					for (DocumentCoverage docC : previousCoverage) {
+						docCoverageDao.delete(docC);
+					}
+				} else {
+//					update the docCoverages which has been added and removed
+					List<Long> newCoveage = new ArrayList<Long>();
+//					add new docCoverage
+					for (DocumentCoverage coverage : docCoverages) {
+						if (coverage.getId() == null) {
+							WKTReader reader = new WKTReader(geometryFactory);
+							Geometry topology = reader.read(coverage.getTopologyWKT());
+							coverage.setDocumentId(docEditData.getDocumentId());
+							coverage.setTopology(topology);
+							coverage = docCoverageDao.save(coverage);
+						}
+						newCoveage.add(coverage.getId());
+					}
+//					remove the document 
+					for (DocumentCoverage previous : previousCoverage) {
+						if (!newCoveage.contains(previous.getId())) {
+							docCoverageDao.delete(previous);
+						}
+					}
+
+				}
+//				document core update
+
+				BibFieldsData bibData = docEditData.getBibFieldData();
+
+				document.setAttribution(docEditData.getAttribution());
+				document.setContributors(docEditData.getContribution());
+				document.setNotes(bibData.getDescription());
+				document.setDoi(bibData.getDoi());
+				document.setLastRevised(new Date());
+				document.setLicenseId(docEditData.getLicenseId());
+				document.setTitle(bibData.getTitle());
+				document.setType(bibData.getType());
+				document.setuFileId(ufile != null ? ufile.getId() : null);
+				document.setFromDate(docEditData.getFromDate());
+				document.setToDate(docEditData.getFromDate());
+				document.setRating(docEditData.getRating());
+				document.setAuthor(bibData.getAuthor());
+				document.setJournal(bibData.getJournal());
+				document.setBookTitle(bibData.getBooktitle());
+				document.setYear(bibData.getYear());
+				document.setMonth(bibData.getMonth());
+				document.setVolume(bibData.getVolume());
+				document.setNumber(bibData.getNumber());
+				document.setPages(bibData.getPages());
+				document.setPublisher(bibData.getPublisher());
+				document.setSchool(bibData.getSchool());
+				document.setEdition(bibData.getEdition());
+				document.setSeries(bibData.getSeries());
+				document.setAddress(bibData.getAddress());
+				document.setChapter(bibData.getChapter());
+				document.setNote(bibData.getNote());
+				document.setEditor(bibData.getEditor());
+				document.setOrganization(bibData.getOrganization());
+				document.setHowPublished(bibData.getHowpublished());
+				document.setInstitution(bibData.getInstitution());
+				document.setUrl(bibData.getUrl());
+				document.setLanguage(bibData.getLanguage());
+				document.setFile(bibData.getFile());
+				document.setItemtype(bibTexItemTypeDao.findById(docEditData.getItemTypeId()).getItemType());
+				document.setIsbn(bibData.getIsbn());
+				document.setExtra(bibData.getExtra());
+
+				documentDao.update(document);
+
+				logActivity.LogDocumentActivities(request.getHeader(HttpHeaders.AUTHORIZATION), null, document.getId(),
+						document.getId(), "Document", null, "Document updated", null);
+
+				updateDocumentLastRevised(document.getId());
+
+			}
+
+			return show(docEditData.getDocumentId());
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
@@ -449,14 +604,29 @@ public class DocumentServiceImpl implements DocumentService {
 
 	@Override
 	public Boolean removeDocument(HttpServletRequest request, Long documentId) {
-		CommonProfile profile = AuthUtil.getProfileFromRequest(request);
-		Long userId = Long.parseLong(profile.getId());
-		JSONArray userRoles = (JSONArray) profile.getAttribute("roles");
-		Document document = documentDao.findById(documentId);
-		if (document.getAuthorId().equals(userId) || userRoles.contains("ROLE_ADMIN")) {
-			document.setIsDeleted(true);
-			documentDao.update(document);
-			return true;
+		try {
+			CommonProfile profile = AuthUtil.getProfileFromRequest(request);
+			Long userId = Long.parseLong(profile.getId());
+			JSONArray userRoles = (JSONArray) profile.getAttribute("roles");
+			Document document = documentDao.findById(documentId);
+
+			MapQueryResponse esResponse;
+
+			esResponse = esService.delete(DocumentIndex.INDEX.getValue(), DocumentIndex.TYPE.getValue(),
+					documentId.toString());
+
+			ResultEnum result = esResponse.getResult();
+
+			if (result.getValue().equals("DELETED")
+					|| (document.getAuthorId().equals(userId) || userRoles.contains("ROLE_ADMIN"))) {
+				document.setIsDeleted(true);
+				documentDao.update(document);
+				System.out.print("===deleted docuemnt===" + documentId + "returned" + result.getValue());
+				return true;
+			}
+
+		} catch (ApiException e) {
+			logger.error(e.getMessage());
 		}
 		return false;
 	}
@@ -832,7 +1002,7 @@ public class DocumentServiceImpl implements DocumentService {
 	}
 
 	@Override
-	public Activity addDocumentCommet(HttpServletRequest request, CommentLoggingData loggingData) {
+	public Activity addDocumentComment(HttpServletRequest request, CommentLoggingData loggingData) {
 		try {
 			loggingData.setMailData(generateMailData(loggingData.getRootHolderId()));
 			activityService = headers.addActivityHeaders(activityService, request.getHeader(HttpHeaders.AUTHORIZATION));
@@ -850,14 +1020,30 @@ public class DocumentServiceImpl implements DocumentService {
 		document.setLastRevised(new Date());
 		documentDao.update(document);
 
-//		TODO elastic update
+//		update the document in es instance
+		produceToRabbitMQ(documentId);
+
+	}
+
+	private void produceToRabbitMQ(Long documentId) {
+		try {
+			ShowDocument res = show(documentId);
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+			objectMapper.setDateFormat(df);
+			String documentData = objectMapper.writeValueAsString(res);
+
+			producer.setMessage("document", documentData, documentId.toString());
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
 	}
 
 	@Override
 	public List<SpeciesGroup> getAllSpeciesGroup() {
 		List<SpeciesGroup> result = null;
 		try {
-			result = taxonomyService.getAllSpeciesGroup();
+			result = speciesService.getAllSpeciesGroup();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
@@ -944,8 +1130,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 			Document document = documentDao.findById(documentId);
 			document.setFlagCount(flagCount);
-			document.setLastRevised(new Date());
 			documentDao.update(document);
+
+			updateDocumentLastRevised(documentId);
 
 			return flagList;
 		} catch (Exception e) {
@@ -969,8 +1156,9 @@ public class DocumentServiceImpl implements DocumentService {
 
 			Document document = documentDao.findById(documentId);
 			document.setFlagCount(flagCount);
-			document.setLastRevised(new Date());
 			documentDao.update(document);
+
+			updateDocumentLastRevised(documentId);
 			return result;
 		} catch (Exception e) {
 			logger.error(e.getMessage());
@@ -1124,6 +1312,8 @@ public class DocumentServiceImpl implements DocumentService {
 		for (DocumentSpeciesGroup sGroup : newDocSgroup)
 			result.add(sGroup.getSpeciesGroupId());
 
+		updateDocumentLastRevised(documentId);
+
 		return result;
 	}
 
@@ -1147,6 +1337,7 @@ public class DocumentServiceImpl implements DocumentService {
 		for (DocumentHabitat docHabitat : newDocHabitat)
 			habitatId.add(docHabitat.getHabitatId());
 
+		updateDocumentLastRevised(documentId);
 		return habitatId;
 	}
 
