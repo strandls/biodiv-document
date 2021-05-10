@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +50,7 @@ import com.strandls.document.Headers;
 import com.strandls.document.dao.BibTexFieldTypeDao;
 import com.strandls.document.dao.BibTexItemFieldMappingDao;
 import com.strandls.document.dao.BibTexItemTypeDao;
+import com.strandls.document.dao.DocSciNameDao;
 import com.strandls.document.dao.DocumentCoverageDao;
 import com.strandls.document.dao.DocumentDao;
 import com.strandls.document.dao.DocumentHabitatDao;
@@ -63,12 +65,14 @@ import com.strandls.document.pojo.BibTexFieldType;
 import com.strandls.document.pojo.BibTexItemFieldMapping;
 import com.strandls.document.pojo.BibTexItemType;
 import com.strandls.document.pojo.BulkUploadExcelData;
+import com.strandls.document.pojo.DocSciName;
 import com.strandls.document.pojo.Document;
 import com.strandls.document.pojo.DocumentCoverage;
 import com.strandls.document.pojo.DocumentCoverageData;
 import com.strandls.document.pojo.DocumentCreateData;
 import com.strandls.document.pojo.DocumentEditData;
 import com.strandls.document.pojo.DocumentHabitat;
+import com.strandls.document.pojo.DocumentMeta;
 import com.strandls.document.pojo.DocumentSpeciesGroup;
 import com.strandls.document.pojo.DocumentUserPermission;
 import com.strandls.document.pojo.DownloadLog;
@@ -86,6 +90,7 @@ import com.strandls.geoentities.pojo.GeoentitiesWKTData;
 import com.strandls.landscape.controller.LandscapeApi;
 import com.strandls.landscape.pojo.Landscape;
 import com.strandls.resource.controllers.ResourceServicesApi;
+import com.strandls.resource.pojo.License;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
 import com.strandls.taxonomy.controllers.SpeciesServicesApi;
@@ -201,6 +206,9 @@ public class DocumentServiceImpl implements DocumentService {
 	private LandscapeApi landScapeService;
 
 	@Inject
+	private DocSciNameDao docSciNameDao;
+
+	@Inject
 	private EsServicesApi esService;
 
 	@Inject
@@ -236,6 +244,8 @@ public class DocumentServiceImpl implements DocumentService {
 				if (document.getuFileId() != null)
 					resource = resourceService.getUFilePath(document.getuFileId().toString());
 
+				License documentLicense = resourceService.getLicenseResource(document.getLicenseId().toString());
+
 				List<FlagShow> flag = utilityService.getFlagByObjectType("content.eml.Document", documentId.toString());
 				List<Tags> tags = utilityService.getTags("document", documentId.toString());
 
@@ -252,7 +262,7 @@ public class DocumentServiceImpl implements DocumentService {
 				}
 
 				ShowDocument showDoc = new ShowDocument(document, userIbp, documentCoverages, userGroup, featured,
-						resource, docHabitatIds, docSGroupIds, flag, tags);
+						resource, docHabitatIds, docSGroupIds, flag, tags, documentLicense);
 				return showDoc;
 			}
 		} catch (Exception e) {
@@ -1344,6 +1354,29 @@ public class DocumentServiceImpl implements DocumentService {
 		if (downloadLog.getId() != null)
 			return true;
 		return false;
+	}
+
+	@Override
+	public List<DocumentMeta> getDocumentByTaxonId(Long taxonConceptId) {
+		try {
+			List<DocumentMeta> result = new ArrayList<DocumentMeta>();
+			List<DocSciName> docSciNameList = docSciNameDao.findByTaxonConceptId(taxonConceptId);
+			for (DocSciName docSciName : docSciNameList) {
+				Document document = documentDao.findById(docSciName.getDocumentId());
+				UserIbp author = userService.getUserIbp(document.getAuthorId().toString());
+				result.add(new DocumentMeta(document.getId(), document.getTitle(), document.getNotes(), author,
+						document.getCreatedOn(), docSciName.getDisplayOrder()));
+			}
+			Collections.sort(result, Collections.reverseOrder());
+
+			return result;
+
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+		}
+
+		return null;
+
 	}
 
 }
