@@ -1,6 +1,7 @@
 package com.strandls.document.service.Impl;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +55,8 @@ public class DocumentListServiceImpl implements DocumentListService {
 			List<MapDocument> documents = result.getDocuments();
 			Long totalCount = result.getTotalDocuments();
 			List<DocumentMappingList> DocumentList = new ArrayList<DocumentMappingList>();
+			SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+			objectMapper.setDateFormat(df);
 			for (MapDocument document : documents) {
 				JsonNode rootNode = objectMapper.readTree(document.getDocument().toString());
 				((ObjectNode) rootNode).replace("documentCoverages", null);
