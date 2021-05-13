@@ -28,12 +28,14 @@ public class ApiConstants {
 	public static final String ITEM = "/item";
 	public static final String LANGUAGE = "/language";
 	public static final String LOG = "/log";
+	public static final String LIST = "/list";
 	public static final String PING = "/ping";
 	public static final String PERMISSION = "/permission";
 	public static final String SERVICES = "/services";
 	public static final String SHOW = "/show";
 	public static final String SPECIESGROUP = "/speciesGroup";
 	public static final String TAGS = "/tags";
+	public static final String TAXONOMY = "/taxonomy";
 	public static final String UNFEATURED = "/unfeatured";
 	public static final String UNFLAG = "/unflag";
 	public static final String UNFOLLOW = "/unfollow";
