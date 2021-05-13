@@ -206,6 +206,9 @@ public class DocumentServiceImpl implements DocumentService {
 	private LandscapeApi landScapeService;
 
 	@Inject
+	private DocSciNameDao docSciNameDao;
+
+	@Inject
 	private EsServicesApi esService;
 
 	@Inject
