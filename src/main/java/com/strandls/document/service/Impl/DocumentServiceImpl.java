@@ -212,9 +212,6 @@ public class DocumentServiceImpl implements DocumentService {
 	private EsServicesApi esService;
 
 	@Inject
-	private DocSciNameDao docSciNameDao;
-
-	@Inject
 	private ESUpdate esUpdate;
 
 	@Override
