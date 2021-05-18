@@ -767,13 +767,13 @@ public class DocumentServiceImpl implements DocumentService {
 
 						fileUpload = headers.addFileUploadHeader(fileUpload,
 								request.getHeader(HttpHeaders.AUTHORIZATION));
-						Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
+						Map<String, Object> fileResponse = fileUpload.moveFiles(filesMoveDto);
 
 						System.out.println("file response : " + fileResponse);
 
 						if (fileResponse != null && !fileResponse.isEmpty()) {
 							Map<String, String> files = (Map<String, String>) fileResponse
-									.get(allFiles.get(fileName).toString());
+									.get(myUploadPath);
 							String relativePath = files.get("name").toString();
 							String mimeType = files.get("mimeType").toString();
 							String size = files.get("size").toString();
