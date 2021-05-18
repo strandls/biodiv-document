@@ -287,6 +287,7 @@ public class DocumentServiceImpl implements DocumentService {
 				FilesDTO filesDto = new FilesDTO();
 				filesDto.setFiles(Arrays.asList(documentCreateData.getResourceURL()));
 				filesDto.setFolder("DOCUMENTS");
+				filesDto.setModule("DOCUMENT");
 
 				fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
 				Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
@@ -463,6 +464,7 @@ public class DocumentServiceImpl implements DocumentService {
 					FilesDTO filesDto = new FilesDTO();
 					filesDto.setFiles(Arrays.asList(ufile.getPath()));
 					filesDto.setFolder("DOCUMENTS");
+					filesDto.setModule("DOCUMENT");
 
 					fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
 					Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
