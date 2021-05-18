@@ -772,8 +772,7 @@ public class DocumentServiceImpl implements DocumentService {
 						System.out.println("file response : " + fileResponse);
 
 						if (fileResponse != null && !fileResponse.isEmpty()) {
-							Map<String, String> files = (Map<String, String>) fileResponse
-									.get(myUploadPath);
+							Map<String, String> files = (Map<String, String>) fileResponse.get(myUploadPath);
 							String relativePath = files.get("name").toString();
 							String mimeType = files.get("mimeType").toString();
 							String size = files.get("size").toString();
@@ -838,21 +837,33 @@ public class DocumentServiceImpl implements DocumentService {
 					}
 					if (siteNumber != null) {
 						String siteNumberArray[] = siteNumber.split(",");
-						for (String site : siteNumberArray) {
-							site = site.toLowerCase();
-							site = site.replace("site", "");
-							if(!site.trim().isEmpty()) {
-								Long siteLong = Long.parseLong(site.trim());
 
-								if (siteGeoentitiyMapping.containsKey(siteLong)) {
-									GeoentitiesWKTData geoEntity = geoEntitiesServices
-											.findGeoentitiesById(siteGeoentitiyMapping.get(siteLong).toString());
-									if (geoEntity != null) {
-										saveDocCoverage(document.getId(), siteGeoentitiyMapping.get(siteLong), geoEntity);
+						for (String siteNumberString : siteNumberArray) {
+
+							for (String site : siteNumberString.split(" ")) {
+
+								site = site.toLowerCase();
+								site = site.replace("site", "");
+								if (!site.trim().isEmpty()) {
+									try {
+										Long siteLong = Long.parseLong(site.trim());
+
+										if (siteGeoentitiyMapping.containsKey(siteLong)) {
+											GeoentitiesWKTData geoEntity = geoEntitiesServices.findGeoentitiesById(
+													siteGeoentitiyMapping.get(siteLong).toString());
+											if (geoEntity != null) {
+												saveDocCoverage(document.getId(), siteGeoentitiyMapping.get(siteLong),
+														geoEntity);
+											}
+										}
+									} catch (Exception e) {
+										logger.error(e.getMessage());
 									}
+
 								}
+
 							}
-							
+
 						}
 					}
 				}
