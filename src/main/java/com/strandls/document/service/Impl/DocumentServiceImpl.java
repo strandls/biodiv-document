@@ -756,9 +756,12 @@ public class DocumentServiceImpl implements DocumentService {
 					String fileName = dataRow.getCell(fieldMapping.get("file")).getStringCellValue();
 
 					if (allFiles.containsKey(fileName)) {
-						System.out.println("file name" + fileName);
+						System.out.println("file name : " + fileName);
 						FilesDTO filesMoveDto = new FilesDTO();
-						filesMoveDto.setFiles(Arrays.asList(allFiles.get(fileName).toString()));
+						String myUploadPath = allFiles.get(fileName).toString();
+						System.out.println("Myupload Path : " + myUploadPath);
+
+						filesMoveDto.setFiles(Arrays.asList(myUploadPath));
 						filesMoveDto.setFolder("DOCUMENTS");
 						filesMoveDto.setModule("DOCUMENT");
 
@@ -766,7 +769,7 @@ public class DocumentServiceImpl implements DocumentService {
 								request.getHeader(HttpHeaders.AUTHORIZATION));
 						Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
 
-						System.out.println(fileResponse);
+						System.out.println("file response : " + fileResponse);
 
 						if (fileResponse != null && !fileResponse.isEmpty()) {
 							Map<String, String> files = (Map<String, String>) fileResponse
