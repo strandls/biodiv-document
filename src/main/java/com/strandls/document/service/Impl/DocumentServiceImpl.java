@@ -840,16 +840,19 @@ public class DocumentServiceImpl implements DocumentService {
 						String siteNumberArray[] = siteNumber.split(",");
 						for (String site : siteNumberArray) {
 							site = site.toLowerCase();
-							site = site.replace("site ", "");
-							Long siteLong = Long.parseLong(site.trim());
+							site = site.replace("site", "");
+							if(!site.trim().isEmpty()) {
+								Long siteLong = Long.parseLong(site.trim());
 
-							if (siteGeoentitiyMapping.containsKey(siteLong)) {
-								GeoentitiesWKTData geoEntity = geoEntitiesServices
-										.findGeoentitiesById(siteGeoentitiyMapping.get(siteLong).toString());
-								if (geoEntity != null) {
-									saveDocCoverage(document.getId(), siteGeoentitiyMapping.get(siteLong), geoEntity);
+								if (siteGeoentitiyMapping.containsKey(siteLong)) {
+									GeoentitiesWKTData geoEntity = geoEntitiesServices
+											.findGeoentitiesById(siteGeoentitiyMapping.get(siteLong).toString());
+									if (geoEntity != null) {
+										saveDocCoverage(document.getId(), siteGeoentitiyMapping.get(siteLong), geoEntity);
+									}
 								}
 							}
+							
 						}
 					}
 				}
