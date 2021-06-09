@@ -4,6 +4,7 @@
 package com.strandls.document.service.Impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -33,6 +34,17 @@ public class DocumentHelper {
 
 	@SuppressWarnings("deprecation")
 	public Document bulkUploadPayload(Row dataRow, Map<String, Integer> fieldMapping, Long authorId, UFile ufile) {
+
+		Map<String, String> itemTypeMap = new HashMap<String, String>();
+		itemTypeMap.put("article", "Article");
+		itemTypeMap.put("book", "Book");
+		itemTypeMap.put("inbook", "Inbook");
+		itemTypeMap.put("mastersthesis", "Mastersthesis");
+		itemTypeMap.put("misc", "Miscellaneous");
+		itemTypeMap.put("phdthesis", "Phdthesis");
+		itemTypeMap.put("proceedings", "Proceedings");
+		itemTypeMap.put("techreport", "Techreport");
+		itemTypeMap.put("unpublished", "Unpublished");
 
 		try {
 			String authors = null;
@@ -115,7 +127,6 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					rating = cell.getStringCellValue();
-					
 				}
 			}
 
@@ -210,7 +221,7 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					edition = cell.getStringCellValue();
-					edition  = edition.replace(".0", "");
+					edition = edition.replace(".0", "");
 				}
 			}
 
@@ -321,6 +332,8 @@ public class DocumentHelper {
 				if (cell != null) {
 					cell.setCellType(CellType.STRING);
 					itemtype = cell.getStringCellValue();
+
+					itemtype = itemTypeMap.get(itemtype);
 				}
 				if (cell == null)
 					return null;

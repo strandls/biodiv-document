@@ -287,6 +287,7 @@ public class DocumentServiceImpl implements DocumentService {
 				FilesDTO filesDto = new FilesDTO();
 				filesDto.setFiles(Arrays.asList(documentCreateData.getResourceURL()));
 				filesDto.setFolder("DOCUMENTS");
+				filesDto.setModule("DOCUMENT");
 
 				fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
 				Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
@@ -463,6 +464,7 @@ public class DocumentServiceImpl implements DocumentService {
 					FilesDTO filesDto = new FilesDTO();
 					filesDto.setFiles(Arrays.asList(ufile.getPath()));
 					filesDto.setFolder("DOCUMENTS");
+					filesDto.setModule("DOCUMENT");
 
 					fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
 					Map<String, Object> fileResponse = fileUpload.moveFiles(filesDto);
@@ -718,6 +720,28 @@ public class DocumentServiceImpl implements DocumentService {
 				citedNameGeoEntityMapping.put(landscape.getShortName().toLowerCase(), landscape.getGeoEntityId());
 			}
 
+//			get all speciesGroup
+			List<SpeciesGroup> speciesGroupList = speciesService.getAllSpeciesGroup();
+			Map<String, Long> sGroupIdMap = new HashMap<String, Long>();
+			for (SpeciesGroup sGroup : speciesGroupList) {
+				sGroupIdMap.put(sGroup.getName(), sGroup.getId());
+			}
+
+//			get all habitat
+			List<Habitat> habitatList = utilityService.getAllHabitat();
+			Map<String, Long> habitatIdMap = new HashMap<String, Long>();
+			for (Habitat habitat : habitatList) {
+				habitatIdMap.put(habitat.getName(), habitat.getId());
+			}
+
+//			get all the files tree
+			FilesDTO filesDto = new FilesDTO();
+			filesDto.setFolder("DOCUMENTS");
+			filesDto.setModule("DOCUMENT");
+
+			fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
+			Map<String, Object> allFiles = fileUpload.getAllFilePathsByUser(filesDto);
+
 			while (dataSheetIterator.hasNext()) {
 				Row dataRow = dataSheetIterator.next();
 
@@ -731,32 +755,38 @@ public class DocumentServiceImpl implements DocumentService {
 				if (fileCell != null) {
 
 					String fileName = dataRow.getCell(fieldMapping.get("file")).getStringCellValue();
-					fileName = fileName + ".pdf";
-					System.out.println("file name" + fileName);
-					FilesDTO filesDto = new FilesDTO();
-					filesDto.setFiles(Arrays.asList(fileName));
-					filesDto.setFolder("DOCUMENTS");
-					filesDto.setModule("DOCUMENT");
 
-					fileUpload = headers.addFileUploadHeader(fileUpload, request.getHeader(HttpHeaders.AUTHORIZATION));
-					Map<String, Object> fileResponse = fileUpload.handleBulkUploadMoveFiles(filesDto);
+					if (allFiles.containsKey(fileName)) {
+						System.out.println("file name : " + fileName);
+						FilesDTO filesMoveDto = new FilesDTO();
+						String myUploadPath = allFiles.get(fileName).toString();
+						System.out.println("Myupload Path : " + myUploadPath);
 
-					System.out.println(fileResponse);
+						filesMoveDto.setFiles(Arrays.asList(myUploadPath));
+						filesMoveDto.setFolder("DOCUMENTS");
+						filesMoveDto.setModule("DOCUMENT");
 
-					if (fileResponse != null && !fileResponse.isEmpty()) {
-						Map<String, String> files = (Map<String, String>) fileResponse.get(fileName);
-						String relativePath = files.get("name").toString();
-						String mimeType = files.get("mimeType").toString();
-						String size = files.get("size").toString();
-						UFileCreateData ufileCreateData = new UFileCreateData();
-						ufileCreateData.setMimeType(mimeType);
-						ufileCreateData.setPath(relativePath);
-						ufileCreateData.setSize(size);
-						ufileCreateData.setWeight(0);
-						resourceService = headers.addResourceHeaders(resourceService,
+						fileUpload = headers.addFileUploadHeader(fileUpload,
 								request.getHeader(HttpHeaders.AUTHORIZATION));
-						ufile = resourceService.createUFile(ufileCreateData);
+						Map<String, Object> fileResponse = fileUpload.moveFiles(filesMoveDto);
 
+						System.out.println("file response : " + fileResponse);
+
+						if (fileResponse != null && !fileResponse.isEmpty()) {
+							Map<String, String> files = (Map<String, String>) fileResponse.get(myUploadPath);
+							String relativePath = files.get("name").toString();
+							String mimeType = files.get("mimeType").toString();
+							String size = files.get("size").toString();
+							UFileCreateData ufileCreateData = new UFileCreateData();
+							ufileCreateData.setMimeType(mimeType);
+							ufileCreateData.setPath(relativePath);
+							ufileCreateData.setSize(size);
+							ufileCreateData.setWeight(0);
+							resourceService = headers.addResourceHeaders(resourceService,
+									request.getHeader(HttpHeaders.AUTHORIZATION));
+							ufile = resourceService.createUFile(ufileCreateData);
+
+						}
 					}
 
 				}
@@ -808,18 +838,33 @@ public class DocumentServiceImpl implements DocumentService {
 					}
 					if (siteNumber != null) {
 						String siteNumberArray[] = siteNumber.split(",");
-						for (String site : siteNumberArray) {
-							site = site.toLowerCase();
-							site = site.replace("site ", "");
-							Long siteLong = Long.parseLong(site.trim());
 
-							if (siteGeoentitiyMapping.containsKey(siteLong)) {
-								GeoentitiesWKTData geoEntity = geoEntitiesServices
-										.findGeoentitiesById(siteGeoentitiyMapping.get(siteLong).toString());
-								if (geoEntity != null) {
-									saveDocCoverage(document.getId(), siteGeoentitiyMapping.get(siteLong), geoEntity);
+						for (String siteNumberString : siteNumberArray) {
+
+							for (String site : siteNumberString.split(" ")) {
+
+								site = site.toLowerCase();
+								site = site.replace("site", "");
+								if (!site.trim().isEmpty()) {
+									try {
+										Long siteLong = Long.parseLong(site.trim());
+
+										if (siteGeoentitiyMapping.containsKey(siteLong)) {
+											GeoentitiesWKTData geoEntity = geoEntitiesServices.findGeoentitiesById(
+													siteGeoentitiyMapping.get(siteLong).toString());
+											if (geoEntity != null) {
+												saveDocCoverage(document.getId(), siteGeoentitiyMapping.get(siteLong),
+														geoEntity);
+											}
+										}
+									} catch (Exception e) {
+										logger.error(e.getMessage());
+									}
+
 								}
+
 							}
+
 						}
 					}
 				}
@@ -932,6 +977,47 @@ public class DocumentServiceImpl implements DocumentService {
 						utilityService = headers.addUtilityHeaders(utilityService,
 								request.getHeader(HttpHeaders.AUTHORIZATION));
 						utilityService.createTags("document", tagsMappingData);
+					}
+
+				}
+
+//				specie group
+				if (fieldMapping.get("speciesGroup") != null) {
+					String sgroupList = null;
+					Cell cell = dataRow.getCell(fieldMapping.get("speciesGroup"),
+							MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					if (cell != null) {
+						cell.setCellType(CellType.STRING);
+						sgroupList = cell.getStringCellValue();
+					}
+					if (sgroupList != null) {
+						for (String sgroupName : sgroupList.split(",")) {
+							if (sGroupIdMap.containsKey(sgroupName.trim())) {
+								DocumentSpeciesGroup docSGroup = new DocumentSpeciesGroup(document.getId(),
+										sGroupIdMap.get(sgroupName.trim()));
+								docSGroupDao.save(docSGroup);
+
+							}
+						}
+					}
+				}
+
+//				habitat
+				if (fieldMapping.get("habitat") != null) {
+					String habitatNameList = null;
+					Cell cell = dataRow.getCell(fieldMapping.get("habitat"), MissingCellPolicy.RETURN_BLANK_AS_NULL);
+					if (cell != null) {
+						cell.setCellType(CellType.STRING);
+						habitatNameList = cell.getStringCellValue();
+					}
+					if (habitatNameList != null) {
+						for (String habitatName : habitatNameList.split(",")) {
+							if (habitatIdMap.containsKey(habitatName.trim())) {
+								DocumentHabitat docHabitat = new DocumentHabitat(document.getId(),
+										habitatIdMap.get(habitatName.trim()));
+								docHabitatDao.save(docHabitat);
+							}
+						}
 					}
 
 				}
