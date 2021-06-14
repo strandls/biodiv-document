@@ -93,7 +93,7 @@ import com.strandls.resource.controllers.ResourceServicesApi;
 import com.strandls.resource.pojo.License;
 import com.strandls.resource.pojo.UFile;
 import com.strandls.resource.pojo.UFileCreateData;
-import com.strandls.taxonomy.controllers.SpeciesServicesApi;
+import com.strandls.taxonomy.controllers.TaxonomyServicesApi;
 import com.strandls.taxonomy.pojo.SpeciesGroup;
 import com.strandls.user.controller.UserServiceApi;
 import com.strandls.user.pojo.Follow;
@@ -179,7 +179,7 @@ public class DocumentServiceImpl implements DocumentService {
 	private ActivitySerivceApi activityService;
 
 	@Inject
-	private SpeciesServicesApi speciesService;
+	private TaxonomyServicesApi taxonomyService;
 
 	@Inject
 	private GeoentitiesServicesApi geoEntitiesServices;
@@ -721,7 +721,7 @@ public class DocumentServiceImpl implements DocumentService {
 			}
 
 //			get all speciesGroup
-			List<SpeciesGroup> speciesGroupList = speciesService.getAllSpeciesGroup();
+			List<SpeciesGroup> speciesGroupList = taxonomyService.getAllSpeciesGroup();
 			Map<String, Long> sGroupIdMap = new HashMap<String, Long>();
 			for (SpeciesGroup sGroup : speciesGroupList) {
 				sGroupIdMap.put(sGroup.getName(), sGroup.getId());
@@ -1135,7 +1135,7 @@ public class DocumentServiceImpl implements DocumentService {
 	public List<SpeciesGroup> getAllSpeciesGroup() {
 		List<SpeciesGroup> result = null;
 		try {
-			result = speciesService.getAllSpeciesGroup();
+			result = taxonomyService.getAllSpeciesGroup();
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 		}
